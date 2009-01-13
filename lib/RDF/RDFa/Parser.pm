@@ -8,7 +8,7 @@ use URI::URL;
 use XML::LibXML;
 use strict;
 
-our $VERSION = 0.01;
+our $VERSION = 0.02;
 
 sub new
 # Usage: RDF::RDFa::Parser->new('<html>...</html>', 'http://example.com/foo');
@@ -16,8 +16,11 @@ sub new
 	my $class   = shift;
 	my $xhtml   = shift;
 	my $baseuri = shift;
+
+	my $parser  = XML::LibXML->new;
+	$parser->validation(0);
+	$parser->recover(1);
 	
-	my $parser  = XML::LibXML->new();
 	my $DOMTree = $parser->parse_string($xhtml);
 
 	my $this = {
@@ -25,7 +28,7 @@ sub new
 			'baseuri' => $baseuri,
 			'DOM'     => $DOMTree,
 			'bnodes'  => 0,
-			'tdb'     => 1,  # Switch to 0 to turn off t-d-b.org feature.
+			'tdb'     => 0,
 			'sub'     => [],
 		};
 	bless $this, $class;	
@@ -88,6 +91,27 @@ sub set_callbacks
 }
 
 
+sub thing_described_by
+{
+	my $this = shift;
+	my $set  = shift;
+	
+	my $rv   = $this->{tdb};
+	
+	$this->{tdb} = $set
+		if (defined $set);
+		
+	return $rv;
+}
+
+
+sub dom
+{
+	my $this = shift;
+	return $this->{DOM};
+}
+
+
 sub rdf_triple
 {
 	my $this = shift;
@@ -135,9 +159,9 @@ sub _rdf_triple_literal
 	
 	# Clumsy, but probably works.
 	$object =~ s/\\/\\\\/g;
-	$object =~ s/\n/\\\n/g;
-	$object =~ s/\r/\\\r/g;
-	$object =~ s/\t/\\\t/g;
+	$object =~ s/\n/\\n/g;
+	$object =~ s/\r/\\r/g;
+	$object =~ s/\t/\\t/g;
 	$object =~ s/\"/\\\"/g;
 	
 	printf("# Triple on element %s.\n", $element->nodePath);
@@ -944,7 +968,7 @@ RDF::RDFa::Parser - RDFa parser using XML::LibXML.
  
 =head1 VERSION
 
- 0.01
+0.02
 
 =head1 METHODS
 
@@ -988,9 +1012,16 @@ The parameters passed to the second callback function are:
     * Datatype URI (possibly undef or '')
     * Language (possibly undef or '')
 
-=item $p->{tdb} = 0
+=item $p->thing_described_by(1)
 
-Used to switch off the thing-described-by.org feature.
+RDF::RDFa::Parser has a feature that allows it to use thing-described-by.org
+to create URIs for some blank nodes. It is disabled by default. This function
+can be used to turn it on (1) or off (0). May be called without a parameter
+which just returns the current status.
+
+=item $p->dom
+
+Returns the parsed XML::LibXML::Document.
 
 =back
 

@@ -4,3 +4,9 @@ Revision history for Perl extension RDF::RDFa::Parser.
 	- original version; created by h2xs 1.23 with options
 		-X -n RDF::RDFa::Parser
 	- See <http://buzzword.org.uk/swignition/rdfa>.
+
+0.02  Tue Jan 13 23:14:00 2009
+	- Make XML parser more tolerant.
+	- Fix bug in Turtle output.
+	- Change default for TDB.
+	- Add KjetilK's patch.
