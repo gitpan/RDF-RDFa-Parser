@@ -1,0 +1,6 @@
+Revision history for Perl extension RDF::RDFa::Parser.
+
+0.01  Tue Jan 13 15:13:21 2009
+	- original version; created by h2xs 1.23 with options
+		-X -n RDF::RDFa::Parser
+	- See <http://buzzword.org.uk/swignition/rdfa>.

@@ -1,0 +1,8 @@
+Changes
+COPYING
+Makefile.PL
+MANIFEST
+README
+t/RDF-RDFa-Parser.t
+lib/RDF/RDFa/Parser.pm
+META.yml                                 Module meta-data (added by MakeMaker)

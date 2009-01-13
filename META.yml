@@ -1,0 +1,15 @@
+--- #YAML:1.0
+name:                RDF-RDFa-Parser
+version:             0.01
+abstract:            RDFa parser using XML::LibXML.
+license:             ~
+author:              
+    - Toby Inkster <tai@apple.com>
+generated_by:        ExtUtils::MakeMaker version 6.42
+distribution_type:   module
+requires:     
+    URI::URL:                      5
+    XML::LibXML:                   1.66
+meta-spec:
+    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
+    version: 1.3
