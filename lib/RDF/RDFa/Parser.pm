@@ -8,7 +8,7 @@ use URI::URL;
 use XML::LibXML;
 use strict;
 
-our $VERSION = 0.03;
+our $VERSION = 0.04;
 
 sub new
 # Usage: RDF::RDFa::Parser->new('<html>...</html>', 'http://example.com/foo');
@@ -27,6 +27,7 @@ sub new
 			'xhtml'   => $xhtml,
 			'baseuri' => $baseuri,
 			'DOM'     => $DOMTree,
+			'RDF'     => {},
 			'bnodes'  => 0,
 			'tdb'     => 0,
 			'sub'     => [],
@@ -42,9 +43,7 @@ sub new
 			if (length $b->getAttribute('href'));
 	}
 	$this->{baseuri} = $this->uri($base)
-		if (length $base);
-		
-	$this->set_callbacks;
+		if (defined $base && length $base);
 		
 	return $this;
 }
@@ -86,8 +85,16 @@ sub set_callbacks
 # Set callback functions for handling RDF triples.
 {
 	my $this = shift;
-	$this->{'sub'}->[0] = shift || \&_rdf_triple;
-	$this->{'sub'}->[1] = shift || \&_rdf_triple_literal;
+
+	for (my $n=0 ; $n<2 ; $n++)
+	{
+		if (lc($_[$n]) eq 'print')
+			{ $this->{'sub'}->[$n] = ($n==0 ? \&_print0 : \&_print1); }
+		elsif ('CODE' eq ref $_[$n])
+			{ $this->{'sub'}->[$n] = $_[$n]; }
+		else
+			{ $this->{'sub'}->[$n] = undef; }
+	}
 }
 
 
@@ -112,21 +119,52 @@ sub dom
 }
 
 
+sub graph
+{
+	my $this = shift;
+	return $this->{RDF};
+}
+
+
 sub rdf_triple
 {
 	my $this = shift;
-	$this->{'sub'}->[0]($this, @_);
+
+	if (defined $_[1] && defined $_[2] && defined $_[3])
+	{
+		push @{ $this->{'RDF'}->{$_[1]}->{$_[2]} },
+		{
+			'value'    => $_[3],
+			'type'     => ($_[3] =~ /^_:/ ? 'bnode' : 'uri'),
+		};
+	}
+	
+	$this->{'sub'}->[0]($this, @_)
+		if ($this->{'sub'}->[0]);
 }
 
 
 sub rdf_triple_literal
 {
 	my $this = shift;
-	$this->{'sub'}->[1]($this, @_);
+
+	if (defined $_[1] && defined $_[2] && defined $_[3])
+	{
+		push @{ $this->{'RDF'}->{$_[1]}->{$_[2]} },
+		{
+			'value'    => $_[3],
+			'type'     => 'literal',
+			'datatype' => ($_[4] ? $_[4] : undef),
+			'lang'     => ($_[5] ? $_[5] : undef),
+		};
+	}
+
+	$this->{'sub'}->[1]($this, @_)
+		if ($this->{'sub'}->[1]);
 }
 
 
-sub _rdf_triple
+sub _print0
 # Prints a Turtle triple.
 # You probably want to do something more useful here!
 {
@@ -145,7 +183,7 @@ sub _rdf_triple
 }
 
 
-sub _rdf_triple_literal
+sub _print1
 # Prints a Turtle triple.
 # You probably want to do something more useful here!
 {
@@ -166,6 +204,7 @@ sub _rdf_triple_literal
 	
 	printf("# Triple on element %s.\n", $element->nodePath);
 
+	no warnings;
 	printf("%s %s %s%s%s .\n",
 		($subject =~ /^_:/ ? $subject : "<$subject>"),
 		"<$pred>",
@@ -173,6 +212,7 @@ sub _rdf_triple_literal
 		(length $dt ? "^^<$dt>" : ''),
 		((length $lang && !length $dt) ? "\@$lang" : '')
 		);
+	use warnings;
 }
 
 
@@ -193,6 +233,8 @@ sub bnode
 sub consume
 # http://www.w3.org/TR/rdfa-syntax/#sec_5.5.
 {
+	no warnings;
+
 	my $this = shift;
 	my $dom  = shift || $this->{DOM}->documentElement;
 	
@@ -964,12 +1006,12 @@ RDF::RDFa::Parser - RDFa parser using XML::LibXML.
  use RDF::RDFa::Parser;
  
  $parser = RDF::RDFa::Parser->new($xhtml, $baseuri);
- $parser->set_callbacks(\&func1, \&func2);
  $parser->consume;
+ $graph = $parser->graph;
  
 =head1 VERSION
 
-0.03
+0.04
 
 =head1 METHODS
 
@@ -1012,6 +1054,11 @@ The parameters passed to the second callback function are:
     * Resource literal
     * Datatype URI (possibly undef or '')
     * Language (possibly undef or '')
+    
+In place of either or both functions you can use the string 'print' which
+sets the callback to a built-in function which prints the triples to STDOUT
+as Turtle. Either or both can be set to undef, in which case, no callback
+is called when a triple is found.
 
 =item $p->thing_described_by(1)
 
@@ -1023,6 +1070,11 @@ which just returns the current status.
 =item $p->dom
 
 Returns the parsed XML::LibXML::Document.
+
+=item $p->graph
+
+Returns a graph of all RDF triples found in a Perl structure close to RDF/JSON.
+http://n2.talis.com/wiki/RDF_JSON_Specification
 
 =back
 

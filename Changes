@@ -11,5 +11,10 @@ Revision history for Perl extension RDF::RDFa::Parser.
 	- Change default for TDB.
 	- Add KjetilK's patch.
 	
-0.03  Wed Jan 13 10:09:00 2009
+0.03  Wed Jan 14 10:09:00 2009
 	- Major bug fix for @property. How did I miss that?!
+
+0.04  Wed Jan 14 12:42:00 2009
+	- Rewrite a lot of the callback stuff.
+	- Build an RDF/JSON-like graph which can be getted.
+	- Add some test cases to build process.
