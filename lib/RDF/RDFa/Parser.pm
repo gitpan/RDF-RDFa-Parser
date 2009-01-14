@@ -8,7 +8,7 @@ use URI::URL;
 use XML::LibXML;
 use strict;
 
-our $VERSION = 0.02;
+our $VERSION = 0.03;
 
 sub new
 # Usage: RDF::RDFa::Parser->new('<html>...</html>', 'http://example.com/foo');
@@ -657,7 +657,8 @@ sub consume
 		# object
 		#     [current object literal] 
 
-		$this->rdf_triple_literal($current_element, $new_subject, $property, @current_object_literal);
+		my $p = curie($this, $property, $current_element, $local_uri_mappings);
+		$this->rdf_triple_literal($current_element, $new_subject, $p, @current_object_literal);
 
 		$activity++;
 		
@@ -968,7 +969,7 @@ RDF::RDFa::Parser - RDFa parser using XML::LibXML.
  
 =head1 VERSION
 
-0.02
+0.03
 
 =head1 METHODS
 

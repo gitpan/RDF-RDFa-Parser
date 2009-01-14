@@ -10,3 +10,6 @@ Revision history for Perl extension RDF::RDFa::Parser.
 	- Fix bug in Turtle output.
 	- Change default for TDB.
 	- Add KjetilK's patch.
+	
+0.03  Wed Jan 13 10:09:00 2009
+	- Major bug fix for @property. How did I miss that?!
