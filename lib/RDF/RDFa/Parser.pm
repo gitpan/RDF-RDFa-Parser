@@ -21,11 +21,11 @@ use strict;
 
 =head1 VERSION
 
-0.10
+0.11
 
 =cut
 
-our $VERSION = 0.10;
+our $VERSION = 0.11;
 
 =head1 PUBLIC METHODS
 
@@ -356,7 +356,6 @@ sub consume
 	my $incomplete_triples = shift || ();
 	my $language           = shift || undef;
 	my $graph              = shift || ($this->{'named_graphs'} ? '_:RDFaDefaultGraph' : undef);
-	my $parent_graph       = shift || ($this->{'named_graphs'} ? '_:RDFaDefaultGraph' : undef);
 	
 	# Processing begins by applying the processing rules below to the document
 	# object, in the context of this initial [evaluation context]. All elements
@@ -374,7 +373,6 @@ sub consume
 	my $local_uri_mappings = $uri_mappings;
 	my $local_incomplete_triples = ();
 	my $current_language   = $language;
-	my $current_graph      = $graph;
 	
 	my $activity = 0;
 	
@@ -415,21 +413,18 @@ sub consume
 	# KjetilK's named graphs.
 	if ($this->{'named_graphs'})
 	{
-		my $new_graph = undef;
 		if ($this->{'named_graphs'}->{'type'} eq 'id'
 		&&  defined $current_element->getAttributeNS($this->{'named_graphs'}->{'xmlns'}, $this->{'named_graphs'}->{'attr'}))
 		{
-			$new_graph = $this->uri('#' . $current_element->getAttributeNS($this->{'named_graphs'}->{'xmlns'}, $this->{'named_graphs'}->{'attr'}));
+			$graph = $this->uri('#' . $current_element->getAttributeNS($this->{'named_graphs'}->{'xmlns'}, $this->{'named_graphs'}->{'attr'}));
 		}
 		elsif ($this->{'named_graphs'}->{'type'} eq 'about'
 		&&  defined $current_element->getAttributeNS($this->{'named_graphs'}->{'xmlns'}, $this->{'named_graphs'}->{'attr'}))
 		{
-			$new_graph = uriOrSafeCurie($this, 
+			$graph = uriOrSafeCurie($this, 
 				$current_element->getAttributeNS($this->{'named_graphs'}->{'xmlns'}, $this->{'named_graphs'}->{'attr'}),
 				$current_element, $local_uri_mappings);
 		}
-		
-		$current_graph = $new_graph if defined $new_graph;
 	}
 	
 	# The [current element] is also parsed for any language information, and
@@ -620,7 +615,7 @@ sub consume
 			# object
 			#     full URI of 'type' 
 
-			$this->rdf_triple($current_element, $new_subject, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', $rdftype, $current_graph);
+			$this->rdf_triple($current_element, $new_subject, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', $rdftype, $graph);
 			$activity++;
 		}
 
@@ -648,7 +643,7 @@ sub consume
 		
 		foreach my $r (@REL)
 		{
-			$this->rdf_triple($current_element, $new_subject, $r, $current_object_resource, $current_graph);
+			$this->rdf_triple($current_element, $new_subject, $r, $current_object_resource, $graph);
 			$activity++;
 		}
 
@@ -665,7 +660,7 @@ sub consume
 		
 		foreach my $r (@REV)
 		{
-			$this->rdf_triple($current_element, $current_object_resource, $r, $new_subject, $current_graph);
+			$this->rdf_triple($current_element, $current_object_resource, $r, $new_subject, $graph);
 			$activity++;
 		}
 	}
@@ -693,7 +688,8 @@ sub consume
 		{
 			push @$local_incomplete_triples, {
 				predicate => $r,
-				direction => 'forward'
+				direction => 'forward',
+				graph     => $graph
 			};
 		}
 		
@@ -711,7 +707,8 @@ sub consume
 		{
 			push @$local_incomplete_triples, {
 				predicate => $r,
-				direction => 'reverse'
+				direction => 'reverse',
+				graph     => $graph
 			};
 		}
 		
@@ -832,7 +829,7 @@ sub consume
 		#     [current object literal] 
 
 		my $p = curie($this, $property, $current_element, $local_uri_mappings);
-		$this->rdf_triple_literal($current_element, $new_subject, $p, @current_object_literal, $current_graph);
+		$this->rdf_triple_literal($current_element, $new_subject, $p, @current_object_literal, $graph);
 
 		$activity++;
 		
@@ -865,7 +862,6 @@ sub consume
 					$uri_mappings,
 					$incomplete_triples,
 					$language,
-					$current_graph,
 					$graph
 				) || $flag;
 			}
@@ -881,7 +877,6 @@ sub consume
 					$local_uri_mappings,
 					$local_incomplete_triples,
 					$current_language,
-					$current_graph,
 					$graph
 				) || $flag;
 			}
@@ -894,11 +889,15 @@ sub consume
 #	# should be completed:
 #	if (!$skip_element && ($flag || ((defined $new_subject) && ($new_subject !~ /^bnodeXXX:/))))
 #	{
+
+	if (!$skip_element && defined $new_subject)
+	{
 		# Loop through list of incomplete triples...
 		foreach my $it (@$incomplete_triples)
 		{
-			my $direction = $it->{direction};
-			my $predicate = $it->{predicate};
+			my $direction    = $it->{direction};
+			my $predicate    = $it->{predicate};
+			my $parent_graph = $it->{graph};
 			
 			if ($direction eq 'forward')
 			{
@@ -911,7 +910,7 @@ sub consume
 				$activity++;
 			}
 		}
-#	}
+	}
 
 	return 1 if ($activity || $new_subject || $flag);
 	return 0;

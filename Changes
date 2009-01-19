@@ -24,3 +24,7 @@ Revision history for Perl extension RDF::RDFa::Parser.
 	- More test cases, including XML Literals and named graphs.
 	- Improve and inline the POD documentation.
 	- Support for KjetilK's named graphs proposal.
+
+0.11  Mon Jan 19 17:00:00 2009
+	- Make named graphs handling more predictable for triples
+	  split across multiple elements.
