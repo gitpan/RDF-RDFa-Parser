@@ -18,3 +18,9 @@ Revision history for Perl extension RDF::RDFa::Parser.
 	- Rewrite a lot of the callback stuff.
 	- Build an RDF/JSON-like graph which can be getted.
 	- Add some test cases to build process.
+
+0.10  Mon Jan 19 11:00:00 2009
+	- Fix broken support for XML literals.
+	- More test cases, including XML Literals and named graphs.
+	- Improve and inline the POD documentation.
+	- Support for KjetilK's named graphs proposal.

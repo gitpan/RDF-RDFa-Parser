@@ -1,11 +1,3 @@
-The following licence applies to all files in Swignition EXCEPT:
-
-./Swignition/DTParse.pm
-./Swignition/ext/*
-./extras/NetNewsWire/Swignition Microformat Indicators.nnwstyle/*
-
-----
-
                     GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 

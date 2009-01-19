@@ -1,17 +1,46 @@
 #!/usr/bin/perl
 
-######################################################################
-package RDF::RDFa::Parser;
-######################################################################
+=head1 NAME
 
+RDF::RDFa::Parser - RDFa parser using XML::LibXML.
+
+=head1 SYNOPSIS
+
+ use RDF::RDFa::Parser;
+ 
+ $parser = RDF::RDFa::Parser->new($xhtml, $baseuri);
+ $parser->consume;
+ $graph = $parser->graph;
+
+=cut
+
+package RDF::RDFa::Parser;
 use URI::URL;
 use XML::LibXML;
 use strict;
 
-our $VERSION = 0.04;
+=head1 VERSION
+
+0.10
+
+=cut
+
+our $VERSION = 0.10;
+
+=head1 PUBLIC METHODS
+
+=over
+
+=item $p = RDF::RDFa::Parser->new($xhtml, $baseuri)
+
+This method creates a new C<RDF::RDFa::Parser> object and returns it. The
+XHTML document is parsed using C<XML::LibXML>, which will throw an exception
+if it is not well-formed. C<RDF::RDFa::Parser> does not catch the exception.
+The base URI is used to resolve relative URIs found in the document.
+
+=cut
 
 sub new
-# Usage: RDF::RDFa::Parser->new('<html>...</html>', 'http://example.com/foo');
 {
 	my $class   = shift;
 	my $xhtml   = shift;
@@ -31,6 +60,8 @@ sub new
 			'bnodes'  => 0,
 			'tdb'     => 0,
 			'sub'     => [],
+			'named_graphs' => 0,
+			'Graphs'  => {},
 		};
 	bless $this, $class;	
 
@@ -48,13 +79,35 @@ sub new
 	return $this;
 }
 
+=item $p->xhtml
+
+Returns the XHTML source of the document being parsed.
+
+=cut
+
+sub xhtml
+{
+	my $this = shift;
+	return $this->{xhtml};
+}
+
+=item $p->uri
+
+Returns the base URI of the document being parsed. This will usually be the
+same as the base URI provided to the constructor, but may differ if the
+document contains a <base> HTML element.
+
+Optionally it may be passed a parameter - an absolute or relative URI - in
+which case it returns the same URI which it was passed as a parameter, but
+as an absolute URI, resolved relative to the document's base URI.
+
+This seems like two unrelated functions, but if you consider the consequence
+of passing a relative URI consisting of a zero-length string, it in fact makes
+sense.
+
+=cut
 
 sub uri
-# This function performs two seemingly different duties. Firstly, if passed a
-# parameter, treats this as a (possibly relative) URI and returns that same URI
-# as an absolute URI, given $this's known base URI. Secondly, if not passed a
-# parameter, will return $this's base URI. However, if you reflect on this, you
-# will notice that the latter duty derives directly from the former.
 {
 	my $this  = shift;
 	my $param = shift || '';
@@ -80,6 +133,71 @@ sub uri
 	return $url->abs->as_string;
 }
 
+=item $p->dom
+
+Returns the parsed C<XML::LibXML::Document>.
+
+=cut
+
+sub dom
+{
+	my $this = shift;
+	return $this->{DOM};
+}
+
+=item $p->set_callbacks(\&func1, \&func2)
+
+Set callbacks for handling RDF triples extracted from RDFa document. The
+first function is called when a triple is generated taking the form of
+(I<resource>, I<resource>, I<resource>). The second function is called when a
+triple is generated taking the form of (I<resource>, I<resource>, I<literal>).
+
+The parameters passed to the first callback function are:
+
+=over 4
+
+=item * A reference to the C<RDF::RDFa::Parser> object
+
+=item * A reference to the C<XML::LibXML element> being parsed
+
+=item * Subject URI or bnode
+
+=item * Predicate URI
+
+=item * Resource URI or bnode
+
+=item * Graph URI or bnode (if named graphs feature is enabled)
+
+=back
+
+The parameters passed to the second callback function are:
+
+=over 4
+
+=item * A reference to the C<RDF::RDFa::Parser> object
+
+=item * A reference to the C<XML::LibXML element> being parsed
+
+=item * Subject URI or bnode
+
+=item * Predicate URI
+
+=item * Resource literal
+
+=item * Datatype URI (possibly undef or '')
+
+=item * Language (possibly undef or '')
+
+=item * Graph URI or bnode (if named graphs feature is enabled)
+
+=back
+
+In place of either or both functions you can use the string C<'print'> which
+sets the callback to a built-in function which prints the triples to STDOUT
+as Turtle. Either or both can be set to undef, in which case, no callback
+is called when a triple is found.
+
+=cut
 
 sub set_callbacks
 # Set callback functions for handling RDF triples.
@@ -97,76 +215,8 @@ sub set_callbacks
 	}
 }
 
-
-sub thing_described_by
-{
-	my $this = shift;
-	my $set  = shift;
-	
-	my $rv   = $this->{tdb};
-	
-	$this->{tdb} = $set
-		if (defined $set);
-		
-	return $rv;
-}
-
-
-sub dom
-{
-	my $this = shift;
-	return $this->{DOM};
-}
-
-
-sub graph
-{
-	my $this = shift;
-	return $this->{RDF};
-}
-
-
-sub rdf_triple
-{
-	my $this = shift;
-
-	if (defined $_[1] && defined $_[2] && defined $_[3])
-	{
-		push @{ $this->{'RDF'}->{$_[1]}->{$_[2]} },
-		{
-			'value'    => $_[3],
-			'type'     => ($_[3] =~ /^_:/ ? 'bnode' : 'uri'),
-		};
-	}
-	
-	$this->{'sub'}->[0]($this, @_)
-		if ($this->{'sub'}->[0]);
-}
-
-
-sub rdf_triple_literal
-{
-	my $this = shift;
-
-	if (defined $_[1] && defined $_[2] && defined $_[3])
-	{
-		push @{ $this->{'RDF'}->{$_[1]}->{$_[2]} },
-		{
-			'value'    => $_[3],
-			'type'     => 'literal',
-			'datatype' => ($_[4] ? $_[4] : undef),
-			'lang'     => ($_[5] ? $_[5] : undef),
-		};
-	}
-
-	$this->{'sub'}->[1]($this, @_)
-		if ($this->{'sub'}->[1]);
-}
-
-
 sub _print0
 # Prints a Turtle triple.
-# You probably want to do something more useful here!
 {
 	my $this    = shift;
 	my $element = shift;
@@ -182,10 +232,8 @@ sub _print0
 		($object =~ /^_:/ ? $object : "<$object>"));
 }
 
-
 sub _print1
 # Prints a Turtle triple.
-# You probably want to do something more useful here!
 {
 	my $this    = shift;
 	my $element = shift;
@@ -215,20 +263,80 @@ sub _print1
 	use warnings;
 }
 
+=item $p->named_graphs($xmlns, $attribute, $attributeType)
 
-sub bnode
+C<RDF::RDFa::Parser> allows for one RDFa document to generate multiple graphs.
+A graph is created by enclosing it in an element with an attribute with XML
+namespace $xmlns and local name $attribute. 
+
+Each graph is given a URI - if $attributeType is the string 'id', then the URI
+is generated by treating the attribute like an 'id' attribute - i.e. the URI is
+the document's base URI, followed by a hash, followed by the attribute value.
+If $attributeType is the string 'about', then the URI is generated by treating
+the attribute like an 'about' attribute - i.e. it is treated as an absolute or
+relative URI, with safe CURIEs being allowed too. If the $attributeType is
+omitted, then the default behaviour is 'about'.
+
+Calling this method with no parameters will disable the named graph feature.
+Named graphs are disabled by default.
+
+=cut
+
+sub named_graphs
 {
-	my $this    = shift;
-	my $element = shift;
+	my $this  = shift;
+	my $xmlns = shift;
+	my $attr  = shift;
+	my $type  = shift || 'about';
 	
-	return sprintf('http://thing-described-by.org/?%s#%s',
-		$this->uri,
-		$this->{element}->getAttribute('id'))
-		if ($this->{tdb} && $element && length $element->getAttribute('id'));
+	if (defined $xmlns)
+	{
+		die "Must specify XML namespace and attribute.\n" unless defined $attr;
+		
+		$this->{'named_graphs'} = {
+			'xmlns'  => $xmlns,
+			'attr'   => $attr,
+			'type'   => lc($type),
+		};
+	}
 
-	return sprintf('_:RDFaAutoNode%03d', $this->{bnodes}++);
+	else
+	{
+		$this->{'named_graphs'} = 0;
+	}
+
+	return $this;
 }
 
+=item $p->thing_described_by(1)
+
+C<RDF::RDFa::Parser> has a feature that allows it to use thing-described-by.org
+to create URIs for some blank nodes. It is disabled by default. This function
+can be used to turn it on (1) or off (0). May be called without a parameter,
+which just returns the current status.
+
+=cut
+
+sub thing_described_by
+{
+	my $this = shift;
+	my $set  = shift;
+	
+	my $rv   = $this->{tdb};
+	
+	$this->{tdb} = $set
+		if (defined $set);
+		
+	return $rv;
+}
+
+=item $p->consume
+
+The document is parsed for RDFa. Nothing of interest is returned by this
+function, but the triples extracted from the document are passed to the
+callbacks as each one is found.
+
+=cut
 
 sub consume
 # http://www.w3.org/TR/rdfa-syntax/#sec_5.5.
@@ -247,6 +355,8 @@ sub consume
 	my $uri_mappings       = shift || {};
 	my $incomplete_triples = shift || ();
 	my $language           = shift || undef;
+	my $graph              = shift || ($this->{'named_graphs'} ? '_:RDFaDefaultGraph' : undef);
+	my $parent_graph       = shift || ($this->{'named_graphs'} ? '_:RDFaDefaultGraph' : undef);
 	
 	# Processing begins by applying the processing rules below to the document
 	# object, in the context of this initial [evaluation context]. All elements
@@ -264,6 +374,7 @@ sub consume
 	my $local_uri_mappings = $uri_mappings;
 	my $local_incomplete_triples = ();
 	my $current_language   = $language;
+	my $current_graph      = $graph;
 	
 	my $activity = 0;
 	
@@ -298,6 +409,27 @@ sub consume
 		{
 			$local_uri_mappings->{$1} = $2;
 		}
+	}
+	
+	# EXTENSION
+	# KjetilK's named graphs.
+	if ($this->{'named_graphs'})
+	{
+		my $new_graph = undef;
+		if ($this->{'named_graphs'}->{'type'} eq 'id'
+		&&  defined $current_element->getAttributeNS($this->{'named_graphs'}->{'xmlns'}, $this->{'named_graphs'}->{'attr'}))
+		{
+			$new_graph = $this->uri('#' . $current_element->getAttributeNS($this->{'named_graphs'}->{'xmlns'}, $this->{'named_graphs'}->{'attr'}));
+		}
+		elsif ($this->{'named_graphs'}->{'type'} eq 'about'
+		&&  defined $current_element->getAttributeNS($this->{'named_graphs'}->{'xmlns'}, $this->{'named_graphs'}->{'attr'}))
+		{
+			$new_graph = uriOrSafeCurie($this, 
+				$current_element->getAttributeNS($this->{'named_graphs'}->{'xmlns'}, $this->{'named_graphs'}->{'attr'}),
+				$current_element, $local_uri_mappings);
+		}
+		
+		$current_graph = $new_graph if defined $new_graph;
 	}
 	
 	# The [current element] is also parsed for any language information, and
@@ -488,7 +620,7 @@ sub consume
 			# object
 			#     full URI of 'type' 
 
-			$this->rdf_triple($current_element, $new_subject, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', $rdftype);
+			$this->rdf_triple($current_element, $new_subject, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', $rdftype, $current_graph);
 			$activity++;
 		}
 
@@ -516,7 +648,7 @@ sub consume
 		
 		foreach my $r (@REL)
 		{
-			$this->rdf_triple($current_element, $new_subject, $r, $current_object_resource);
+			$this->rdf_triple($current_element, $new_subject, $r, $current_object_resource, $current_graph);
 			$activity++;
 		}
 
@@ -533,7 +665,7 @@ sub consume
 		
 		foreach my $r (@REV)
 		{
-			$this->rdf_triple($current_element, $current_object_resource, $r, $new_subject);
+			$this->rdf_triple($current_element, $current_object_resource, $r, $new_subject, $current_graph);
 			$activity++;
 		}
 	}
@@ -700,7 +832,7 @@ sub consume
 		#     [current object literal] 
 
 		my $p = curie($this, $property, $current_element, $local_uri_mappings);
-		$this->rdf_triple_literal($current_element, $new_subject, $p, @current_object_literal);
+		$this->rdf_triple_literal($current_element, $new_subject, $p, @current_object_literal, $current_graph);
 
 		$activity++;
 		
@@ -732,7 +864,9 @@ sub consume
 					$parent_object,
 					$uri_mappings,
 					$incomplete_triples,
-					$language
+					$language,
+					$current_graph,
+					$graph
 				) || $flag;
 			}
 			
@@ -746,7 +880,9 @@ sub consume
 					(defined $current_object_resource ? $current_object_resource : ($new_subject ? $new_subject : $parent_subject)),
 					$local_uri_mappings,
 					$local_incomplete_triples,
-					$current_language
+					$current_language,
+					$current_graph,
+					$graph
 				) || $flag;
 			}
 		}	
@@ -766,12 +902,12 @@ sub consume
 			
 			if ($direction eq 'forward')
 			{
-				$this->rdf_triple($current_element, $parent_subject, $predicate, $new_subject);
+				$this->rdf_triple($current_element, $parent_subject, $predicate, $new_subject, $parent_graph);
 				$activity++;
 			}
 			else
 			{
-				$this->rdf_triple($current_element, $new_subject, $predicate, $parent_subject);
+				$this->rdf_triple($current_element, $new_subject, $predicate, $parent_subject, $parent_graph);
 				$activity++;
 			}
 		}
@@ -781,8 +917,61 @@ sub consume
 	return 0;
 }
 
+sub rdf_triple
+# Function only used internally.
+{
+	my $this = shift;
+
+	if (defined $_[1] && defined $_[2] && defined $_[3])
+	{
+		push @{ $this->{'RDF'}->{$_[1]}->{$_[2]} },
+		{
+			'value'    => $_[3],
+			'type'     => ($_[3] =~ /^_:/ ? 'bnode' : 'uri'),
+		};
+		
+		if ($this->{'named_graphs'} && defined $_[4])
+		{
+			$this->{'RDF'}->{$_[1]}->{$_[2]}->[-1]->{graph} = $_[4];
+			push @{ $this->{'Graphs'}->{$_[4]}->{$_[1]}->{$_[2]} },
+				$this->{'RDF'}->{$_[1]}->{$_[2]}->[-1];
+		}
+	}
+	
+	$this->{'sub'}->[0]($this, @_)
+		if ($this->{'sub'}->[0]);
+}
+
+sub rdf_triple_literal
+# Function only used internally.
+{
+	my $this = shift;
+
+	if (defined $_[1] && defined $_[2] && defined $_[3])
+	{
+		push @{ $this->{'RDF'}->{$_[1]}->{$_[2]} },
+		{
+			'value'    => $_[3],
+			'type'     => 'literal',
+		};
+
+		$this->{'RDF'}->{$_[1]}->{$_[2]}->[-1]->{'datatype'} = $_[4] if $_[4];
+		$this->{'RDF'}->{$_[1]}->{$_[2]}->[-1]->{'lang'}     = $_[5] if $_[5];
+
+		if ($this->{'named_graphs'} && defined $_[6])
+		{
+			$this->{'RDF'}->{$_[1]}->{$_[2]}->[-1]->{graph} = $_[6];
+			push @{ $this->{'Graphs'}->{$_[6]}->{$_[1]}->{$_[2]} },
+				$this->{'RDF'}->{$_[1]}->{$_[2]}->[-1];
+		}
+	}
+	
+	$this->{'sub'}->[1]($this, @_)
+		if ($this->{'sub'}->[1]);
+}
 
 sub stringify
+# Function only used internally.
 {
 	my $this = shift;
 	my $dom  = shift;
@@ -806,16 +995,37 @@ sub stringify
 	return '';
 }
 
-
 sub xmlify
+# Function only used internally.
 {
 	my $this = shift;
 	my $dom  = shift;
-	return $dom->toString;
+	my $rv;
+	
+	foreach my $kid ($dom->childNodes)
+	{
+		$rv .= $kid->toStringC14N;
+	}
+	
+	return $rv;
 }
 
+sub bnode
+# Function only used internally.
+{
+	my $this    = shift;
+	my $element = shift;
+	
+	return sprintf('http://thing-described-by.org/?%s#%s',
+		$this->uri,
+		$this->{element}->getAttribute('id'))
+		if ($this->{tdb} && $element && length $element->getAttribute('id'));
+
+	return sprintf('_:RDFaAutoNode%03d', $this->{bnodes}++);
+}
 
 sub curie
+# Function only used internally.
 {
 	my $page  = shift;
 	my $str   = shift;
@@ -862,8 +1072,8 @@ sub curie
 	return undef;
 }
 
-
 sub uriOrSafeCurie
+# Function only used internally.
 {
 	my $page  = shift;
 	my $str   = shift;
@@ -914,8 +1124,8 @@ sub uriOrSafeCurie
 	return undef;
 }
 
-
 sub reservedWordOrCurie
+# Function only used internally.
 {
 	my $page  = shift;
 	my $str   = shift;
@@ -992,85 +1202,6 @@ sub reservedWordOrCurie
 	return undef;
 }
 
-
-1;
-
-__END__
-
-=head1 NAME
-
-RDF::RDFa::Parser - RDFa parser using XML::LibXML.
-
-=head1 SYNOPSIS
-
- use RDF::RDFa::Parser;
- 
- $parser = RDF::RDFa::Parser->new($xhtml, $baseuri);
- $parser->consume;
- $graph = $parser->graph;
- 
-=head1 VERSION
-
-0.04
-
-=head1 METHODS
-
-=over
-
-=item $p = RDF::RDFa::Parser->new($xhtml, $baseuri)
-
-This method creates a new C<RDF::RDFa::Parser> object and returns it. The
-XHTML document is parsed using XML::LibXML, which will throw an exception
-if it is not well-formed. RDF::RDFa::Parser does not catch the exception.
-The base URI is used to resolve relative URIs found in the document.
-
-=item $p->consume
-
-The document is parsed for RDFa. Nothing of interest is returned by this
-function, but the triples extracted from the document are passed to the
-callbacks as each one is found.
-
-=item $p->set_callbacks(\&func1, \&func2)
-
-Set callbacks for handling RDF triples extracted from RDFa document. The
-first function is called when a triple is generated taking the form of
-(resource, resource, resource). The second function is called when a triple
-is generated taking the form of (resource, resource, literal).
-
-The parameters passed to the first callback function are:
-
-    * A reference to the RDF::RDFa::Parser object
-    * A reference to the XML::LibXML element being parsed
-    * Subject URI or bnode
-    * Predicate URI
-    * Resource URI or bnode
-    
-The parameters passed to the second callback function are:
-
-    * A reference to the RDF::RDFa::Parser object
-    * A reference to the XML::LibXML element being parsed
-    * Subject URI or bnode
-    * Predicate URI
-    * Resource literal
-    * Datatype URI (possibly undef or '')
-    * Language (possibly undef or '')
-    
-In place of either or both functions you can use the string 'print' which
-sets the callback to a built-in function which prints the triples to STDOUT
-as Turtle. Either or both can be set to undef, in which case, no callback
-is called when a triple is found.
-
-=item $p->thing_described_by(1)
-
-RDF::RDFa::Parser has a feature that allows it to use thing-described-by.org
-to create URIs for some blank nodes. It is disabled by default. This function
-can be used to turn it on (1) or off (0). May be called without a parameter
-which just returns the current status.
-
-=item $p->dom
-
-Returns the parsed XML::LibXML::Document.
-
 =item $p->graph
 
 Returns a graph of all RDF triples found in a Perl structure close to RDF/JSON.
@@ -1078,9 +1209,35 @@ http://n2.talis.com/wiki/RDF_JSON_Specification
 
 =back
 
+=cut
+
+sub graph
+{
+	my $this = shift;
+	return $this->{RDF};
+}
+
+=item $p->graphs
+
+Returns a hashref of all named graphs.
+
+=back
+
+=cut
+
+sub graphs
+{
+	my $this = shift;
+	return $this->{Graphs};
+}
+
+1;
+
 =head1 SEE ALSO
 
-http://buzzword.org.uk/swignition/rdfa
+L<RDF::RDFa::Parser::Trine>, L<XML::LibXML>.
+
+L<http://buzzword.org.uk/swignition/rdfa>
 
 =head1 COPYRIGHT
 

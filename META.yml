@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                RDF-RDFa-Parser
-version:             0.04
+version:             0.1
 abstract:            RDFa parser using XML::LibXML.
 license:             ~
 author:              
