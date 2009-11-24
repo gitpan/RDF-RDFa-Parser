@@ -1,22 +1,11 @@
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl RDF-RDFa-Parser.t'
-
-#########################
-
-# change 'tests => 1' to 'tests => last_test_to_print';
-
-use Test::More tests => 4;
+use Test::More tests => 7;
 BEGIN { use_ok('RDF::RDFa::Parser') };
-
-#########################
-
-# Insert your test code below, the Test::More module is use()ed here so read
-# its man page ( perldoc Test::More ) for help writing this test script.
 
 use RDF::RDFa::Parser;
 
 my $xhtml = <<EOF;
-<html xmlns:dc="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xml:lang="en">
+<html xmlns:dc="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xml:lang="en"
+xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<title property="dc:title">This is the title</title>
 	</head>
@@ -33,10 +22,34 @@ EOF
 $parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/einstein');
 $parser->named_graphs('http://example.com/graphing', 'graph');
 $parser->consume;
-my $graph  = $parser->graph;
-my $graphs = $parser->graphs;
 
-ok($graph->{'http://example.com/einstein#maker'}->{'http://xmlns.com/foaf/0.1/name'}->[0]->{'graph'} eq 'http://example.com/einstein#JOE', "Named graphs working OK for complete triples on \$current_element");
-ok($graph->{'http://example.com/einstein#maker'}->{'http://xmlns.com/foaf/0.1/made'}->[0]->{'graph'} ne 'http://example.com/einstein#JOE', "Named graphs working OK for incomplete triples on \$current_element");
+ok($parser->graph('http://example.com/einstein#JOE')->count_statements(
+		RDF::Trine::Node::Resource->new('http://example.com/einstein#maker'),
+		RDF::Trine::Node::Resource->new('http://xmlns.com/foaf/0.1/name'),
+		RDF::Trine::Node::Literal->new('Joe Bloggs', 'en')
+		),
+	"The graph(uri) method returns the appropriate graph");
 
-ok($graphs->{'http://example.com/einstein#JOE'}->{'http://example.com/einstein#maker'}->{'http://xmlns.com/foaf/0.1/name'}->[0]->{'value'} eq 'Joe Bloggs', "graphs method working fine")
+ok(!$parser->graph('_:RDFaDefaultGraph')->count_statements(
+		RDF::Trine::Node::Resource->new('http://example.com/einstein#maker'),
+		RDF::Trine::Node::Resource->new('http://xmlns.com/foaf/0.1/name'),
+		RDF::Trine::Node::Literal->new('Joe Bloggs', 'en')
+		),
+	"Statement in a non-default graph isn't duplicated in the default graph.");
+
+ok($parser->graphs->{'http://example.com/einstein#JOE'}->count_statements(
+		RDF::Trine::Node::Resource->new('http://example.com/einstein#maker'),
+		RDF::Trine::Node::Resource->new('http://xmlns.com/foaf/0.1/name'),
+		RDF::Trine::Node::Literal->new('Joe Bloggs', 'en')
+		),
+	"The graphs() method returns a hashref of graphs");
+
+my $iter = $parser->graph->get_statements(
+	RDF::Trine::Node::Resource->new('http://example.com/einstein#maker'),
+	RDF::Trine::Node::Resource->new('http://xmlns.com/foaf/0.1/name'),
+	RDF::Trine::Node::Literal->new('Joe Bloggs', 'en'),
+	RDF::Trine::Node::Resource->new('http://example.com/einstein#JOE'));
+my $st = $iter->next;
+isa_ok($st, 'RDF::Trine::Statement::Quad');
+isa_ok($st->context, 'RDF::Trine::Node::Resource');
+ok($st->context->uri eq 'http://example.com/einstein#JOE', "Graph URI looks OK.");

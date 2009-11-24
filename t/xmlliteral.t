@@ -1,27 +1,41 @@
-use Test::More tests => 6;
+# Tests that XML Literals are working OK.
+
+use Test::More tests => 7;
 BEGIN { use_ok('RDF::RDFa::Parser') };
 
-use RDF::RDFa::Parser;
-
 my $xhtml = <<EOF;
-<html xmlns:foaf="http://xmlns.com/foaf/0.1/">
+<html xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">
 	<body xmlns:dc="http://purl.org/dc/elements/1.1/">
 		<div rel="foaf:primaryTopic" rev="foaf:page">
 			<h1 about="#topic" typeof="foaf:Person" property="foaf:name" 
-                datatype="http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral"><strong>Albert Einstein</strong></h1>
+                datatype="rdf:XMLLiteral"><strong>Albert Einstein</strong></h1>
 		</div>
 	</body>
 </html>
 EOF
+
 $parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/einstein');
 
 ok(lc($parser->dom->documentElement->tagName) eq 'html', 'DOM Tree returned OK.');
 
 ok($parser->consume, "Parse OK");
 
-ok(my $graph = $parser->graph, "Graph retrieved");
+my $model;
+ok($model = $parser->graph, "Graph retrieved");
 
-ok($graph->{'http://example.com/einstein#topic'}->{'http://xmlns.com/foaf/0.1/name'}->[0]->{'datatype'} =~ /XMLLiteral$/ , "XML seems to have correct datatype");
+my $iter = $model->get_statements(
+	RDF::Trine::Node::Resource->new('http://example.com/einstein#topic'),
+	RDF::Trine::Node::Resource->new('http://xmlns.com/foaf/0.1/name'),
+	undef);
+my $st = $iter->next;
+ok(defined $st, "Literal found");
 
-ok($graph->{'http://example.com/einstein#topic'}->{'http://xmlns.com/foaf/0.1/name'}->[0]->{'value'} =~ /^<strong/ , "XML seems to have correct value");
+ok($st->object->literal_datatype eq 'http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral',
+	"XML seems to have correct datatype");
+
+ok($st->object->literal_value eq '<strong xmlns="http://www.w3.org/1999/xhtml">Albert Einstein</strong>',
+	"XML seems to have correct literal value (with ec14n)");
+
+
 

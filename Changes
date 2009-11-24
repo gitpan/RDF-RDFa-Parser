@@ -28,3 +28,17 @@ Revision history for Perl extension RDF::RDFa::Parser.
 0.11  Mon Jan 19 17:00:00 2009
 	- Make named graphs handling more predictable for triples
 	  split across multiple elements.
+
+0.20	Tue Nov 24 13:04:29 2009
+	- IMPORTANT: graph() and graphs() methods now return RDF::Trine::Model objects.
+	- Allow various parsing options to be passed to constructor.
+	- Support for @prefix now optional, off by default.
+	- Support for @lang now optional, off by default.
+	- Support for extended @rel/@rev now optional, off by default.
+	- Support for HEAD, BODY and BASE elements now optional, on by default.
+	- Support for full URIs instead of CURIEs now optional, off by default.
+	- Add optional support for xml:base.
+	- Add optional support for embedded RDF/XML.
+	- Add optional support for XFN 1.1 keywords.
+	- Diallow Safe CURIEs in @src/@href.
+	- Module SVN repository now at <http://goddamn.co.uk/viewvc/perlmods/>

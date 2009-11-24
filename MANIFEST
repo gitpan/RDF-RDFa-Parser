@@ -4,8 +4,12 @@ COPYING.Artistic
 Makefile.PL
 MANIFEST
 README
-t/RDF-RDFa-Parser.t
+t/0-parser.t
+t/lang.t
+t/curie.t
 t/named-graphs.t
+t/rdfxml.t
 t/xmlliteral.t
+t/xmlbase.t
 lib/RDF/RDFa/Parser.pm
 META.yml                                 Module meta-data (added by MakeMaker)
