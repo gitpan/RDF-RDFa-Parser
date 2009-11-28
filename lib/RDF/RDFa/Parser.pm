@@ -10,12 +10,13 @@ RDF::RDFa::Parser - RDFa parser using XML::LibXML.
  
  $parser = RDF::RDFa::Parser->new($xhtml, $baseuri);
  $parser->consume;
- $graph = $parser->graph;
+ $graph  = $parser->graph;
 
 =cut
 
 package RDF::RDFa::Parser;
 use Carp;
+use Encode qw(encode_utf8);
 use RDF::Trine;
 use URI::URL;
 use XML::LibXML qw(:all);
@@ -23,13 +24,13 @@ use strict;
 
 =head1 VERSION
 
-0.20
+0.21
 
 Note: version 0.20 introduced major incompatibilities with 0.0x and 0.1x.
 
 =cut
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 =head1 PUBLIC METHODS
 
@@ -61,6 +62,8 @@ Options (mostly booleans) [default in brackets]:
                       0=no, 1=yes, 2=use it for RDF/XML too
   * prefix_attr     - Support @prefix rather than just @xmlns:foo. [0]
   * tdb_service     - Use thing-described-by.org to name some bnodes. [0]
+  * use_rtnlx       - Use RDF::Trine::Node::Literal::XML. [0]
+                      0=no, 1=if available.
 
 The default options attempt to stick to the XHTML+RDFa spec as rigidly
 as possible.
@@ -115,6 +118,7 @@ sub new
 				'tdb_service'           => 0,
 				'xhtml_base'            => 1,
 				'embedded_rdfxml'       => 0,
+				'use_rtnlx'             => 0,
 			},
 			'Graphs'  => {},
 		};
@@ -132,8 +136,11 @@ sub new
 		my $base;
 		foreach my $b (@bases)
 		{
-			$base = $b->getAttribute('href')
-				if (length $b->getAttribute('href'));
+			if ($b->hasAttribute('href'))
+			{
+				$base = $b->getAttribute('href');
+				$base =~ s/#.*$//g;
+			}
 		}
 		$this->{baseuri} = $this->uri($base)
 			if (defined $base && length $base);
@@ -199,7 +206,15 @@ sub uri
 	}
 	
 	my $url = url $param, $base;
-	return $url->abs->as_string;
+	my $rv  = $url->abs->as_string;
+
+	# This is needed to pass test case 0114.
+	while ($rv =~ m!^(http://.*)(\.\./|\.)+(\.\.|\.)?$!i)
+	{
+		$rv = $1;
+	}
+	
+	return $rv;
 }
 
 =item $p->dom
@@ -515,6 +530,8 @@ sub consume
 	if ($current_element->hasAttributeNS(XML_XML_NS, 'base'))
 	{
 		$xml_base = $current_element->getAttributeNS(XML_XML_NS, 'base');
+		$xml_base =~ s/#.*$//g;
+		$xml_base = $this->uri($xml_base);
 	}
 	my $hrefsrc_base = $base;
 	if ($this->{'options'}->{'xml_base'}==2 && defined $xml_base)
@@ -668,6 +685,9 @@ sub consume
 					$this->{'options'}->{'named_graphs'}->{'xmlns'},
 					$this->{'options'}->{'named_graphs'}->{'attr'}),
 				$current_element, $local_uri_mappings, $xml_base);
+			
+			$graph = $this->{'options'}->{'named_graphs'}->{'default'}
+				unless defined $graph;
 		}
 	}
 	
@@ -708,22 +728,22 @@ sub consume
 			
 		# otherwise, by using the URI from @src, if present, obtained
 		# according to the section on CURIE and URI Processing.
-		elsif (defined $current_element->getAttributeNode('src'))
+		if ((!defined $new_subject) && defined $current_element->getAttributeNode('src'))
 			{ $new_subject = $this->uri($current_element->getAttribute('src'), {'element'=>$current_element,'xml_base'=>$hrefsrc_base}); }
 			
 		# otherwise , by using the URI from @resource, if present, obtained
 		# according to the section on CURIE and URI Processing ; 
-		elsif (defined $current_element->getAttributeNode('resource'))
+		if ((!defined $new_subject) && defined $current_element->getAttributeNode('resource'))
 			{ $new_subject = uriOrSafeCurie($this, $current_element->getAttribute('resource'), $current_element, $local_uri_mappings, $xml_base); }
 			
 		# otherwise , by using the URI from @href, if present, obtained
 		# according to the section on CURIE and URI Processing.
-		elsif (defined $current_element->getAttributeNode('href'))
+		if ((!defined $new_subject) && defined $current_element->getAttributeNode('href'))
 			{ $new_subject = $this->uri($current_element->getAttribute('href'), {'element'=>$current_element,'xml_base'=>$hrefsrc_base}); }
 			
 		# If no URI is provided by a resource attribute, then the first
 		# match from the following rules will apply: 
-		else
+		unless (defined $new_subject)
 		{
 			# if the element is the head or body element then act as if
 			# there is an empty @about present, and process it according to
@@ -771,12 +791,12 @@ sub consume
 			
 		# otherwise, by using the URI from @src, if present, obtained
 		# according to the section on CURIE and URI Processing.
-		elsif (defined $current_element->getAttributeNode('src'))
+		if ((!defined $new_subject) && $current_element->getAttributeNode('src'))
 			{ $new_subject = $this->uri($current_element->getAttribute('src'), {'element'=>$current_element,'xml_base'=>$hrefsrc_base}); }
 
 		# If no URI is provided then the first match from the following rules
 		# will apply: 
-		else
+		unless (defined $new_subject)
 		{
 			# if the element is the head or body element then act as if
 			# there is an empty @about present, and process it according
@@ -814,7 +834,7 @@ sub consume
 			
 		# otherwise, by using the URI from @href, if present, obtained according
 		# to the section on CURIE and URI Processing.
-		elsif (defined $current_element->getAttributeNode('href'))
+		if ((!defined $current_object_resource) && defined $current_element->getAttributeNode('href'))
 			{ $current_object_resource = $this->uri($current_element->getAttribute('href'), {'element'=>$current_element,'xml_base'=>$hrefsrc_base}); }
 		
 		# Note that final value of the [current object resource] will either
@@ -1015,7 +1035,7 @@ sub consume
 		elsif ($datatype eq 'http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral'
 		|| ($datatype==-1 && $current_element->getElementsByTagName('*')))
 		{
-			@current_object_literal = ($this->xmlify($current_element),
+			@current_object_literal = ($this->xmlify($current_element, $current_language),
 				'http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral',
 				$current_language);
 			$recurse = 0;
@@ -1209,16 +1229,31 @@ sub rdf_triple_literal
 	my $graph     = shift;  # Graph URI or bnode (if named graphs feature is enabled)
 
 	# Now we know there's a literal
-
 	my $to;
+	
+	# Work around bad Unicode handling in RDF::Trine.
+	$object = encode_utf8($object);
 
 	if (defined $datatype)
 	{
-		# if (0) because current release of RDF::Trine doesn't include this class.
-		if (0 && $datatype eq 'http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral')
+		if ($datatype eq 'http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral')
 		{
-			$object = $element->childNodes;
-			$to = RDF::Trine::Node::Literal::XML->new($object);
+			if ($this->{'options'}->{'use_rtnlx'})
+			{
+				eval
+				{
+					require RDF::Trine::Node::Literal::XML;
+					$to = RDF::Trine::Node::Literal::XML->new($element->childNodes);
+				};
+			}
+			
+			if ( $@ || !defined $to)
+			{
+				my $orig = $RDF::Trine::Node::Literal::USE_XMLLITERALS;
+				$RDF::Trine::Node::Literal::USE_XMLLITERALS = 0;
+				$to = RDF::Trine::Node::Literal->new($object, undef, $datatype);
+				$RDF::Trine::Node::Literal::USE_XMLLITERALS = $orig;
+			}
 		}
 		else
 		{
@@ -1320,11 +1355,27 @@ sub xmlify
 {
 	my $this = shift;
 	my $dom  = shift;
+	my $lang = shift;
 	my $rv;
 	
 	foreach my $kid ($dom->childNodes)
 	{
+		my $fakelang = 0;
+		if (($kid->nodeType == XML_ELEMENT_NODE) && defined $lang)
+		{
+			unless ($kid->hasAttributeNS(XML_XML_NS, 'lang'))
+			{
+				$kid->setAttributeNS(XML_XML_NS, 'lang', $lang);
+				$fakelang++;
+			}
+		}
+		
 		$rv .= $kid->toStringEC14N(1);
+		
+		if ($fakelang)
+		{
+			$kid->removeAttributeNS(XML_XML_NS, 'lang');
+		}
 	}
 	
 	return $rv;
@@ -1468,8 +1519,6 @@ sub curie
 		return '_:'.$1;
 	}
 	
-	$str = 'xhv'.$str if ($str =~ /^\:/);
-	
 	# Cope with safe CURIEs.
 	if ($str =~ /^\[(.*)\]$/)
 	{
@@ -1477,6 +1526,11 @@ sub curie
 		$safe = 1;
 	}
 	
+	if ($str =~ /^\:(\S*)$/)
+	{
+		return 'http://www.w3.org/1999/xhtml/vocab#' . $1;
+	}
+
 	# If the string matches CURIE syntax, then resolve the CURIE.
 	if ($str =~ /^([a-z_][^\s\:]*)?\:(.*)$/i)
 	{
@@ -1525,15 +1579,18 @@ sub uriOrSafeCurie
 		return '_:'.$1;
 	}
 
-	$str = 'xhv'.$str if ($str =~ /^\:/);
-	
 	# Cope with safe CURIEs.
 	if ($str =~ /^\[(.*)\]$/)
 	{
 		$str  = $1;
 		$safe = 1;
 	}
-	
+
+	if ($str =~ /^\:(\S*)$/)
+	{
+		return 'http://www.w3.org/1999/xhtml/vocab#' . $1;
+	}
+
 	# Only safe CURIEs allowed
 	if ($safe)
 	{
@@ -1794,42 +1851,29 @@ sub OPTS_XML
 			
 1;
 
+=head1 BUGS
+
+RDF::RDFa::Parser 0.21 passes all approved tests in the W3C's XHTML+RDFa
+test suite.
+
+Please report any bugs to L<http://rt.cpan.org/>.
+
 =head1 SEE ALSO
 
-L<RDF::RDFa::Parser::Trine>, L<XML::LibXML>.
+L<XML::LibXML>, L<RDF::Trine>.
 
-L<http://buzzword.org.uk/swignition/rdfa>
+L<http://www.perlrdf.org/>.
+
+=head1 AUTHOR
+
+Toby Inkster E<lt>tobyink@cpan.orgE<gt> with contributions from
+Kjetil Kjernsmo E<lt>kjetilk@cpan.orgE<gt>.
 
 =head1 COPYRIGHT
 
- Copyright 2008, 2009 Toby Inkster
+Copyright 2008, 2009 Toby Inkster
 
- This file is dual licensed under:
- The Artistic License
- GNU General Public License 3.0
-
- You may choose which of those two licences you are going to honour the
- terms of, but you cannot pick and choose the parts which you like of
- each. You must fulfil the licensing requirements of at least one of the
- two licenses.
-
- The Artistic License
- <http://www.perl.com/language/misc/Artistic.html>
-
- GNU General Public License 3.0
- <http://www.gnu.org/licenses/gpl-3.0.html>
-
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program. If not, see <http://www.gnu.org/licenses/>.
+This library is free software; you can redistribute it and/or modify it under the same
+terms as Perl itself.
 
 =cut

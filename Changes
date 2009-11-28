@@ -42,3 +42,6 @@ Revision history for Perl extension RDF::RDFa::Parser.
 	- Add optional support for XFN 1.1 keywords.
 	- Diallow Safe CURIEs in @src/@href.
 	- Module SVN repository now at <http://goddamn.co.uk/viewvc/perlmods/>
+
+0.21
+	- Use RDF::Trine::Node::Literal::XML if it exists.

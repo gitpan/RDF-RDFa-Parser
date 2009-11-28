@@ -34,7 +34,7 @@ ok(defined $st, "Literal found");
 ok($st->object->literal_datatype eq 'http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral',
 	"XML seems to have correct datatype");
 
-ok($st->object->literal_value eq '<strong xmlns="http://www.w3.org/1999/xhtml">Albert Einstein</strong>',
+ok($st->object->literal_value eq '<strong xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">Albert Einstein</strong>',
 	"XML seems to have correct literal value (with ec14n)");
 
 
