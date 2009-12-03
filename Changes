@@ -45,3 +45,12 @@ Revision history for Perl extension RDF::RDFa::Parser.
 
 0.21
 	- Use RDF::Trine::Node::Literal::XML if it exists.
+	- Various test case compliance fixes (passes XHTML test suite)
+	
+0.22
+	- Various test case compliance fixes (passes HTML4 and HTML5 test suites)
+	- Flexible keyword extensibility (optional)
+	- Special rel="alternate stylesheet" handling (optional, good for HTML5)
+	- Allow suffix-less CURIEs without colons (optional)
+	- Allow case-insensitive CURIE prefixes (optional, good for HTML)
+	- Default/empty CURIE prefix can be configured (optional)

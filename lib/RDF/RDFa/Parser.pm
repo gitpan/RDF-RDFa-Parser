@@ -17,20 +17,22 @@ RDF::RDFa::Parser - RDFa parser using XML::LibXML.
 package RDF::RDFa::Parser;
 use Carp;
 use Encode qw(encode_utf8);
+use JSON;
 use RDF::Trine;
+use URI::Escape;
 use URI::URL;
 use XML::LibXML qw(:all);
 use strict;
 
 =head1 VERSION
 
-0.21
+0.22
 
 Note: version 0.20 introduced major incompatibilities with 0.0x and 0.1x.
 
 =cut
 
-our $VERSION = '0.21';
+our $VERSION = '0.22';
 
 =head1 PUBLIC METHODS
 
@@ -38,32 +40,39 @@ our $VERSION = '0.21';
 
 =item $p = RDF::RDFa::Parser->new($xhtml, $baseuri, \%options, $storage)
 
-This method creates a new C<RDF::RDFa::Parser> object and returns it.
+This method creates a new RDF::RDFa::Parser object and returns it.
 
 The $xhtml variable may contain an XHTML/XML string, or a
 XML::LibXML::Document. If a string, the document is parsed using
-C<XML::LibXML>, which will throw an exception if it is not
-well-formed. C<RDF::RDFa::Parser> does not catch the exception.
+XML::LibXML::Parser, which will throw an exception if it is not
+well-formed. RDF::RDFa::Parser does not catch the exception.
 
 The base URI is used to resolve relative URIs found in the document.
 
 Options (mostly booleans) [default in brackets]:
 
-  * full_uris       - Support full URIs in CURIE-only attributes. [0]
-  * strict_reserved_words  - Be strict about reserved words. [1]
-  * xfn_reserved_words     - Allow XFN 1.1 reserved words. [0]
+  * alt_stylesheet  - Magic rel="alternate stylesheet". [0]
+  * auto_config     - See section "Auto Config" [0]
   * embedded_rdfxml - Find plain RDF/XML chunks within document. [0]
                       0=no, 1=handle, 2=skip.
-  * xml_base        - Support for 'xml:base' attribute. [0]
-                      0=only RDF/XML; 1=except @href/@src; 2=always.
-  * xhtml_elements  - Process <head> and <body> specially. [1]
-  * xhtml_lang      - Support @lang rather than just @xml:lang. [0]
-  * xhtml_base      - Process <base> element. [1]
-                      0=no, 1=yes, 2=use it for RDF/XML too
-  * prefix_attr     - Support @prefix rather than just @xmlns:foo. [0]
-  * tdb_service     - Use thing-described-by.org to name some bnodes. [0]
+  * full_uris       - Support full URIs in CURIE-only attributes. [0]
+  * keywords        - THIS WILL VOID YOUR WARRANTY!
+  * prefix_attr     - Support @prefix rather than just @xmlns:*. [0]
+  * prefix_bare     - Support CURIEs with no colon+suffix. [0]
+  * prefix_empty    - URI for empty prefix.
+                      ['http://www.w3.org/1999/xhtml/vocab#']
+  * prefix_nocase   - Ignore case-sensitivity of CURIE prefixes. [0]
+  * safe_anywhere   - Allow Safe CURIEs in @rel/@rev/etc. [0] 
+  * tdb_service     - Use thing-described-by.org to name bnodes. [0]
   * use_rtnlx       - Use RDF::Trine::Node::Literal::XML. [0]
                       0=no, 1=if available.
+  * xhtml_base      - Process <base> element. [1]
+                      0=no, 1=yes, 2=use it for RDF/XML too
+  * xhtml_elements  - Process <head> and <body> specially. [1]
+  * xhtml_lang      - Support @lang rather than just @xml:lang. [0]
+  * xml_base        - Support for 'xml:base' attribute. [0]
+                      0=only RDF/XML; 1=except @href/@src; 2=always.
+  * xml_lang        - Support for 'xml:lang' attribute. [1]
 
 The default options attempt to stick to the XHTML+RDFa spec as rigidly
 as possible.
@@ -107,18 +116,23 @@ sub new
 			'bnodes'  => 0,
 			'sub'     => [],
 			'options' => {
-				'named_graphs'          => 0,
-				'xml_base'              => 0,
+				'alt_stylesheet'        => 0,
+				'embedded_rdfxml'       => 0,
 				'full_uris'             => 0,
-				'strict_reserved_words' => 1,
-				'xfn_reserved_words'    => 0,
+				'keywords'              => keywords('rdfa'),
+				'named_graphs'          => 0,
+				'prefix_attr'           => 0,
+				'prefix_bare'           => 0,
+				'prefix_empty'          => 'http://www.w3.org/1999/xhtml/vocab#',
+				'prefix_nocase'         => 0,
+				'safe_anywhere'         => 0,
+				'tdb_service'           => 0,
+				'use_rtnlx'             => 0,
+				'xhtml_base'            => 1,
 				'xhtml_elements'        => 1,
 				'xhtml_lang'            => 0,
-				'prefix_attr'           => 0,
-				'tdb_service'           => 0,
-				'xhtml_base'            => 1,
-				'embedded_rdfxml'       => 0,
-				'use_rtnlx'             => 0,
+				'xml_base'              => 0,
+				'xml_lang'              => 1,
 			},
 			'Graphs'  => {},
 		};
@@ -128,6 +142,8 @@ sub new
 	{
 		$this->{'options'}->{$o} = $options->{$o};
 	}
+	
+	$this->auto_config;
 
 	# HTML <base> element.
 	if ($this->{'options'}->{'xhtml_base'})
@@ -142,8 +158,8 @@ sub new
 				$base =~ s/#.*$//g;
 			}
 		}
-		$this->{baseuri} = $this->uri($base)
-			if (defined $base && length $base);
+		$this->{'baseuri'} = $this->uri($base)
+			if defined $base && length $base;
 	}
 	
 	return $this;
@@ -219,7 +235,7 @@ sub uri
 
 =item $p->dom
 
-Returns the parsed C<XML::LibXML::Document>.
+Returns the parsed XML::LibXML::Document.
 
 =cut
 
@@ -386,7 +402,7 @@ sub _print1
 
 =item $p->named_graphs($xmlns, $attribute, $attributeType)
 
-C<RDF::RDFa::Parser> allows for one RDFa document to generate multiple graphs.
+RDF::RDFa::Parser allows for one RDFa document to generate multiple graphs.
 A graph is created by enclosing it in an element with an attribute with XML
 namespace $xmlns and local name $attribute. 
 
@@ -435,7 +451,7 @@ sub named_graphs
 
 =item $p->thing_described_by(1)
 
-C<RDF::RDFa::Parser> has a feature that allows it to use thing-described-by.org
+RDF::RDFa::Parser has a feature that allows it to use thing-described-by.org
 to create URIs for some blank nodes. It is disabled by default. This function
 can be used to turn it on (1) or off (0). May be called without a parameter,
 which just returns the current status.
@@ -481,7 +497,7 @@ sub consume
 	my $base               = shift || $this->uri;
 	my $parent_subject     = shift || $base;
 	my $parent_object      = shift || undef;
-	my $uri_mappings       = shift || { 'xml' => XML_XML_NS, 'xmlns' => XML_XMLNS_NS , '' => 'http://www.w3.org/1999/xhtml/vocab#' };
+	my $uri_mappings       = shift || {};
 	my $incomplete_triples = shift || ();
 	my $language           = shift || undef;
 	my $graph              = shift || ($this->{'options'}->{'named_graphs'} ? $this->{'options'}->{'named_graphs'}->{'default'} : undef);
@@ -519,7 +535,8 @@ sub consume
 		$current_language = $current_element->getAttribute('lang')
 			if valid_lang( $current_element->getAttribute('lang')) ;
 	}
-	if ($current_element->hasAttributeNS(XML_XML_NS, 'lang'))
+	if ($this->{'options'}->{'xml_lang'}
+	&& $current_element->hasAttributeNS(XML_XML_NS, 'lang'))
 	{
 		$current_language = $current_element->getAttributeNS(XML_XML_NS, 'lang')
 			if valid_lang($current_element->getAttributeNS(XML_XML_NS, 'lang'));
@@ -618,7 +635,7 @@ sub consume
 		
 		if ($attr =~ /^xmlns\:(.+)$/i)
 		{
-			my $pfx = $1;
+			my $pfx = $this->{'options'}->{'prefix_nocase'} ? (lc $1) : $1;
 			my $uri = $A->getValue;
 			if ($pfx =~ /^(xml|xmlns|_)$/i)
 			{
@@ -640,25 +657,14 @@ sub consume
 	# prefixes. This uses a single @prefix attribute, making it more DTD
 	# friendly. Let's support that too.
 	if ($this->{'options'}->{'prefix_attr'}
-	&& $current_element->getAttribute('prefix'))
+	&& $current_element->hasAttribute('prefix'))
 	{
 		my $pfx_attr = $current_element->getAttribute('prefix');
 		while ($pfx_attr =~ /^\s*(\S*)[\s\r\n]*=[\s\r\n]*(\S*)[\s\r\n]+/gs)
 		{
-			my $pfx = $1;
+			my $pfx = $this->{'options'}->{'prefix_nocase'} ? (lc $1) : $1;
 			my $uri = $2;
-			if ($pfx =~ /^(xml|xmlns|_)$/i)
-			{
-				carp("Attempt to redefine CURIE prefix '$pfx' not allowed.");
-			}
-			elsif ($uri eq XML_XML_NS || $uri eq XML_XMLNS_NS)
-			{
-				carp("Attempt to define CURIE prefix for '$uri' not allowed.");
-			}
-			else
-			{
-				$local_uri_mappings->{$pfx} = $uri;
-			}
+			$local_uri_mappings->{$pfx} = $uri;
 		}
 	}
 	
@@ -667,7 +673,7 @@ sub consume
 	if ($this->{'options'}->{'named_graphs'})
 	{
 		if ($this->{'options'}->{'named_graphs'}->{'type'} eq 'id'
-		&&  defined $current_element->getAttributeNS(
+		&&  $current_element->hasAttributeNS(
 				$this->{'options'}->{'named_graphs'}->{'xmlns'},
 				$this->{'options'}->{'named_graphs'}->{'attr'}))
 		{
@@ -676,15 +682,15 @@ sub consume
 					$this->{'options'}->{'named_graphs'}->{'attr'}));
 		}
 		elsif ($this->{'options'}->{'named_graphs'}->{'type'} eq 'about'
-		&&  defined $current_element->getAttributeNS(
+		&&  $current_element->hasAttributeNS(
 				$this->{'options'}->{'named_graphs'}->{'xmlns'},
 				$this->{'options'}->{'named_graphs'}->{'attr'}))
 		{
-			$graph = uriOrSafeCurie($this, 
+			$graph = $this->uriOrSafeCurie(
 				$current_element->getAttributeNS(
 					$this->{'options'}->{'named_graphs'}->{'xmlns'},
 					$this->{'options'}->{'named_graphs'}->{'attr'}),
-				$current_element, $local_uri_mappings, $xml_base);
+				$current_element, 'graph', $local_uri_mappings, $xml_base);
 			
 			$graph = $this->{'options'}->{'named_graphs'}->{'default'}
 				unless defined $graph;
@@ -699,11 +705,18 @@ sub consume
 	$rel =~ s/(^\s+|\s+$)//g;
 	$rel =~ s/\s+/ /g;
 	my @rel = split / /, $rel;
+	if ($this->{'options'}->{'alt_stylesheet'}
+	&&  (grep /^alternate$/i, @rel)
+	&&  (grep /^stylesheet$/i, @rel))   # EXTENSION: rel="alternate stylesheet"
+	{
+		@rel = grep !/^(alternate|stylesheet)$/i, @rel;
+		push @rel, 'ALTERNATE-STYLESHEET';
+	}
 	my @REL;
 	foreach my $r (@rel)
 	{
-		my $R = reservedWordOrCurie($this, $r, $current_element, $local_uri_mappings, $xml_base);
-		push @REL, $R if (length $R);
+		my $R = $this->curie($r, $current_element, 'rel', $local_uri_mappings, $xml_base);
+		push @REL, $R if defined $R;
 	}
 	my $rev = $current_element->getAttribute('rev');
 	$rev =~ s/(^\s+|\s+$)//g;
@@ -712,33 +725,34 @@ sub consume
 	my @REV;
 	foreach my $r (@rev)
 	{
-		my $R = reservedWordOrCurie($this, $r, $current_element, $local_uri_mappings, $xml_base);
-		push @REV, $R if (length $R);
+		my $R = $this->curie($r, $current_element, 'rev', $local_uri_mappings, $xml_base);
+		push @REV, $R if defined $R;
 	}
-	if ((!defined $current_element->getAttribute('rel'))
-	&&  (!defined $current_element->getAttribute('rev')))
+	
+	unless ($current_element->hasAttribute('rel')
+	||      $current_element->hasAttribute('rev'))
 	{
 		# [new subject] is set to the URI obtained from the first match
 		# from the following rules:
 		
 		# by using the URI from @about, if present, obtained according to
 		# the section on CURIE and URI Processing ; 
-		if (defined $current_element->getAttributeNode('about'))
-			{ $new_subject = uriOrSafeCurie($this, $current_element->getAttribute('about'), $current_element, $local_uri_mappings, $xml_base); }
+		if ($current_element->hasAttribute('about'))
+			{ $new_subject = $this->uriOrSafeCurie($current_element->getAttribute('about'), $current_element, 'about', $local_uri_mappings, $xml_base); }
 			
 		# otherwise, by using the URI from @src, if present, obtained
 		# according to the section on CURIE and URI Processing.
-		if ((!defined $new_subject) && defined $current_element->getAttributeNode('src'))
+		if ($current_element->hasAttribute('src') && !defined $new_subject)
 			{ $new_subject = $this->uri($current_element->getAttribute('src'), {'element'=>$current_element,'xml_base'=>$hrefsrc_base}); }
 			
 		# otherwise , by using the URI from @resource, if present, obtained
 		# according to the section on CURIE and URI Processing ; 
-		if ((!defined $new_subject) && defined $current_element->getAttributeNode('resource'))
-			{ $new_subject = uriOrSafeCurie($this, $current_element->getAttribute('resource'), $current_element, $local_uri_mappings, $xml_base); }
+		if ($current_element->hasAttribute('resource') && !defined $new_subject)
+			{ $new_subject = $this->uriOrSafeCurie($current_element->getAttribute('resource'), $current_element, 'resource', $local_uri_mappings, $xml_base); }
 			
 		# otherwise , by using the URI from @href, if present, obtained
 		# according to the section on CURIE and URI Processing.
-		if ((!defined $new_subject) && defined $current_element->getAttributeNode('href'))
+		if ($current_element->hasAttribute('href') && !defined $new_subject)
 			{ $new_subject = $this->uri($current_element->getAttribute('href'), {'element'=>$current_element,'xml_base'=>$hrefsrc_base}); }
 			
 		# If no URI is provided by a resource attribute, then the first
@@ -757,8 +771,8 @@ sub consume
 			# if @instanceof is present, obtained according to the section
 			# on CURIE and URI Processing , then [new subject] is set to be
 			# a newly created [bnode]; 
-			elsif (defined $current_element->getAttributeNode('typeof')
-				||  defined $current_element->getAttributeNode('instanceof'))
+			elsif ($current_element->hasAttribute('typeof')
+				||  $current_element->hasAttribute('instanceof'))
 			{
 				$new_subject = $this->bnode($current_element);
 			}
@@ -770,7 +784,7 @@ sub consume
 			{
 				$new_subject = $parent_object;
 				$skip_element = 1
-					unless (defined $current_element->getAttributeNode('property'));
+					unless $current_element->hasAttribute('property');
 			}
 		}
 	}
@@ -786,12 +800,12 @@ sub consume
 		
 		# by using the URI from @about, if present, obtained according
 		# to the section on CURIE and URI Processing; 
-		if (defined $current_element->getAttributeNode('about'))
-			{ $new_subject = uriOrSafeCurie($this, $current_element->getAttribute('about'), $current_element, $local_uri_mappings, $xml_base); }
+		if ($current_element->hasAttribute('about'))
+			{ $new_subject = $this->uriOrSafeCurie($current_element->getAttribute('about'), $current_element, 'about', $local_uri_mappings, $xml_base); }
 			
 		# otherwise, by using the URI from @src, if present, obtained
 		# according to the section on CURIE and URI Processing.
-		if ((!defined $new_subject) && $current_element->getAttributeNode('src'))
+		if ($current_element->hasAttribute('src') && !defined $new_subject)
 			{ $new_subject = $this->uri($current_element->getAttribute('src'), {'element'=>$current_element,'xml_base'=>$hrefsrc_base}); }
 
 		# If no URI is provided then the first match from the following rules
@@ -810,8 +824,8 @@ sub consume
 			# if @instanceof is present, obtained according to the section
 			# on CURIE and URI Processing, then [new subject] is set to be a
 			# newly created [bnode]; 
-			elsif (defined $current_element->getAttributeNode('typeof')
-				||  defined $current_element->getAttributeNode('instanceof'))
+			elsif ($current_element->hasAttribute('typeof')
+				||  $current_element->hasAttribute('instanceof'))
 			{
 				$new_subject = $this->bnode($current_element);
 			}
@@ -829,23 +843,23 @@ sub consume
 		
 		# by using the URI from @resource, if present, obtained according to
 		# the section on CURIE and URI Processing; 
-		if (defined $current_element->getAttributeNode('resource'))
-			{ $current_object_resource = uriOrSafeCurie($this, $current_element->getAttribute('resource'), $current_element, $local_uri_mappings, $xml_base); }
+		if ($current_element->hasAttribute('resource'))
+			{ $current_object_resource = $this->uriOrSafeCurie($current_element->getAttribute('resource'), $current_element, 'resource', $local_uri_mappings, $xml_base); }
 			
 		# otherwise, by using the URI from @href, if present, obtained according
 		# to the section on CURIE and URI Processing.
-		if ((!defined $current_object_resource) && defined $current_element->getAttributeNode('href'))
+		if ($current_element->hasAttribute('href') && !defined $current_object_resource)
 			{ $current_object_resource = $this->uri($current_element->getAttribute('href'), {'element'=>$current_element,'xml_base'=>$hrefsrc_base}); }
 		
 		# Note that final value of the [current object resource] will either
-		# be null (from initialization), a full URI or a bnode. 
+		# be null (from initialization), a full URI or a bnode. 		
 	}
 	
 	# If in any of the previous steps a [new subject] was set to a non-null
 	# value, it is now used to provide a subject for type values
 	if ($new_subject
-	&& defined ($current_element->getAttributeNode('instanceof')
-		.$current_element->getAttributeNode('typeof')))
+	&& (  $current_element->hasAttribute('instanceof')
+		|| $current_element->hasAttribute('typeof')))
 	{
 		# One or more 'types' for the [ new subject ] can be set by using
 		# @instanceof. If present, the attribute must contain one or more
@@ -853,15 +867,15 @@ sub consume
 	
 		my $instanceof = $current_element->getAttribute('typeof');
 		$instanceof = $current_element->getAttribute('instanceof')
-			unless defined($instanceof);
+			unless defined $instanceof;
 		$instanceof =~ s/\s+/ /g;
 		$instanceof =~ s/(^\s|\s$)//g;
 		my @instanceof = split / /, $instanceof;
 		
 		foreach my $instanceof (@instanceof)
 		{
-			my $rdftype = curie($this, $instanceof, $current_element, $local_uri_mappings, $xml_base);
-			next unless $rdftype;
+			my $rdftype = $this->curie($instanceof, $current_element, 'typeof', $local_uri_mappings, $xml_base);
+			next unless defined $rdftype;
 		
 			# ... each of which is used to generate a triple as follows:
 			#
@@ -982,12 +996,11 @@ sub consume
 	my @prop = split / /, $prop;
 
 	my $datatype = -1;
-	if (defined $current_element->getAttributeNode('datatype'))
-		{ $datatype = curie($this, $current_element->getAttribute('datatype'), $current_element, $local_uri_mappings, $xml_base); }
+	if ($current_element->hasAttribute('datatype'))
+		{ $datatype = $this->curie($current_element->getAttribute('datatype'), $current_element, 'datatype', $local_uri_mappings, $xml_base); }
 		
 	if (length $prop)
 	{
-	
 		# Predicates for the [current object literal] can be set by using
 		# @property. If present, one or more URIs are obtained according
 		# to the section on CURIE and URI Processing and then the actual
@@ -996,7 +1009,7 @@ sub consume
 		# as a [ plain literal ] if: 
 		#
 		# @content is present; 
-		if (defined $current_element->getAttributeNode('content'))
+		if ($current_element->hasAttribute('content'))
 		{
 			@current_object_literal = ($current_element->getAttribute('content'),
 				($datatype == -1 ? undef : $datatype),
@@ -1053,7 +1066,7 @@ sub consume
 		# Processing.
 		elsif ($datatype != -1)
 		{
-			if (defined $current_element->getAttribute('content'))
+			if ($current_element->hasAttribute('content'))
 			{
 				@current_object_literal = ($current_element->getAttribute('content'),
 					($datatype == -1 ? undef : $datatype),
@@ -1085,7 +1098,9 @@ sub consume
 		# object
 		#     [current object literal] 
 
-		my $p = curie($this, $property, $current_element, $local_uri_mappings, $xml_base);
+		my $p = $this->curie($property, $current_element, 'property', $local_uri_mappings, $xml_base);
+		next unless defined $p;
+		
 		$this->rdf_triple_literal($current_element, $new_subject, $p, @current_object_literal, $graph);
 
 		$activity++;
@@ -1131,7 +1146,7 @@ sub consume
 					$kid,
 					$base,
 					$new_subject,
-					(defined $current_object_resource ? $current_object_resource : ($new_subject ? $new_subject : $parent_subject)),
+					(defined $current_object_resource ? $current_object_resource : (defined $new_subject ? $new_subject : $parent_subject)),
 					$local_uri_mappings,
 					$local_incomplete_triples,
 					$current_language,
@@ -1500,52 +1515,56 @@ sub curie
 	my $page  = shift;
 	my $str   = shift;
 	my $dom   = shift;
+	my $attr  = shift;
 	my $maps  = shift;
 	my $xbase = shift;
 	my $xpath = $dom->getAttribute('_xpath') if ($dom);
 	my $safe  = 0;
 	
+	# Keywords
+	if (defined $page->{'options'}->{'keywords'}->{lc $attr}->{lc $str})
+		{ return $page->{'options'}->{'keywords'}->{lc $attr}->{lc $str}; }
+	
 	# Blank nodes
 	if ($str eq '_:' || $str eq '[_:]')
-	{
-		return '_:RDFaX';
-	}
+		{ return '_:RDFaX'; }
 	elsif ($str =~ /^_:RDFa(.*)$/i || $str =~ /^\[_:RDFa(.*)\]$/i)
-	{
-		return '_:RDFax'.$1;
-	}
+		{ return '_:RDFax'.$1; }
 	elsif ($str =~ /^_:(.+)$/i || $str =~ /^\[_:(.+)\]$/i)
-	{
-		return '_:'.$1;
-	}
-	
+		{ return '_:'.$1; }
+
 	# Cope with safe CURIEs.
-	if ($str =~ /^\[(.*)\]$/)
+	if ($page->{'options'}->{'safe_anywhere'} && $str =~ /^\[(.*)\]$/)
 	{
 		$str  = $1;
 		$safe = 1;
 	}
-	
+
+	# Default prefix
 	if ($str =~ /^\:(\S*)$/)
-	{
-		return 'http://www.w3.org/1999/xhtml/vocab#' . $1;
-	}
+		{ return $page->uri($page->{'options'}->{'prefix_empty'} . $1, {'element'=>$dom,'xml_base'=>$xbase}); }
 
 	# If the string matches CURIE syntax, then resolve the CURIE.
-	if ($str =~ /^([a-z_][^\s\:]*)?\:(.*)$/i)
+	if ($str =~ /^([a-z_][^\s\:]*)?\:(\S*)$/i)
 	{
-		my $pfx = $1 || '';
+		my $pfx = $page->{'options'}->{'prefix_nocase'} ? (lc ($1 || '')) : ($1 || '');
 		my $sfx = $2;
-		my $ns  = $maps->{$pfx};
 		
-		return $page->uri($ns.$sfx,{'element'=>$dom,'xml_base'=>$xbase})
-			if ($ns);
+		return $page->uri($maps->{$pfx}.$sfx, {'element'=>$dom,'xml_base'=>$xbase})
+			if defined $maps->{$pfx};
 			
-		return 'http://invalid.invalid/ns#'.$sfx
-			if ($safe);
+		return undef if $safe;
 	}
 	
-	# If it wasn't a safe CURIE, then fall back to a URI.
+	if ($page->{'options'}->{'prefix_bare'})
+	{
+		my $pfx = $page->{'options'}->{'prefix_nocase'} ? (lc $str) : $str;
+		
+		return $page->uri($maps->{$pfx}, {'element'=>$dom,'xml_base'=>$xbase})
+			if defined $maps->{$pfx};
+	}
+	
+	# If it wasn't a safe CURIE, then try falling back to an absolute URI.
 	if (!$safe && $page->{'options'}->{'full_uris'})
 	{
 		return $page->uri($str, {'require-absolute'=>1,'element'=>$dom,'xml_base'=>$xbase});
@@ -1560,24 +1579,23 @@ sub uriOrSafeCurie
 	my $page  = shift;
 	my $str   = shift;
 	my $dom   = shift;
+	my $attr  = shift;
 	my $maps  = shift;
 	my $xbase = shift;
 	my $xpath = $dom->getAttribute('_xpath') if ($dom);
 	my $safe  = 0;
+
+	# Keywords
+	if (defined $page->{'options'}->{'keywords'}->{lc $attr}->{lc $str})
+		{ return $page->{'options'}->{'keywords'}->{lc $attr}->{lc $str}; }
 	
 	# Blank nodes
 	if ($str eq '_:' || $str eq '[_:]')
-	{
-		return '_:RDFaX';
-	}
+		{ return '_:RDFaX'; }
 	elsif ($str =~ /^_:RDFa(.*)$/i || $str =~ /^\[_:RDFa(.*)\]$/i)
-	{
-		return '_:RDFax'.$1;
-	}
+		{ return '_:RDFax'.$1; }
 	elsif ($str =~ /^_:(.+)$/i || $str =~ /^\[_:(.+)\]$/i)
-	{
-		return '_:'.$1;
-	}
+		{ return '_:'.$1; }
 
 	# Cope with safe CURIEs.
 	if ($str =~ /^\[(.*)\]$/)
@@ -1586,26 +1604,31 @@ sub uriOrSafeCurie
 		$safe = 1;
 	}
 
+	# Default prefix
 	if ($str =~ /^\:(\S*)$/)
-	{
-		return 'http://www.w3.org/1999/xhtml/vocab#' . $1;
-	}
+		{ return $page->uri($page->{'options'}->{'prefix_empty'} . $1, {'element'=>$dom,'xml_base'=>$xbase}); }
 
 	# Only safe CURIEs allowed
 	if ($safe)
 	{
 		# If the string matches CURIE syntax, then resolve the CURIE.
-		if ($str =~ /^([a-z_][^\s\:]*)?\:(.*)$/i)
+		if ($str =~ /^([a-z_][^\s\:]*)?\:(\S*)$/i)
 		{
-			my $pfx = $1 || '';
+			my $pfx = $page->{'options'}->{'prefix_nocase'} ? (lc ($1 || '')) : ($1 || '');
 			my $sfx = $2;
-			my $ns  = $maps->{$pfx};
 			
-			return $page->uri($ns.$sfx,{'element'=>$dom,'xml_base'=>$xbase})
-				if ($ns);
+			return $page->uri($maps->{$pfx}.$sfx, {'element'=>$dom,'xml_base'=>$xbase})
+				if defined $maps->{$pfx};
 			
-			return 'http://invalid.invalid/ns#'.$sfx
-				if ($safe);
+			return undef;
+		}
+		
+		if ($page->{'options'}->{'prefix_bare'})
+		{
+			my $pfx = $page->{'options'}->{'prefix_nocase'} ? (lc $str) : $str;
+			
+			return $page->uri($maps->{$pfx}, {'element'=>$dom,'xml_base'=>$xbase})
+				if defined $maps->{$pfx};
 		}
 	}
 	
@@ -1618,125 +1641,6 @@ sub uriOrSafeCurie
 	return undef;
 }
 
-sub reservedWordOrCurie
-# Function only used internally.
-{
-	my $page  = shift;
-	my $str   = shift;
-	my $dom   = shift;
-	my $maps  = shift;
-	my $xbase = shift;
-	my $xpath = $dom->getAttribute('_xpath') if ($dom);
-	my $safe  = 0;
-
-	my $xhv = 'http://www.w3.org/1999/xhtml/vocab#';
-	
-	# Blank nodes
-	if ($str eq '_:' || $str eq '[_:]')
-	{
-		return '_:RDFaX';
-	}
-	elsif ($str =~ /^_:RDFa(.*)$/i || $str =~ /^\[_:RDFa(.*)\]$/i)
-	{
-		return '_:RDFax'.$1;
-	}
-	elsif ($str =~ /^_:(.+)$/i || $str =~ /^\[_:(.+)\]$/i)
-	{
-		return '_:'.$1;
-	}
-	
-	if ($page->{'options'}->{'strict_reserved_words'})
-	{
-		if ($str =~ /^\:?( alternate | appendix | bookmark | cite |
-			chapter | contents | copyright | first | glossary | help |
-			icon | index | last | license | meta | next | p3pv1 |
-			prev | role | section | stylesheet | subsection | start |
-			top | up )$/ix)
-		{
-			return $xhv.lc($1);
-		}
-	}
-	else
-	{
-		# From HTML 4.01 and (in all-caps) HTML 3.2 specs 
-		if ($str =~ /^\:?( Alternate | Stylesheet | Start | Next | Prev |
-			Contents | Index | Glossary | Copyright | Chapter | Section |
-			Subsection | Appendix | Help | Bookmark | PREVIOUS | SEARCH |
-			MADE | TOP )$/ix)
-		{
-			return $xhv.lc($1);
-		}
-		# And the HTML 5 spec.
-		# 2008-07-20 : removed 'contact' as it's gone from HTML 5 draft.
-		elsif ($str =~ /^\:?( alternate | archives | author | bookmark |
-			external | feed | first | help | icon | index | last | license | next |
-			nofollow | noreferrer | pingback | prefetch | prev | search |
-			stylesheet | sidebar | tag | up )$/ix)
-		{
-			return $xhv.lc($1);
-		}
-		# Selected values from XHTML 2
-		elsif ($str =~ /^\:?( cite | meta | p3pv1 | role )$/ix)
-		{
-			return $xhv.lc($1);
-		}
-		# GRDDL
-		elsif (lc($str) eq 'transformation')
-			{ return 'http://www.w3.org/2003/g/data-view#transformation'; }
-		elsif (lc($str) eq 'profiletransformation')
-			{ return 'http://www.w3.org/2003/g/data-view#profileTransformation'; }
-		elsif (lc($str) eq 'namespacetransformation')
-			{ return 'http://www.w3.org/2003/g/data-view#namespaceTransformation'; }
-		# IANA Link Type Registry
-		elsif ($str =~ /^\:?( alternate | appendix | bookmark | chapter |
-			contents | copyright | current | describedby | edit | edit-media |
-			enclosure | first | glossary | help | index | last | license |
-			next | next-archive | payment | prev | previous | prev-archive |
-			related | replies | section | self | service | start | stylesheet |
-			subsection | up | via )$/ix)
-		{
-			return "http://www.iana.org/assignments/relation/".lc($1);
-		}
-		# XFN 1.1
-		elsif ($page->{'options'}->{'xfn_reserved_words'}
-		&& $str =~ /^\:?( contact | acquaintance | friend | met |
-				co-worker | colleague | co-resident | neighbor | child |
-				parent | sibling | spouse | kin | muse | crush | date |
-				sweetheart | me )$/ix)
-		{
-			return "http://vocab.sindice.com/xfn#".lc($1)."-hyperlink";
-		}
-	}
-		
-	# Cope with safe CURIEs.
-	if ($str =~ /^\[(.*)\]$/)
-	{
-		$str  = $1;
-		$safe = 1;
-	}
-	
-	# If the string matches CURIE syntax, then resolve the CURIE.
-	if ($str =~ /^([a-z_][^\s\:]*)?\:(.*)$/i)
-	{
-		my $pfx = $1 || '';
-		my $sfx = $2;
-		my $ns  = $maps->{$pfx};
-		
-		return $page->uri($ns.$sfx, {'element'=>$dom,'xml_base'=>$xbase})
-			if ($ns);
-			
-		return 'http://invalid.invalid/ns#'.$sfx
-			if ($safe);
-	}
-	
-	# If it wasn't a safe CURIE, then fall back to a URI.
-	if (!$safe && $page->{'options'}->{'full_uris'})
-	{
-		return $page->uri($str, {'require-absolute'=>1,'element'=>$dom,'xml_base'=>$xbase});
-	}
-	
-	return undef;
-}
 
 =item $p->graph( [ $graph_name ] ) 
 
@@ -1749,6 +1653,9 @@ graphs, all triples will be returned unless a graph name is specified.
 It will also take an optional graph URI as argument, and return an
 RDF::Trine::Model tied to a temporary storage with all triples in that
 graph.
+
+It makes sense to call C<consume> before calling C<graph>. Otherwise
+you'll just get an empty graph.
 
 =cut
 
@@ -1787,6 +1694,9 @@ sub graph
 Will return a hashref of all named graphs, where the graph name is a
 key and the value is a RDF::Trine::Model tied to a temporary storage.
 
+It makes sense to call C<consume> before calling C<graphs>. Otherwise
+you'll just get an empty hashref.
+
 =back
 
 =cut
@@ -1803,6 +1713,205 @@ sub graphs
 	return \%result;
 }
 
+sub auto_config
+# Internal use only.
+{
+	my $this  = shift;
+	my $count = 0;
+	
+	return undef unless ($this->{'options'}->{'auto_config'});
+
+	my $xpc = XML::LibXML::XPathContext->new;
+	$xpc->registerNs('x', 'http://www.w3.org/1999/xhtml');
+	my $nodes   = $xpc->find('//x:meta[@name="http://search.cpan.org/dist/RDF-RDFa-Parser/#auto_config"]/@content', $this->{'DOM'}->documentElement);
+	my $optstr = '';
+	foreach my $node ($nodes->get_nodelist)
+	{
+		$optstr .= '&' . $node->getValue;
+	}
+	$optstr =~ s/^\&//;
+	my $options = parse_axwfue($optstr);
+	
+	foreach my $o (keys %$options)
+	{
+		next unless $o=~ /^(alt_stylesheet | embedded_rdfxml | full_uris |
+			keywords | prefix_attr | prefix_bare | prefix_empty | prefix_nocase |
+			safe_anywhere | tdb_service | xhtml_base | xhtml_elements | xhtml_lang |
+			xml_base | xml_lang)$/ix;
+		
+		$count++;
+			
+		if ($o =~ /^keywords$/i)
+		{
+			$this->{'options'}->{lc $o} = keywords($options->{$o});
+		}
+		else
+		{
+			$this->{'options'}->{lc $o} = $options->{$o};
+		}
+	}
+	
+	return $count;
+}
+
+sub parse_axwfue
+# Internal use only
+{
+	my $axwfue = shift;
+	$axwfue =~ tr/;/&/;
+	$axwfue =~ s/(^&+|&+$)//g;
+	my $rv = {};
+	for (split /&/, $axwfue)
+	{
+		my ($k, $v) = split /=/, $_, 2;
+		next unless length $k;
+		$rv->{uri_unescape($k)} = uri_unescape($v);
+	}
+	return $rv;
+}
+
+=head1 UTILITY METHOD
+
+=over 8
+
+=item RDF::RDFa::Parser::keywords();
+
+Without any options, gets an empty structure for keywords. Passing
+additional strings adds certain bundles of predefined keywords to the
+structure.
+
+  my $keyword_structure = RDF::RDFa::Parser::keywords(
+	'xhtml', 'xfn', 'grddl');
+
+A keyword structure may be provided as an option when creating a
+new RDF::RDFa::Parser object. You probably want to leave this alone
+unless you know what you're doing.
+
+Bundles include: rdfa, html5, html4, html32, iana, grddl, xfn.
+
+=cut
+
+sub keywords
+{
+	my $terms = join(' ', @_);
+	
+	my $KW = {
+		'about'     => {},
+		'resource'  => {},
+		'rel'       => {},
+		'rev'       => {},
+		'property'  => {},
+		'datatype'  => {},
+		'typeof'    => {},
+		'graph'     => {},
+		};
+	
+	if ($terms =~ /\b(rdfa)\b/i)
+	{
+		foreach my $attr (qw(rel rev))
+		{
+			foreach my $word (qw(alternate appendix bookmark cite
+				chapter contents copyright first glossary help
+				icon index last license meta next p3pv1
+				prev role section stylesheet subsection start top up))
+			{
+				$KW->{ $attr }->{ lc $word } = 'http://www.w3.org/1999/xhtml/vocab#' . (lc $word)
+					unless defined $KW->{ $attr }->{ lc $word };
+			}
+		}
+	}
+
+	if ($terms =~ /\b(html5)\b/i)
+	{
+		foreach my $attr (qw(rel rev))
+		{
+			foreach my $word (qw(alternate archives author bookmark
+				external feed first help icon index last license next
+				nofollow noreferrer pingback prefetch prev search
+				stylesheet sidebar tag up ALTERNATE-STYLESHEET))
+			{
+				$KW->{ $attr }->{ lc $word } = 'http://www.w3.org/1999/xhtml/vocab#' . $word
+					unless defined $KW->{ $attr }->{ lc $word };
+			}
+		}
+	}
+	
+	if ($terms =~ /\b(html4)\b/i)
+	{
+		foreach my $attr (qw(rel rev))
+		{
+			foreach my $word (qw(Alternate Stylesheet Start Next Prev
+				Contents Index Glossary Copyright Chapter Section
+				Subsection Appendix Help Bookmark))
+			{
+				$KW->{ $attr }->{ lc $word } = 'http://www.w3.org/1999/xhtml/vocab#' . (lc $word)
+					unless defined $KW->{ $attr }->{ lc $word };
+			}
+		}
+	}
+	
+	if ($terms =~ /\b(html32)\b/i)
+	{
+		foreach my $attr (qw(rel rev))
+		{
+			foreach my $word (qw(top contents index glossary copyright
+				next previous help search chapter made))
+			{
+				$KW->{ $attr }->{ lc $word } = 'http://www.w3.org/1999/xhtml/vocab#' . $word
+					unless defined $KW->{ $attr }->{ lc $word };
+			}
+		}
+	}
+	
+	if ($terms =~ /\b(iana)\b/i)
+	{
+		foreach my $attr (qw(rel rev))
+		{
+			foreach my $word (qw(alternate appendix bookmark chapter
+				contents copyright current describedby edit edit-media
+				enclosure first glossary help index last license
+				next next-archive payment prev previous prev-archive
+				related replies section self service start stylesheet
+				subsection up via))
+			{
+				$KW->{ $attr }->{ lc $word } = 'http://www.iana.org/assignments/relation/' . $word
+					unless defined $KW->{ $attr }->{ lc $word };
+			}
+		}
+	}
+
+	if ($terms =~ /\b(grddl)\b/i)
+	{
+		foreach my $attr (qw(rel rev))
+		{
+			foreach my $word (qw(transformation profileTransformation namespaceTransformation))
+			{
+				$KW->{ $attr }->{ lc $word } = 'http://www.w3.org/2003/g/data-view#' . $word
+					unless defined $KW->{ $attr }->{ lc $word };
+			}
+		}
+	}
+	
+	if ($terms =~ /\b(xfn)\b/i)
+	{
+		foreach my $attr (qw(rel rev))
+		{
+			foreach my $word (qw(contact acquaintance friend met
+				co-worker colleague co-resident neighbor child
+				parent sibling spouse kin muse crush date
+				sweetheart me))
+			{
+				$KW->{ $attr }->{ lc $word } = 'http://vocab.sindice.com/xfn#' . $word . "-hyperlink"
+					unless defined $KW->{ $attr }->{ lc $word };
+			}
+		}
+	}
+	
+	return $KW;
+}
+
+=back
+
 =head1 CONSTANTS
 
 =over 8
@@ -1816,6 +1925,28 @@ Suggested options hashref for parsing XHTML.
 sub OPTS_XHTML
 {
 	return {};
+}
+
+=item RDF::RDFa::Parser::OPTS_HTML4
+
+Suggested options hashref for parsing HTML.
+
+=cut
+
+sub OPTS_HTML4
+{
+	return {'prefix_nocase'=>1,'keywords'=>keywords('rdfa html4'),'xml_lang'=>0};
+}
+
+=item RDF::RDFa::Parser::OPTS_HTML5
+
+Suggested options hashref for parsing HTML.
+
+=cut
+
+sub OPTS_HTML5
+{
+	return {'prefix_nocase'=>1,'keywords'=>keywords('rdfa html5'),'alt_stylesheet'=>1};
 }
 
 =item RDF::RDFa::Parser::OPTS_SVG
@@ -1851,16 +1982,67 @@ sub OPTS_XML
 			
 1;
 
+=head1 AUTO CONFIG
+
+RDF::RDFa::Parser has a lot of different options that can be switched
+on and off. Sometimes it might be useful to allow the page being
+parsed to control some of the options. If you switch on the 'auto_config'
+option, pages can do this.
+
+A page can set options using a specially crafted E<lt>metaE<gt> tag:
+
+  <meta name="http://search.cpan.org/dist/RDF-RDFa-Parser/#auto_config"
+     content="xhtml_lang=1&amp;keywords=rdfa+html5+html4+html32" />
+
+Note that the C<content> attribute is an application/x-www-form-urlencoded
+string (which must then be HTML-escaped of course). Semicolons may be used
+instead of ampersands, as these tend to look nicer:
+
+  <meta name="http://search.cpan.org/dist/RDF-RDFa-Parser/#auto_config"
+     content="xhtml_lang=1;keywords=rdfa+html5+html4+html32" />
+
+Any option allowed in the constructor may be given using auto config,
+except 'use_rtnlx', and of course 'auto_config' itself. As named graphs
+cannot currently be configured using the constructor, they are also
+not supported with auto config.
+
 =head1 BUGS
 
-RDF::RDFa::Parser 0.21 passes all approved tests in the W3C's XHTML+RDFa
-test suite.
+RDF::RDFa::Parser 0.21 passed all approved tests in the XHTML+RDFa
+test suite at the time of its release.
+
+RDF::RDFa::Parser 0.22 (used in conjunction with HTML::HTML5::Parser
+0.01 and HTML::HTML5::Sanity 0.01) additionally passes all approved
+tests in the HTML4+RDFa and HTML5+RDFa test suites at the time of
+its release; except test cases 0113 and 0121, which the author of
+this module believes mandate incorrect HTML parsing.
 
 Please report any bugs to L<http://rt.cpan.org/>.
 
+Common gotchas:
+
+=over 8
+
+=item * Is your XML well-formed?
+
+Despite having several options for dealing with HTML+RDFa, this
+package uses a strict XML parser. If you need to deal with tag
+soup, you'll need to parse it into an XML::LibXML::Document
+yourself (e.g. using HTML::HTML5::Parser) and then pass the
+XML::LibXML::Document to this package's contructor function.
+
+=item * Are your namespaces set correctly?
+
+Does your document have 'xmlns="http://www.w3.org/1999/xhtml"' on
+the root element? If not, some aspects of this package's behaviour
+may be unexpected. If you parsed the document using
+HTML::HTML5::Parser you may need to run it through HTML::HTML5::Sanity.
+
+=back
+
 =head1 SEE ALSO
 
-L<XML::LibXML>, L<RDF::Trine>.
+L<XML::LibXML>, L<RDF::Trine>, L<HTML::HTML5::Parser>, L<HTML::HTML5::Sanity>.
 
 L<http://www.perlrdf.org/>.
 
