@@ -1,12 +1,43 @@
-use 5.008006;
-use ExtUtils::MakeMaker;
+use strict;
+use warnings;
 
-WriteMakefile(
-    NAME              => 'RDF::RDFa::Parser',
-    VERSION_FROM      => 'lib/RDF/RDFa/Parser.pm',
-    PREREQ_PM         => { 'XML::LibXML' => 1.66 , 'URI::URL' => 5 , 'RDF::Trine'=>'0.111' }, 
+use inc::Module::Install;
 
-    ($] >= 5.005 ?
-      (ABSTRACT_FROM  => 'lib/RDF/RDFa/Parser.pm',
-       AUTHOR         => 'Toby Inkster <tai@g5n.co.uk>') : ()),
-);
+my $dist = 'RDF-RDFa-Parser';
+my $fn   = "lib/$dist.pm"; $fn =~ s#-#/#g;
+
+name                $dist;
+perl_version_from   $fn;
+version_from        $fn;
+abstract_from       $fn;
+readme_from         $fn;
+author              'Toby Inkster <tobyink@cpan.org>';
+license             'perl';
+
+test_requires       'Test::More' => '0.61';
+
+requires            'Carp'           => 0;
+requires            'File::ShareDir' => 0;
+requires            'RDF::Trine'     => 0.112;
+requires            'URI::Escape'    => 0;
+requires            'URI::URL'       => 0;
+requires            'XML::LibXML'    => 1.66;
+
+resources(
+	'homepage'   => "http://search.cpan.org/dist/$dist/",
+	'repository' => "http://goddamn.co.uk/viewvc/perlmods/$dist/",
+	'bugtracker' => "http://rt.cpan.org/Dist/Display.html?Queue=$dist",
+	);
+
+write_doap_changes;
+write_doap_changes_xml;
+
+install_share;
+
+include 'Test::Signature';
+auto_install;
+WriteAll(
+	'meta' => 1,
+	'sign' => 1,
+	);
+

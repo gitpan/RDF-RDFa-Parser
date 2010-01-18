@@ -1,0 +1,87 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.61.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It will check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+SHA1 35f13ca5e03f088d7d4e1815e4bcba6b8384add9 COPYING.Artistic
+SHA1 8624bcdae55baeef00cd11d5dfcfa60f68710a02 COPYING.GPL3
+SHA1 d8aa436326a8e848b100ace7e1812a20824a041a Changes
+SHA1 f78a1d61f1388629d3407df1b84352c21c65df51 Changes.ttl
+SHA1 acd9902dd428ad1ea28f7fb55b0fd8a710c4b575 Changes.xml
+SHA1 260487c7527ce3750d144997396eb1b0bd459715 MANIFEST
+SHA1 00884f792ab034e203334d8627fcbe6dbe600fe6 MANIFEST.SKIP
+SHA1 6f349a92efc9d3807cac946ffdacde349367a87a META.yml
+SHA1 1feaf39c3b77e4ea013e0c1cdc4e29111e48925e Makefile.PL
+SHA1 0e994169357c9f1df1018fe92109a301d500dec7 README
+SHA1 e5fb92ac217988bfc7a6af739b0459627020a27e inc/Module/AutoInstall.pm
+SHA1 fd5f3c4f0418efee3b9b16cf8c3902e8374909df inc/Module/Install.pm
+SHA1 5c529e96420d964b192f011b121283a4916f7331 inc/Module/Install/AutoInstall.pm
+SHA1 7cd7c349afdf3f012e475507b1017bdfa796bfbd inc/Module/Install/Base.pm
+SHA1 ba186541bbf6439111f01fc70769cf24d22869bf inc/Module/Install/Can.pm
+SHA1 fe38042391364605e8309579e47b8aa0238a513c inc/Module/Install/DOAPChangeSets.pm
+SHA1 aaa50eca0d7751db7a4d953fac9bc72c6294e238 inc/Module/Install/Fetch.pm
+SHA1 219da5a95c290312a81477b226f005997d97dcfd inc/Module/Install/Include.pm
+SHA1 3e83972921d54198d1246f7278f08664006cd65d inc/Module/Install/Makefile.pm
+SHA1 12bf1867955480d47d5171a9e9c6a96fabe0b58f inc/Module/Install/Metadata.pm
+SHA1 a615bb050ca0b2d79bfa0224addcb83019a53b09 inc/Module/Install/ReadmeFromPod.pm
+SHA1 a1ccb2a21d1118b1bed4f97bd31ebd7dfd8fe43c inc/Module/Install/Share.pm
+SHA1 f7ee667e878bd2faf22ee9358a7b5a2cc8e91ba4 inc/Module/Install/Win32.pm
+SHA1 8ed29d6cf217e0977469575d788599cbfb53a5ca inc/Module/Install/WriteAll.pm
+SHA1 1e6399a0585817abef500c34fce676fb9b0545f0 inc/Test/Signature.pm
+SHA1 22465cf9a5e8a25449bcaaba5e60df4c988092b3 lib/RDF/RDFa/Parser.pm
+SHA1 65d694802ebf040e505d2d82925231c978f4fffe share/catalogue/index.xml
+SHA1 19a1208f80c699956c1360237510f11999672c6a share/catalogue/xhtml-base-1.mod
+SHA1 d9f882c23130865e98cd1dd971cc8157c15e07f5 share/catalogue/xhtml-bdo-1.mod
+SHA1 2ea30b752070ae9fda53ac9bcc1a6641931e685e share/catalogue/xhtml-csismap-1.mod
+SHA1 102094405f7ce9520b560c4c27cf11ee3aa8c49c share/catalogue/xhtml-datatypes-1.mod
+SHA1 dbf6e495e4336ada1f554f2bc65efcd14b3617a2 share/catalogue/xhtml-edit-1.mod
+SHA1 50a7aebfa0b695f0aa80703d6496e7c0866a30f8 share/catalogue/xhtml-form-1.mod
+SHA1 36a16328636b2b7f456921d39563f05ce2ef32e5 share/catalogue/xhtml-framework-1.mod
+SHA1 391df247bc6978daaca3c938e9ed9b743272c8fb share/catalogue/xhtml-hypertext-1.mod
+SHA1 e2d2125647986f1a886e9eda5e1330d3bbe9dfc0 share/catalogue/xhtml-image-1.mod
+SHA1 aa3681956de62ea41d0138528527e1a51dcb973c share/catalogue/xhtml-inlstyle-1.mod
+SHA1 4067d7d1d3032f24a91e6a781acf6dfb4215c27e share/catalogue/xhtml-legacy-1.mod
+SHA1 d373be3ad9dc487d852a9e5fd69ab8b4a7825bd7 share/catalogue/xhtml-link-1.mod
+SHA1 03634b27b28d0db8a735cf7be6c8a53d637fe2ee share/catalogue/xhtml-list-1.mod
+SHA1 79b5effbbf6ba25a0cca08316f4aad916de3bb92 share/catalogue/xhtml-meta-1.mod
+SHA1 bcfb72402c8a9bc0bd5ec40ddb24c04069a7aa53 share/catalogue/xhtml-metaAttributes-1.mod
+SHA1 4be7fbb1acaeb0d1b7a909408c9bfc52a724c989 share/catalogue/xhtml-object-1.mod
+SHA1 0eab428a3357db0ff1368ebe4a105cd4a02eecc8 share/catalogue/xhtml-param-1.mod
+SHA1 b9e70a717b03ba10abc6f1a340e142c07b94c5e9 share/catalogue/xhtml-pres-1.mod
+SHA1 884c11d278bdf3b2a70334096c5f849e8f775db3 share/catalogue/xhtml-rdfa-1.dtd
+SHA1 87e22379d545a43d0dec73d91120b3f13bb04e72 share/catalogue/xhtml-rdfa-model-1.mod
+SHA1 7bcaf7931ad7ded6ff03b67d915f2eed806fd1df share/catalogue/xhtml-ruby-1.mod
+SHA1 5694c086e51d78a64931ca8e8f39f15f209593c6 share/catalogue/xhtml-script-1.mod
+SHA1 32f02f0400b079de976ed0e52926367dbfc8926d share/catalogue/xhtml-ssismap-1.mod
+SHA1 d7ce4bb7848501fd9cd8e564861eddfe4ead38f2 share/catalogue/xhtml-struct-1.mod
+SHA1 6cbd59fe08d4b7d3d84ebfaac3dd1935cc9499c3 share/catalogue/xhtml-style-1.mod
+SHA1 1329df62ee260613923d105808e97bd05c483407 share/catalogue/xhtml-table-1.mod
+SHA1 39b65f9422b3cefea54ec06d9ec1fb67e8635142 share/catalogue/xhtml-target-1.mod
+SHA1 dfd30cc70c2b214a40e3ec724bba9bf024af745a share/catalogue/xhtml-text-1.mod
+SHA1 bb128dce2db8ad397dbeb957d79d084cc5d2391a t/00sig.t
+SHA1 ef62bbe7897fe9739ca59ed22f330aa33c360401 t/01basic.t
+SHA1 8a8081fbaf4f54de9c58dd99dcaa309f3659aa4c t/02curie.t
+SHA1 644744f5f0f6175ccdfea50f2b00961899f5962c t/03lang.t
+SHA1 33348996811f3b630acc5b73470efc160e5e3063 t/04xmlliteral.t
+SHA1 02dde52dfe7b0dbd8230ffa5e435e68fd40a1baa t/05namedgraphs.t
+SHA1 7cc059cbc6e349758912008f49d7eb58e0d2db39 t/06xmlbase.t
+SHA1 d42d076129c0b8f568b4374e3704f54964fad11f t/07rdfxml.t
+SHA1 03d4dca1de7d84c2ff220cc4f3d4760d90c99563 t/08atom.t
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAktUuv8ACgkQzr+BKGoqfTlZYwCgikFYOHQib0Bs9T5Tt2n0DULd
+kmQAnjOQ+HyOp9N53U/pmtfCjJkjWS/P
+=TAlb
+-----END PGP SIGNATURE-----

@@ -19,8 +19,12 @@ xmlns="http://www.w3.org/1999/xhtml">
 	</body>
 </html>
 EOF
-$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/einstein');
-$parser->named_graphs('http://example.com/graphing', 'graph');
+$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/einstein',
+	{
+		graph => 1,
+		graph_attr => '{http://example.com/graphing}graph',
+		graph_type => 'about',
+	});
 $parser->consume;
 
 ok($parser->graph('http://example.com/einstein#JOE')->count_statements(

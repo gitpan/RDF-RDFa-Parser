@@ -17,26 +17,35 @@ RDF::RDFa::Parser - RDFa parser using XML::LibXML.
 package RDF::RDFa::Parser;
 use Carp;
 use Encode qw(encode_utf8);
-use JSON;
+use File::ShareDir qw(dist_file);
+use LWP::UserAgent;
 use RDF::Trine;
 use URI::Escape;
 use URI::URL;
 use XML::LibXML qw(:all);
 use strict;
+use 5.008;
 
 =head1 VERSION
 
-0.22
+0.30
 
 Note: version 0.20 introduced major incompatibilities with 0.0x and 0.1x.
 
 =cut
 
-our $VERSION = '0.22';
+our $VERSION = '0.30';
+our $HAS_AWOL;
+
+BEGIN
+{
+	eval "use XML::Atom::OWL;";
+	$HAS_AWOL = $@ ? 0 : 1;
+}
 
 =head1 PUBLIC METHODS
 
-=over
+=over 4
 
 =item $p = RDF::RDFa::Parser->new($xhtml, $baseuri, \%options, $storage)
 
@@ -52,14 +61,23 @@ The base URI is used to resolve relative URIs found in the document.
 Options (mostly booleans) [default in brackets]:
 
   * alt_stylesheet  - Magic rel="alternate stylesheet". [0]
+  * atom_elements   - Process <feed> and <entry> specially. [0]
+  * atom_parser     - Extract Atom 1.0 native semantics. [0]
   * auto_config     - See section "Auto Config" [0]
   * embedded_rdfxml - Find plain RDF/XML chunks within document. [0]
                       0=no, 1=handle, 2=skip.
   * full_uris       - Support full URIs in CURIE-only attributes. [0]
+  * graph           - Enable support for named graphs. [0]
+  * graph_attr      - Attribute to use for named graphs. ['graph']
+                      Use Clark Notation to specify a namespace.
+  * graph_type      - Graph attr behaviour ('id' or 'about'). ['id']
+  * graph_default   - Default graph name. ['_:RDFaDefaultGraph']
   * keywords        - THIS WILL VOID YOUR WARRANTY!
   * prefix_attr     - Support @prefix rather than just @xmlns:*. [0]
   * prefix_bare     - Support CURIEs with no colon+suffix. [0]
-  * prefix_empty    - URI for empty prefix.
+  * prefix_default  - URI for default prefix (e.g. rel="foo").
+                      [undef]
+  * prefix_empty    - URI for empty prefix (e.g. rel=":foo").
                       ['http://www.w3.org/1999/xhtml/vocab#']
   * prefix_nocase   - Ignore case-sensitivity of CURIE prefixes. [0]
   * safe_anywhere   - Allow Safe CURIEs in @rel/@rev/etc. [0] 
@@ -91,6 +109,20 @@ sub new
 	my $store   = shift;
 	my $DOMTree;
 
+	unless (defined $xhtml)
+	{
+		my $ua = LWP::UserAgent->new;
+		$ua->agent(sprintf('%s/%s ', __PACKAGE__, $VERSION));
+		$ua->default_header("Accept" => "application/xhtml+xml, application/xml;q=0.1, text/xml;q=0.1");
+		my $response = $ua->get($baseuri);
+		use Data::Dumper;
+		croak "HTTP response not successful\n"
+			unless $response->is_success;
+		croak "Non-XHTML HTTP response\n"
+			unless $response->content_type =~ m`^(text/(x|ht)ml)|(application/(xhtml\+xml|xml))$`;
+		$xhtml = $response->decoded_content;
+	}
+	
 	if (UNIVERSAL::isa($xhtml, 'XML::LibXML::Document'))
 	{
 		$DOMTree = $xhtml;
@@ -101,6 +133,11 @@ sub new
 		my $parser  = XML::LibXML->new;
 		$parser->validation(0);
 		$parser->recover(1);
+		
+		my $catalogue = dist_file('RDF-RDFa-Parser', 'catalogue/index.xml');
+		$parser->load_catalog($catalogue)
+			if -r $catalogue;
+		
 		$DOMTree = $parser->parse_string($xhtml);
 	}
 	
@@ -114,15 +151,23 @@ sub new
 			'DOM'     => $DOMTree,
 			'RESULTS' => RDF::Trine::Model->new($store),
 			'bnodes'  => 0,
-			'sub'     => [],
+			'sub'     => {},
 			'options' => {
 				'alt_stylesheet'        => 0,
+				'atom_elements'         => 0,
+				'atom_parser'           => 0,
+				'auto_config'           => 0,
 				'embedded_rdfxml'       => 0,
 				'full_uris'             => 0,
 				'keywords'              => keywords('rdfa'),
-				'named_graphs'          => 0,
+				'graph'                 => 0,
+				'graph_attr'            => 'graph',
+				'graph_type'            => 'id',
+				'graph_default'         => '_:RDFaDefaultGraph',
+				'graph_default_trine'   => undef,  # not officially exposed
 				'prefix_attr'           => 0,
 				'prefix_bare'           => 0,
+				'prefix_default'        => 0,
 				'prefix_empty'          => 'http://www.w3.org/1999/xhtml/vocab#',
 				'prefix_nocase'         => 0,
 				'safe_anywhere'         => 0,
@@ -245,66 +290,28 @@ sub dom
 	return $this->{DOM};
 }
 
-=item $p->set_callbacks(\&func1, \&func2)
+=item $p->set_callbacks(\%callbacks)
 
-Set callbacks for handling RDF triples extracted from RDFa document. The
-first function is called when a triple is generated taking the form of
-(I<resource>, I<resource>, I<resource>). The second function is called when a
-triple is generated taking the form of (I<resource>, I<resource>, I<literal>).
+Set callback functions for the parser to call on certain events. These are only necessary if
+you want to do something especially unusual.
 
-The parameters passed to the first callback function are:
+  $p->set_callbacks({
+    'pretriple_resource' => sub { ... } ,
+    'pretriple_literal'  => sub { ... } ,
+    'ontriple'           => undef ,
+    'onprefix'           => \&some_function ,
+    });
 
-=over 4
+An older syntax is still supported for setting the two pretriple callbacks:
 
-=item * A reference to the C<RDF::RDFa::Parser> object
+  $p->set_callbacks(\&cb_pretriple_resource, \&cb_pretriple_literal);
 
-=item * A reference to the C<XML::LibXML element> being parsed
+Either of the two pretriple callbacks can be set to the string 'print' instead of a coderef.
+This enables built-in callbacks for printing Turtle to STDOUT.
 
-=item * Subject URI or bnode
-
-=item * Predicate URI
-
-=item * Object URI or bnode
-
-=item * Graph URI or bnode (if named graphs feature is enabled)
-
-=back
-
-The parameters passed to the second callback function are:
-
-=over 4
-
-=item * A reference to the C<RDF::RDFa::Parser> object
-
-=item * A reference to the C<XML::LibXML element> being parsed
-
-=item * Subject URI or bnode
-
-=item * Predicate URI
-
-=item * Object literal
-
-=item * Datatype URI (possibly undef or '')
-
-=item * Language (possibly undef or '')
-
-=item * Graph URI or bnode (if named graphs feature is enabled)
-
-=back
-
-In place of either or both functions you can use the string C<'print'> which
-sets the callback to a built-in function which prints the triples to STDOUT
-as Turtle. Either or both can be set to undef, in which case, no callback
-is called when a triple is found.
-
-Beware that for literal callbacks, sometimes both a datatype *and* a language
-will be passed. (This goes beyond the normal RDF data model.)
-
-C<set_callbacks> must be used I<before> C<consume>.
-
-IMPORTANT - CHANGED IN VERSION 0.20 - callback functions should return true
-if they wish to prevent the triple from being added to the parser's built-in
-model; false otherwise.
+For details of the callback functions, see the section CALLBACKS. C<set_callbacks> must
+be used I<before> C<consume>. C<set_callbacks> itself returns a reference to the parser
+object itself.
 
 =cut
 
@@ -313,15 +320,32 @@ sub set_callbacks
 {
 	my $this = shift;
 
-	for (my $n=0 ; $n<2 ; $n++)
+	if ('HASH' eq ref $_[0])
 	{
-		if (lc($_[$n]) eq 'print')
-			{ $this->{'sub'}->[$n] = ($n==0 ? \&_print0 : \&_print1); }
-		elsif ('CODE' eq ref $_[$n])
-			{ $this->{'sub'}->[$n] = $_[$n]; }
-		else
-			{ $this->{'sub'}->[$n] = undef; }
+		$this->{'sub'} = $_[0];
+		$this->{'sub'}->{'pretriple_resource'} = \&_print0
+			if lc $this->{'sub'}->{'pretriple_resource'}  eq 'print';
+		$this->{'sub'}->{'pretriple_literal'} = \&_print1
+			if lc $this->{'sub'}->{'pretriple_literal'}  eq 'print';
 	}
+	else
+	{
+		if (lc($_[0]) eq 'print')
+			{ $this->{'sub'}->{'pretriple_resource'} = \&_print0; }
+		elsif ('CODE' eq ref $_[0])
+			{ $this->{'sub'}->{'pretriple_resource'} = $_[0]; }
+		else
+			{ $this->{'sub'}->{'pretriple_resource'} = undef; }
+
+		if (lc($_[1]) eq 'print')
+			{ $this->{'sub'}->{'pretriple_literal'} = \&_print1; }
+		elsif ('CODE' eq ref $_[1])
+			{ $this->{'sub'}->{'pretriple_literal'} = $_[1]; }
+		else
+			{ $this->{'sub'}->{'pretriple_literal'} = undef; }
+	}
+	
+	return $this;
 }
 
 sub _print0
@@ -412,12 +436,16 @@ the document's base URI, followed by a hash, followed by the attribute value.
 If $attributeType is the string 'about', then the URI is generated by treating
 the attribute like an 'about' attribute - i.e. it is treated as an absolute or
 relative URI, with safe CURIEs being allowed too. If the $attributeType is
-omitted, then the default behaviour is 'about'.
+omitted, then the default behaviour is 'id'.
 
 Calling this method with no parameters will disable the named graph feature.
 Named graphs are disabled by default.
 
 C<named_graphs> must be used I<before> C<consume>.
+
+NOTE - version 0.30 changed the default type from 'about' to 'id'.
+
+THIS FUNCTION IS DEPRECATED - pass options to the constructor instead.
 
 =cut
 
@@ -427,63 +455,78 @@ sub named_graphs
 	my $xmlns = shift;
 	my $attr  = shift;
 	my $type  = shift || 'about';
-	
-	if (defined $xmlns)
+
+	unless (defined $attr)
 	{
-		die "Must specify XML namespace and attribute.\n" unless defined $attr;
-		
-		$this->{'options'}->{'named_graphs'} = {
-			'xmlns'         => $xmlns,
-			'attr'          => $attr,
-			'type'          => lc($type),
-			'default'       => '_:RDFaDefaultGraph',
-			'default_trine' => RDF::Trine::Node::Blank->new('RDFaDefaultGraph'),
-		};
+		$this->{'options'}->{'graph'} = 0;
 	}
 
-	else
-	{
-		$this->{'options'}->{'named_graphs'} = 0;
-	}
+	$this->{'options'}->{'graph'} = 1;
+	$this->{'options'}->{'graph_attr'} = (length $xmlns) ? sprintf('{%s}%s', $xmlns, $attr) : $attr;
+	$this->{'options'}->{'graph_type'} = lc $type;
+	
+	#		'default'       => '_:RDFaDefaultGraph',
+	#		'default_trine' => RDF::Trine::Node::Blank->new('RDFaDefaultGraph'),
 
 	return $this;
 }
 
-=item $p->thing_described_by(1)
-
-RDF::RDFa::Parser has a feature that allows it to use thing-described-by.org
-to create URIs for some blank nodes. It is disabled by default. This function
-can be used to turn it on (1) or off (0). May be called without a parameter,
-which just returns the current status.
-
-C<thing_described_by> must be used I<before> C<consume>.
-
-THIS FUNCTION IS DEPRECATED. PASS AN OPTION TO THE CONSTRUCTOR INSTEAD.
-
-=cut
-
 sub thing_described_by
-{
-	my $this = shift;
-	my $set  = shift;
-	
-	my $rv   = $this->{options}->{tdb_service};
-	
-	$this->{options}->{tdb_service} = $set
-		if (defined $set);
-		
-	return $rv;
-}
+	{ croak "The thing_described_by function is no longer supported (use the tdb_service option instead)"; }
 
 =item $p->consume
 
-The document is parsed for RDFa. Nothing of interest is returned by this
-function, but the triples extracted from the document are passed to the
-callbacks as each one is found.
+The document is parsed for RDFa. Triples extracted from the document are passed
+to the callbacks as each one is found; triples are made available in the model returned
+by the C<graph> method.
+
+This function returns the parser object itself, making it easy to abbreviate several of
+RDF::RDFa::Parser's functions:
+
+  my $iterator = RDF::RDFa::Parser->new($xhtml,$uri)
+                 ->consume->graph->as_stream;
 
 =cut
 
 sub consume
+{
+	my $self = shift;
+	
+	if ($self->{'options'}->{'graph'})
+	{
+		$self->{'options'}->{'graph_attr'} = 'graph'
+			unless defined $self->{'options'}->{'graph_attr'};
+		$self->{'options'}->{'graph_type'} = 'id'
+			unless defined $self->{'options'}->{'graph_type'};
+		$self->{'options'}->{'graph_default'} = '_:RDFaDefaultGraph'
+			unless defined $self->{'options'}->{'graph_default'};
+		
+		if ((substr $self->{'options'}->{'graph_default'}, 0, 2) eq '_:')
+		{
+			$self->{'options'}->{'graph_default_trine'} =
+				RDF::Trine::Node::Blank->new( substr $self->{'options'}->{'graph_default'}, 2 );
+		}
+		else
+		{
+			$self->{'options'}->{'graph_default_trine'} =
+				RDF::Trine::Node::Resource->new( $self->{'options'}->{'graph_default'} );
+		}
+	}
+	
+	$self->_consume;
+	
+	if ($self->{'options'}->{'atom_parser'} && $HAS_AWOL)
+	{
+		my $awol = XML::Atom::OWL->new( $self->dom , $self->uri , undef, $self->{'RESULTS'} );
+		$awol->{'bnode_generator'} = $self;
+		$awol->set_callbacks( $self->{'sub'} );
+		$awol->consume;
+	}
+	
+	return $self;
+}
+
+sub _consume
 # http://www.w3.org/TR/rdfa-syntax/#sec_5.5.
 {
 	no warnings;
@@ -500,7 +543,7 @@ sub consume
 	my $uri_mappings       = shift || {};
 	my $incomplete_triples = shift || ();
 	my $language           = shift || undef;
-	my $graph              = shift || ($this->{'options'}->{'named_graphs'} ? $this->{'options'}->{'named_graphs'}->{'default'} : undef);
+	my $graph              = shift || ($this->{'options'}->{'graph'} ? $this->{'options'}->{'graph_default'} : undef);
 	my $xml_base           = shift || undef;
 	
 	# Processing begins by applying the processing rules below to the document
@@ -600,7 +643,7 @@ sub consume
 					$o[2] = $st->object->literal_value_language;
 					
 					$this->rdf_triple_literal(undef, $s, $p, @o,
-						($this->{'options'}->{'named_graphs'} ? $g : undef));
+						($this->{'options'}->{'graph'} ? $g : undef));
 				}
 				else
 				{
@@ -608,7 +651,7 @@ sub consume
 						($g.'_'.$st->object->blank_identifier) :
 						$st->object->uri_value ;
 					$this->rdf_triple(undef, $s, $p, @o,
-						($this->{'options'}->{'named_graphs'} ? $g : undef));
+						($this->{'options'}->{'graph'} ? $g : undef));
 				}				
 			});
 			
@@ -647,6 +690,9 @@ sub consume
 			}
 			else
 			{
+				$this->{'sub'}->{'onprefix'}($this, $current_element, $pfx, $uri)
+					if defined $this->{'sub'}->{'onprefix'};
+	
 				$local_uri_mappings->{$pfx} = $uri;
 			}
 		}
@@ -664,35 +710,35 @@ sub consume
 		{
 			my $pfx = $this->{'options'}->{'prefix_nocase'} ? (lc $1) : $1;
 			my $uri = $2;
+			$this->{'sub'}->{'onprefix'}($this, $current_element, $pfx, $uri)
+				if defined $this->{'sub'}->{'onprefix'};
 			$local_uri_mappings->{$pfx} = $uri;
 		}
 	}
 	
 	# EXTENSION
 	# KjetilK's named graphs.
-	if ($this->{'options'}->{'named_graphs'})
+	if ($this->{'options'}->{'graph'})
 	{
-		if ($this->{'options'}->{'named_graphs'}->{'type'} eq 'id'
-		&&  $current_element->hasAttributeNS(
-				$this->{'options'}->{'named_graphs'}->{'xmlns'},
-				$this->{'options'}->{'named_graphs'}->{'attr'}))
+		my ($xmlns, $attr) = ($this->{'options'}->{'graph_attr'} =~ /^(?:\{(.+)\})?(.+)$/);
+		unless ($attr)
 		{
-			$graph = $this->uri('#' . $current_element->getAttributeNS(
-					$this->{'options'}->{'named_graphs'}->{'xmlns'},
-					$this->{'options'}->{'named_graphs'}->{'attr'}));
+			$xmlns = undef;
+			$attr  = 'graph';
 		}
-		elsif ($this->{'options'}->{'named_graphs'}->{'type'} eq 'about'
-		&&  $current_element->hasAttributeNS(
-				$this->{'options'}->{'named_graphs'}->{'xmlns'},
-				$this->{'options'}->{'named_graphs'}->{'attr'}))
+		
+		if ($this->{'options'}->{'graph_type'} eq 'id'
+		&&  $current_element->hasAttributeNS($xmlns, $attr))
 		{
-			$graph = $this->uriOrSafeCurie(
-				$current_element->getAttributeNS(
-					$this->{'options'}->{'named_graphs'}->{'xmlns'},
-					$this->{'options'}->{'named_graphs'}->{'attr'}),
+			$graph = $this->uri('#' . $current_element->getAttributeNS($xmlns, $attr));
+		}
+		elsif ($this->{'options'}->{'graph_type'} eq 'about'
+		&&  $current_element->hasAttributeNS($xmlns, $attr))
+		{
+			$graph = $this->uriOrSafeCurie($current_element->getAttributeNS($xmlns, $attr),
 				$current_element, 'graph', $local_uri_mappings, $xml_base);
 			
-			$graph = $this->{'options'}->{'named_graphs'}->{'default'}
+			$graph = $this->{'options'}->{'graph_default'}
 				unless defined $graph;
 		}
 	}
@@ -763,11 +809,20 @@ sub consume
 			# there is an empty @about present, and process it according to
 			# the rule for @about, above; 
 			if ($this->{'options'}->{'xhtml_elements'}
+			&& ($current_element->namespaceURI eq 'http://www.w3.org/1999/xhtml')
 			&& ($current_element->tagName eq 'head' || $current_element->tagName eq 'body'))
 			{
 				$new_subject = $this->uri;
 			}
-			
+
+			# EXTENSION: atom elements
+			elsif ($this->{'options'}->{'atom_elements'}
+			&& ($current_element->namespaceURI eq 'http://www.w3.org/2005/Atom')
+			&& ($current_element->tagName eq 'feed' || $current_element->tagName eq 'entry'))
+			{
+				$new_subject = $this->_atom_magic($current_element);
+			}
+
 			# if @instanceof is present, obtained according to the section
 			# on CURIE and URI Processing , then [new subject] is set to be
 			# a newly created [bnode]; 
@@ -816,9 +871,18 @@ sub consume
 			# there is an empty @about present, and process it according
 			# to the rule for @about, above; 
 			if ($this->{'options'}->{'xhtml_elements'}
+			&& ($current_element->namespaceURI eq 'http://www.w3.org/1999/xhtml')
 			&& ($current_element->tagName eq 'head' || $current_element->tagName eq 'body'))
 			{
 				$new_subject = $this->uri;
+			}
+			
+			# EXTENSION: atom elements
+			elsif ($this->{'options'}->{'atom_elements'}
+			&& ($current_element->namespaceURI eq 'http://www.w3.org/2005/Atom')
+			&& ($current_element->tagName eq 'feed' || $current_element->tagName eq 'entry'))
+			{
+				$new_subject = $this->_atom_magic($current_element);
 			}
 			
 			# if @instanceof is present, obtained according to the section
@@ -1126,7 +1190,7 @@ sub consume
 			# replaced with the local values; 
 			if ($skip_element)
 			{
-				$flag = $this->consume(
+				$flag = $this->_consume(
 					$kid,
 					$base,
 					$parent_subject,
@@ -1142,7 +1206,7 @@ sub consume
 			# Otherwise, the values are: 
 			else
 			{
-				$flag = $this->consume(
+				$flag = $this->_consume(
 					$kid,
 					$base,
 					$new_subject,
@@ -1196,10 +1260,8 @@ sub rdf_triple
 	my $this = shift;
 
 	my $suppress_triple = 0;
-	if ($this->{'sub'}->[0])
-	{
-		$suppress_triple = $this->{'sub'}->[0]($this, @_);
-	}
+	$suppress_triple = $this->{'sub'}->{'pretriple_resource'}($this, @_)
+		if defined $this->{'sub'}->{'pretriple_resource'};
 	return if $suppress_triple;
 	
 	my $element   = shift;  # A reference to the XML::LibXML element being parsed
@@ -1229,10 +1291,8 @@ sub rdf_triple_literal
 	my $this = shift;
 
 	my $suppress_triple = 0;
-	if ($this->{'sub'}->[1])
-	{
-		$suppress_triple = $this->{'sub'}->[1]($this, @_);
-	}
+	$suppress_triple = $this->{'sub'}->{'pretriple_literal'}($this, @_)
+		if defined $this->{'sub'}->{'pretriple_literal'};
 	return if $suppress_triple;
 
 	my $element   = shift;  # A reference to the XML::LibXML element being parsed
@@ -1306,8 +1366,10 @@ sub rdf_triple_common
 		$ts = RDF::Trine::Node::Resource->new($subject);
 	}
 
+	my $statement;
+
 	# If we are configured for it, and graph name can be found, add it.
-	if (ref($this->{'options'}->{'named_graphs'}) && ($graph))
+	if ($this->{'options'}->{'graph'} && $graph)
 	{
 		$this->{Graphs}->{$graph}++;
 		
@@ -1321,23 +1383,28 @@ sub rdf_triple_common
 			$tg = RDF::Trine::Node::Resource->new($graph);
 		}
 
-		my $statement = RDF::Trine::Statement::Quad->new($ts, $tp, $to, $tg);
-		$this->{RESULTS}->add_statement($statement);
-	
-		#if ($graph ne $this->{'options'}->{'named_graphs'}->{'default'})
-		#{
-		#	my $graph_statement = RDF::Trine::Statement::Quad->new($ts, $tp, $to, 
-		#		$this->{'options'}->{'named_graphs'}->{'default_trine'});
-		#	$this->{RESULTS}->add_statement($graph_statement,
-		#		$this->{'options'}->{'named_graphs'}->{'default_trine'});
-		#}
+		$statement = RDF::Trine::Statement::Quad->new($ts, $tp, $to, $tg);
 	}
+	# If no graph name, just add triples
 	else
 	{
-		# If no graph name, just add triples
-		my $statement = RDF::Trine::Statement->new($ts, $tp, $to);
-		$this->{RESULTS}->add_statement($statement);
+		$statement = RDF::Trine::Statement->new($ts, $tp, $to);
 	}
+
+	my $suppress_triple = 0;
+	$suppress_triple = $this->{'sub'}->{'ontriple'}($this, $element, $statement)
+		if ($this->{'sub'}->{'ontriple'});
+	return if $suppress_triple;
+
+	$this->{RESULTS}->add_statement($statement);
+}
+
+sub _atom_magic
+{
+	my $this    = shift;
+	my $element = shift;
+	
+	return $this->bnode($element, 1);
 }
 
 sub stringify
@@ -1401,13 +1468,27 @@ sub bnode
 {
 	my $this    = shift;
 	my $element = shift;
+	my $save_me = shift || 0;
+	
+	if (defined $element
+	and $this->{'saved_bnodes'}->{ $element->nodePath })
+	{
+		return $this->{'saved_bnodes'}->{ $element->nodePath };
+	}
 	
 	return sprintf('http://thing-described-by.org/?%s#%s',
 		$this->uri,
 		$this->{element}->getAttribute('id'))
 		if ($this->{options}->{tdb_service} && $element && length $element->getAttribute('id'));
 
-	return sprintf('_:RDFaAutoNode%03d', $this->{bnodes}++);
+	my $rv = sprintf('_:RDFaAutoNode%03d', $this->{bnodes}++);
+	
+	if ($save_me and defined $element)
+	{
+		$this->{'saved_bnodes'}->{ $element->nodePath } = $rv;
+	}
+	
+	return $rv;
 }
 
 sub valid_lang
@@ -1564,6 +1645,12 @@ sub curie
 			if defined $maps->{$pfx};
 	}
 	
+	if ($page->{'options'}->{'prefix_default'} and $str !~ /:/)
+	{
+		return $page->uri( $page->{'options'}->{'prefix_default'}.$str,
+			{'element'=>$dom,'xml_base'=>$xbase} );
+	}
+	
 	# If it wasn't a safe CURIE, then try falling back to an absolute URI.
 	if (!$safe && $page->{'options'}->{'full_uris'})
 	{
@@ -1629,6 +1716,12 @@ sub uriOrSafeCurie
 			
 			return $page->uri($maps->{$pfx}, {'element'=>$dom,'xml_base'=>$xbase})
 				if defined $maps->{$pfx};
+		}
+		
+		if ($page->{'options'}->{'prefix_default'} and $str !~ /:/)
+		{
+			return $page->uri( $page->{'options'}->{'prefix_default'}.$str,
+				{'element'=>$dom,'xml_base'=>$xbase} );
 		}
 	}
 	
@@ -1737,7 +1830,8 @@ sub auto_config
 		next unless $o=~ /^(alt_stylesheet | embedded_rdfxml | full_uris |
 			keywords | prefix_attr | prefix_bare | prefix_empty | prefix_nocase |
 			safe_anywhere | tdb_service | xhtml_base | xhtml_elements | xhtml_lang |
-			xml_base | xml_lang)$/ix;
+			xml_base | xml_lang | graph | graph_attr | graph_type | graph_default |
+			prefix_default )$/ix;
 		
 		$count++;
 			
@@ -1772,7 +1866,7 @@ sub parse_axwfue
 
 =head1 UTILITY METHOD
 
-=over 8
+=over 4
 
 =item RDF::RDFa::Parser::keywords();
 
@@ -1914,7 +2008,7 @@ sub keywords
 
 =head1 CONSTANTS
 
-=over 8
+=over 4
 
 =item RDF::RDFa::Parser::OPTS_XHTML
 
@@ -1929,24 +2023,34 @@ sub OPTS_XHTML
 
 =item RDF::RDFa::Parser::OPTS_HTML4
 
-Suggested options hashref for parsing HTML.
+Suggested options hashref for parsing HTML 4.x.
 
 =cut
 
 sub OPTS_HTML4
 {
-	return {'prefix_nocase'=>1,'keywords'=>keywords('rdfa html4'),'xml_lang'=>0};
+	return {
+		'prefix_nocase'=>1,
+		'keywords'=>keywords('rdfa html4'),
+		'xml_lang'=>0,
+		'xhtml_lang'=>1,
+		};
 }
 
 =item RDF::RDFa::Parser::OPTS_HTML5
 
-Suggested options hashref for parsing HTML.
+Suggested options hashref for parsing HTML5.
 
 =cut
 
 sub OPTS_HTML5
 {
-	return {'prefix_nocase'=>1,'keywords'=>keywords('rdfa html5'),'alt_stylesheet'=>1};
+	return {
+		'prefix_nocase'=>1,
+		'keywords'=>keywords('rdfa html5'),
+		'alt_stylesheet'=>1,
+		'xhtml_lang'=>1,
+		};
 }
 
 =item RDF::RDFa::Parser::OPTS_SVG
@@ -1958,6 +2062,20 @@ Suggested options hashref for parsing SVG.
 sub OPTS_SVG
 {
 	return &OPTS_XML;
+}
+
+=item RDF::RDFa::Parser::OPTS_ATOM
+
+Suggested options hashref for parsing Atom / DataRSS.
+
+=cut
+
+sub OPTS_ATOM
+{
+	my $opts = &OPTS_XML;
+	$opts->{atom_elements} = 1;
+	$opts->{keywords} = keywords('rdfa iana');
+	return $opts;
 }
 
 =item RDF::RDFa::Parser::OPTS_XML
@@ -1976,11 +2094,128 @@ sub OPTS_XML
 		};
 }
 
+1;
+
 =back
 
-=cut
-			
-1;
+=head1 CALLBACKS
+
+Several callback functions are provided. These may be set using the C<set_callbacks> function,
+which taskes a hashref of keys pointing to coderefs. The keys are named for the event to fire the
+callback on.
+
+=head2 pretriple_resource
+
+This is called when a triple has been found, but before preparing the triple for
+adding to the model. It is only called for triples with a non-literal object value.
+
+The parameters passed to the callback function are:
+
+=over 4
+
+=item * A reference to the C<RDF::RDFa::Parser> object
+
+=item * A reference to the C<XML::LibXML::Element> being parsed
+
+=item * Subject URI or bnode (string)
+
+=item * Predicate URI (string)
+
+=item * Object URI or bnode (string)
+
+=item * Graph URI or bnode (string or undef)
+
+=back
+
+The callback should return 1 to tell the parser to skip this triple (not add it to
+the graph); return 0 otherwise.
+
+=head2 pretriple_literal
+
+This is the equivalent of pretriple_resource, but is only called for triples with a
+literal object value.
+
+The parameters passed to the callback function are:
+
+=over 4
+
+=item * A reference to the C<RDF::RDFa::Parser> object
+
+=item * A reference to the C<XML::LibXML::Element> being parsed
+
+=item * Subject URI or bnode (string)
+
+=item * Predicate URI (string)
+
+=item * Object literal (string)
+
+=item * Datatype URI (string or undef)
+
+=item * Language (string or undef)
+
+=item * Graph URI or bnode (string or undef)
+
+=back
+
+Beware: sometimes both a datatype I<and> a language will be passed. 
+This goes beyond the normal RDF data model.)
+
+The callback should return 1 to tell the parser to skip this triple (not add it to
+the graph); return 0 otherwise.
+
+=head2 ontriple
+
+This is called once a triple is ready to be added to the graph. (After the pretriple
+callbacks.) The parameters passed to the callback function are:
+
+=over 4
+
+=item * A reference to the C<RDF::RDFa::Parser> object
+
+=item * A reference to the C<XML::LibXML::Element> being parsed
+
+=item * An RDF::Trine::Statement object.
+
+=back
+
+The callback should return 1 to tell the parser to skip this triple (not add it to
+the graph); return 0 otherwise. The callback may modify the RDF::Trine::Statement
+object.
+
+=head2 onprefix
+
+This is called when a new CURIE prefix is discovered. The parameters passed
+to the callback function are:
+
+=over 4
+
+=item * A reference to the C<RDF::RDFa::Parser> object
+
+=item * A reference to the C<XML::LibXML::Element> being parsed
+
+=item * The prefix (string, e.g. "foaf")
+
+=item * The expanded URI (string, e.g. "http://xmlns.com/foaf/0.1/")
+
+=back
+
+=head1 ATOM SUPPORT
+
+When processing Atom, if the 'atom_elements' option is switched on, RDF::RDFa::Parser
+will treat <feed> and <entry> elements specially. This is similar to the special support
+for <head> and <body> mandated by the XHTML+RDFa Recommendation. Essentially <feed> and
+<entry> elements are assumed to have an imaginary "about" attribute which has its value
+set to a brand new blank node.
+
+If the 'atom_parser' option is switched on, RDF::RDFa::Parser fully parses Atom feeds
+and entries, using the XML::Atom::OWL package. The two modules attempt to work together
+in assigning blank node identifiers consistently, etc. If XML::Atom::OWL is not installed,
+then this option will be silently ignored.
+
+Generally speaking, adding RDFa attributes to elements in the Atom namespace themselves
+can result in some slightly muddy semantics. It's best to use an extension namespace and
+add the RDFa attributes to elements in that namespace. DataRSS provides a good
+example of this. See L<http://developer.yahoo.com/searchmonkey/smguide/datarss.html>.
 
 =head1 AUTO CONFIG
 
@@ -2002,9 +2237,7 @@ instead of ampersands, as these tend to look nicer:
      content="xhtml_lang=1;keywords=rdfa+html5+html4+html32" />
 
 Any option allowed in the constructor may be given using auto config,
-except 'use_rtnlx', and of course 'auto_config' itself. As named graphs
-cannot currently be configured using the constructor, they are also
-not supported with auto config.
+except 'use_rtnlx', and of course 'auto_config' itself. 
 
 =head1 BUGS
 
@@ -2028,7 +2261,7 @@ Common gotchas:
 Despite having several options for dealing with HTML+RDFa, this
 package uses a strict XML parser. If you need to deal with tag
 soup, you'll need to parse it into an XML::LibXML::Document
-yourself (e.g. using HTML::HTML5::Parser) and then pass the
+yourself (e.g. using L<HTML::HTML5::Parser>) and then pass the
 XML::LibXML::Document to this package's contructor function.
 
 =item * Are your namespaces set correctly?
@@ -2036,26 +2269,40 @@ XML::LibXML::Document to this package's contructor function.
 Does your document have 'xmlns="http://www.w3.org/1999/xhtml"' on
 the root element? If not, some aspects of this package's behaviour
 may be unexpected. If you parsed the document using
-HTML::HTML5::Parser you may need to run it through HTML::HTML5::Sanity.
+HTML::HTML5::Parser you may need to run it through L<HTML::HTML5::Sanity>.
+
+=item * Are you using the XML catalogue?
+
+RDF::RDFa::Parser maintains a locally cached version of the XHTML+RDFa
+DTD. This will normally be within your Perl module directory, in a subdirectory
+named "auto/share/dist/RDF-RDFa-Parser/catalogue/".
+If this is missing, the parser should still work, but will be very slow.
 
 =back
 
 =head1 SEE ALSO
 
-L<XML::LibXML>, L<RDF::Trine>, L<HTML::HTML5::Parser>, L<HTML::HTML5::Sanity>.
+L<XML::LibXML>, L<RDF::Trine>, L<HTML::HTML5::Parser>, L<HTML::HTML5::Sanity>,
+L<XML::Atom::RDF>.
 
 L<http://www.perlrdf.org/>.
 
 =head1 AUTHOR
 
-Toby Inkster E<lt>tobyink@cpan.orgE<gt> with contributions from
-Kjetil Kjernsmo E<lt>kjetilk@cpan.orgE<gt>.
+Toby Inkster E<lt>tobyink@cpan.orgE<gt>.
+
+=head1 ACKNOWLEDGEMENTS
+
+Kjetil Kjernsmo E<lt>kjetilk@cpan.orgE<gt> wrote much of the stuff for
+building RDF::Trine models. Neubert Joachim taught me to use XML
+catalogues, which massively speeds up parsing of XHTML files that have
+DTDs.
 
 =head1 COPYRIGHT
 
-Copyright 2008, 2009 Toby Inkster
+Copyright 2008-2010 Toby Inkster
 
-This library is free software; you can redistribute it and/or modify it under the same
-terms as Perl itself.
+This library is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
 
 =cut

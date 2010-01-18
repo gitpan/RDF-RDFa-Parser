@@ -1,7 +1,8 @@
 # Tests that XML Literals are working OK.
 
-use Test::More tests => 7;
+use Test::More tests => 8;
 BEGIN { use_ok('RDF::RDFa::Parser') };
+BEGIN { use_ok('XML::LibXML') };
 
 my $xhtml = <<EOF;
 <html xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -34,8 +35,12 @@ ok(defined $st, "Literal found");
 ok($st->object->literal_datatype eq 'http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral',
 	"XML seems to have correct datatype");
 
-ok($st->object->literal_value eq '<strong xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">Albert Einstein</strong>',
-	"XML seems to have correct literal value (with ec14n)");
+SKIP: {
+	skip("If you care about XML canonicalisation, upgrade to at least libxml 2.6.23.", 1)
+		unless XML::LibXML::LIBXML_VERSION >= 20623;
 
+	ok($st->object->literal_value eq '<strong xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">Albert Einstein</strong>',
+		"XML seems to have correct literal value (with ec14n)");
+}
 
 
