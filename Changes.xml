@@ -325,6 +325,42 @@
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.30</revision>
     <rdfs:label xml:lang="en">Version 3 (kinda)</rdfs:label>
   </Version>
+  <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_00">
+    <dcs:changeset>
+      <rdf:Description>
+        <dcs:item>
+          <rdf:Description>
+            <rdfs:label xml:lang="en">Improve named graph documentation.</rdfs:label>
+          </rdf:Description>
+        </dcs:item>
+        <dcs:item>
+          <rdf:Description>
+            <rdfs:label xml:lang="en">Correct name of XML::Atom::OWL module in POD.</rdfs:label>
+          </rdf:Description>
+        </dcs:item>
+        <dcs:item>
+          <rdf:Description>
+            <rdfs:label xml:lang="en">Document auto-config in non-XHTML XML.</rdfs:label>
+          </rdf:Description>
+        </dcs:item>
+        <dcs:item>
+          <dcs:Removal>
+            <rdfs:label xml:lang="en">&amp;set_callbacks no longer supports old argument syntax.</rdfs:label>
+          </dcs:Removal>
+        </dcs:item>
+        <dcs:item>
+          <dcs:Removal>
+            <rdfs:label xml:lang="en">&amp;named_graphs no longer supported as a way to enable named graph support.</rdfs:label>
+          </dcs:Removal>
+        </dcs:item>
+        <dcs:versus rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_30"/>
+      </rdf:Description>
+    </dcs:changeset>
+    <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-01-29</dc:issued>
+    <file-release rdf:resource="http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00_00.tar.gz"/>
+    <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00_00</revision>
+    <rdfs:label xml:lang="en">1.00 Preview</rdfs:label>
+  </Version>
   <Project rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#project">
     <bug-database rdf:resource="http://rt.cpan.org/Dist/Display.html?Queue=RDF-RDFa-Parser"/>
     <created rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-13</created>
@@ -346,6 +382,7 @@
     <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_21"/>
     <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_22"/>
     <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_30"/>
+    <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_00"/>
     <repository>
       <SVNRepository>
         <browse rdf:resource="http://goddamn.co.uk/viewvc/perlmods/RDF-RDFa-Parser/"/>

@@ -29,14 +29,14 @@ EOF
 
 $parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/einstein');
 
-$parser->set_callbacks(undef, sub{
+$parser->set_callbacks({pretriple_literal => sub{
 	if ($_[2] eq 'http://example.com/einstein#maker'
 	&&  $_[3] eq 'http://xmlns.com/foaf/0.1/name')
 	{
 		ok($_[4] eq 'Joe Bloggs', 'Callbacks working OK.');
 	}
 	return 0;
-});
+}});
 
 ok(lc($parser->dom->documentElement->tagName) eq 'html', 'DOM Tree returned OK.');
 

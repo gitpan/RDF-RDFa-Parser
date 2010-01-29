@@ -172,6 +172,23 @@ my:v_0_30
 			[ rdfs:label "Copyright 2010."@en ; a dcs:Update ] ,
 			[ rdfs:label "Change set_callbacks parameters and support additional callbacks."@en ; a dcs:Addition ]
 	] .
+	
+my:v_1_00_00
+
+	a               :Version ;
+	dc:issued       "2010-01-29"^^xsd:date ;
+	:revision       "1.00_00"^^xsd:string ;
+	:file-release   <http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00_00.tar.gz> ;
+	rdfs:label      "1.00 Preview"@en ;
+	dcs:changeset [
+		dcs:versus my:v_0_30 ;
+		dcs:item
+			[ rdfs:label "Improve named graph documentation."@en ] ,
+			[ rdfs:label "Correct name of XML::Atom::OWL module in POD."@en ] ,
+			[ rdfs:label "Document auto-config in non-XHTML XML."@en ] ,
+			[ rdfs:label "&set_callbacks no longer supports old argument syntax."@en ; a dcs:Removal ] ,
+			[ rdfs:label "&named_graphs no longer supported as a way to enable named graph support."@en ; a dcs:Removal ]
+	] .
 
 #############################################################
 
@@ -192,7 +209,8 @@ my:project
 	:created        "2009-01-13"^^xsd:date ;
 	:license        <http://dev.perl.org/licenses/> ;
 	:release        my:v_0_01 , my:v_0_02 , my:v_0_03 , my:v_0_04 , my:v_0_10, my:v_0_11 ,
-	                my:v_0_20 , my:v_0_21 , my:v_0_22 , my:v_0_30 .
+	                my:v_0_20 , my:v_0_21 , my:v_0_22 , my:v_0_30 ,
+                        my:v_1_00_00 .
 
 #############################################################
 

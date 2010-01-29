@@ -66,8 +66,9 @@ ok(!$model->count_statements(
 		),
 	"Embedded RDF/XML is skipped.");
 
-$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/', {embedded_rdfxml=>1});
-$parser->named_graphs('http://example.com/graphing', 'graph');
+$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/',
+	{embedded_rdfxml=>1, graph=>1}
+	);
 $parser->consume;
 
 $model = $parser->graph;
