@@ -2,14 +2,13 @@
 
 =head1 NAME
 
-RDF::RDFa::Parser - RDFa parser using XML::LibXML.
+RDF::RDFa::Parser - flexible RDFa parser
 
 =head1 SYNOPSIS
 
  use RDF::RDFa::Parser;
  
  $parser = RDF::RDFa::Parser->new(undef, $uri)->consume;
- $parser->consume;
  $graph  = $parser->graph;
 
 =cut
@@ -28,11 +27,11 @@ use 5.008;
 
 =head1 VERSION
 
-1.00_00
+1.00_01
 
 =cut
 
-our $VERSION = '1.00_00';
+our $VERSION = '1.00_01';
 our $HAS_AWOL;
 
 BEGIN

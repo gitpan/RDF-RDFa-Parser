@@ -1,15 +1,14 @@
 NAME
-    RDF::RDFa::Parser - RDFa parser using XML::LibXML.
+    RDF::RDFa::Parser - flexible RDFa parser
 
 SYNOPSIS
      use RDF::RDFa::Parser;
  
      $parser = RDF::RDFa::Parser->new(undef, $uri)->consume;
-     $parser->consume;
      $graph  = $parser->graph;
 
 VERSION
-    1.00_00
+    1.00_01
 
 PUBLIC METHODS
     $p = RDF::RDFa::Parser->new($xhtml, $baseuri, \%options, $storage)

@@ -361,6 +361,27 @@
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00_00</revision>
     <rdfs:label xml:lang="en">1.00 Preview</rdfs:label>
   </Version>
+  <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_01">
+    <dcs:changeset>
+      <rdf:Description>
+        <dcs:item>
+          <rdf:Description>
+            <rdfs:label xml:lang="en">Fix double use of &amp;consume in POD SYNOPSIS.</rdfs:label>
+          </rdf:Description>
+        </dcs:item>
+        <dcs:item>
+          <dcs:Update>
+            <rdfs:label xml:lang="en">POD NAME section short description to match description in CPAN registered modules list.</rdfs:label>
+          </dcs:Update>
+        </dcs:item>
+        <dcs:versus rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_00"/>
+      </rdf:Description>
+    </dcs:changeset>
+    <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-02-04</dc:issued>
+    <file-release rdf:resource="http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00_01.tar.gz"/>
+    <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00_01</revision>
+    <rdfs:label xml:lang="en">1.00 Preview'</rdfs:label>
+  </Version>
   <Project rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#project">
     <bug-database rdf:resource="http://rt.cpan.org/Dist/Display.html?Queue=RDF-RDFa-Parser"/>
     <created rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-13</created>
@@ -383,12 +404,13 @@
     <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_22"/>
     <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_30"/>
     <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_00"/>
+    <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_01"/>
     <repository>
       <SVNRepository>
         <browse rdf:resource="http://goddamn.co.uk/viewvc/perlmods/RDF-RDFa-Parser/"/>
       </SVNRepository>
     </repository>
-    <shortdesc xml:lang="en">RDFa parser using XML::LibXML</shortdesc>
+    <shortdesc xml:lang="en">flexible RDFa parser</shortdesc>
     <tester rdf:resource="http://tobyinkster.co.uk/#i"/>
   </Project>
   <foaf:Person rdf:about="http://tobyinkster.co.uk/#i">

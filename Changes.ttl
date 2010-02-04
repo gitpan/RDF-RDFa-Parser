@@ -190,13 +190,27 @@ my:v_1_00_00
 			[ rdfs:label "&named_graphs no longer supported as a way to enable named graph support."@en ; a dcs:Removal ]
 	] .
 
+my:v_1_00_01
+
+	a               :Version ;
+	dc:issued       "2010-02-04"^^xsd:date ;
+	:revision       "1.00_01"^^xsd:string ;
+	:file-release   <http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00_01.tar.gz> ;
+	rdfs:label      "1.00 Preview'"@en ;
+	dcs:changeset [
+		dcs:versus my:v_1_00_00 ;
+		dcs:item
+			[ rdfs:label "Fix double use of &consume in POD SYNOPSIS."@en ] ,
+			[ rdfs:label "POD NAME section short description to match description in CPAN registered modules list."@en ; a dcs:Update ]
+		]  .
+
 #############################################################
 
 my:project
 
 	a               :Project ;
 	:name           "RDF-RDFa-Parser" ;
-	:shortdesc      "RDFa parser using XML::LibXML"@en ;
+	:shortdesc      "flexible RDFa parser"@en ;
 	:programming-language  "Perl" ;
 	:homepage       <http://search.cpan.org/dist/RDF-RDFa-Parser/> ;
 	:download-page  <http://search.cpan.org/dist/RDF-RDFa-Parser/> ;
@@ -208,9 +222,11 @@ my:project
 	:tester         toby:i ;
 	:created        "2009-01-13"^^xsd:date ;
 	:license        <http://dev.perl.org/licenses/> ;
-	:release        my:v_0_01 , my:v_0_02 , my:v_0_03 , my:v_0_04 , my:v_0_10, my:v_0_11 ,
-	                my:v_0_20 , my:v_0_21 , my:v_0_22 , my:v_0_30 ,
-                        my:v_1_00_00 .
+	:release        my:v_0_01 , my:v_0_02 , my:v_0_03 , my:v_0_04 ,
+                        my:v_0_10 , my:v_0_11 ,
+	                my:v_0_20 , my:v_0_21 , my:v_0_22 ,
+                        my:v_0_30 ,
+                        my:v_1_00_00 , my:v_1_00_01 .
 
 #############################################################
 

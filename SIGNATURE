@@ -14,14 +14,14 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 6f23b6fc77998e0f78dcf3e62b9897ec8091f315 Changes
-SHA1 e4f01f8f490e726674415cd7ed1fe0e370a73dbc Changes.ttl
-SHA1 0ec81125f277ba9af0d634d0e3c6aeeda6bf4c28 Changes.xml
+SHA1 eb0742c9673584b4fbd2ee3562110aa4ac11346b Changes
+SHA1 948129a462d87a5a10aca7a0ee116253259601ed Changes.ttl
+SHA1 7e8a38c6a196278087e0aca9743317ed7bcdca4b Changes.xml
 SHA1 dc5126338ee4f96582b845f1e680851b8968ee43 MANIFEST
 SHA1 606907202ab6cd1581c157f00394b56c0f9de1af MANIFEST.SKIP
-SHA1 adfb69baa606ae66568c61f0fe95e9a5fc0ba2ed META.yml
+SHA1 6e737f39c6452649568f7444de57062efe6ba320 META.yml
 SHA1 1feaf39c3b77e4ea013e0c1cdc4e29111e48925e Makefile.PL
-SHA1 6b82a9e1adb070aabc13022ab1023fde5d880341 README
+SHA1 4ad99d50143b480589200c30abb31d80cb2efa1b README
 SHA1 e5fb92ac217988bfc7a6af739b0459627020a27e inc/Module/AutoInstall.pm
 SHA1 fd5f3c4f0418efee3b9b16cf8c3902e8374909df inc/Module/Install.pm
 SHA1 5c529e96420d964b192f011b121283a4916f7331 inc/Module/Install/AutoInstall.pm
@@ -37,7 +37,7 @@ SHA1 a1ccb2a21d1118b1bed4f97bd31ebd7dfd8fe43c inc/Module/Install/Share.pm
 SHA1 f7ee667e878bd2faf22ee9358a7b5a2cc8e91ba4 inc/Module/Install/Win32.pm
 SHA1 8ed29d6cf217e0977469575d788599cbfb53a5ca inc/Module/Install/WriteAll.pm
 SHA1 1e6399a0585817abef500c34fce676fb9b0545f0 inc/Test/Signature.pm
-SHA1 cf60a0e16cf10fa6b241eaccf659b26950afc76f lib/RDF/RDFa/Parser.pm
+SHA1 16a110aa30d2f47c88f8158c8935ae9db83c2de4 lib/RDF/RDFa/Parser.pm
 SHA1 65d694802ebf040e505d2d82925231c978f4fffe share/catalogue/index.xml
 SHA1 19a1208f80c699956c1360237510f11999672c6a share/catalogue/xhtml-base-1.mod
 SHA1 d9f882c23130865e98cd1dd971cc8157c15e07f5 share/catalogue/xhtml-bdo-1.mod
@@ -79,7 +79,7 @@ SHA1 03d4dca1de7d84c2ff220cc4f3d4760d90c99563 t/08atom.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAktixuoACgkQzr+BKGoqfTlDEwCeJCmxbMrR3PswfnxZnwKtTqmy
-FM0AnArQ6bKLvVWW4k8ekuN/jsvrv+FI
-=XLpO
+iEYEARECAAYFAktrIJcACgkQzr+BKGoqfTmGRACdHOG1lxHWdmfzZpQFdGmUevp9
+5boAn28IgU9LH01JArmh2Is85jgai2cd
+=6bh8
 -----END PGP SIGNATURE-----
