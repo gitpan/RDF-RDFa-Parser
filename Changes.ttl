@@ -204,6 +204,33 @@ my:v_1_00_01
 			[ rdfs:label "POD NAME section short description to match description in CPAN registered modules list."@en ; a dcs:Update ]
 		]  .
 
+my:v_1_00_02
+
+	a               :Version ;
+	dc:issued       "2010-02-05"^^xsd:date ;
+	:revision       "1.00_02"^^xsd:string ;
+	:file-release   <http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00_02.tar.gz> ;
+	rdfs:label      "1.00 Preview''"@en ;
+	dcs:changeset [
+		dcs:versus my:v_1_00_01 ;
+		dcs:item
+			[ rdfs:label "Arrange methods in a more sensible order for documentation."@en ] ,
+			[ rdfs:label "Document HTML support better."@en ] ,
+			[ rdfs:label "Document Atom support better."@en ] ,
+			[ rdfs:label "Document SVG support better."@en ] ,
+			[ rdfs:label "Document RDF/XML support better."@en ]
+		]  .
+
+my:roadmap_1_10
+
+	a                dcs:ToDoList ;
+	rdfs:label       "Roadmap for RDF::RDFa::Parser 1.10"@en ;
+	dcs:milestone    my:v_1_10 ;
+	dcs:item
+		[ rdfs:label "Integrate HTML parsing using HTML::HTML5::Parser and HTML::HTML5::Sanity."@en ; dcs:timescale "Once the two modules are more stable."@en ] ,
+		[ rdfs:label "RDFa 1.1 Support."@en ; dcs:timescale "Dependent on progress in the W3C RDFa WG. Early to mid 2011?"@en ] ,
+		[ rdfs:label "Add support for native SVG semantics of <svg:title> and <svg:desc>, perhaps via a separate module a la XML::Atom::OWL."@en ] .
+
 #############################################################
 
 my:project
@@ -226,7 +253,7 @@ my:project
                         my:v_0_10 , my:v_0_11 ,
 	                my:v_0_20 , my:v_0_21 , my:v_0_22 ,
                         my:v_0_30 ,
-                        my:v_1_00_00 , my:v_1_00_01 .
+                        my:v_1_00_00 , my:v_1_00_01 , my:v_1_00_02 .
 
 #############################################################
 
@@ -236,6 +263,7 @@ toby:i
 	foaf:name       "Toby Inkster" ;
 	foaf:homepage   <http://tobyinkster.co.uk/> ;
 	foaf:page       <http://search.cpan.org/~tobyink/> ;
-	foaf:mbox       <mailto:tobyink@cpan.org> .
+	foaf:mbox       <mailto:tobyink@cpan.org> ;
+	dcs:tasks       my:roadmap_1_10 .
 
 #############################################################

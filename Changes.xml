@@ -382,6 +382,63 @@
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00_01</revision>
     <rdfs:label xml:lang="en">1.00 Preview'</rdfs:label>
   </Version>
+  <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_02">
+    <dcs:changeset>
+      <rdf:Description>
+        <dcs:item>
+          <rdf:Description>
+            <rdfs:label xml:lang="en">Arrange methods in a more sensible order for documentation.</rdfs:label>
+          </rdf:Description>
+        </dcs:item>
+        <dcs:item>
+          <rdf:Description>
+            <rdfs:label xml:lang="en">Document HTML support better.</rdfs:label>
+          </rdf:Description>
+        </dcs:item>
+        <dcs:item>
+          <rdf:Description>
+            <rdfs:label xml:lang="en">Document Atom support better.</rdfs:label>
+          </rdf:Description>
+        </dcs:item>
+        <dcs:item>
+          <rdf:Description>
+            <rdfs:label xml:lang="en">Document SVG support better.</rdfs:label>
+          </rdf:Description>
+        </dcs:item>
+        <dcs:item>
+          <rdf:Description>
+            <rdfs:label xml:lang="en">Document RDF/XML support better.</rdfs:label>
+          </rdf:Description>
+        </dcs:item>
+        <dcs:versus rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_01"/>
+      </rdf:Description>
+    </dcs:changeset>
+    <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-02-05</dc:issued>
+    <file-release rdf:resource="http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00_02.tar.gz"/>
+    <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00_02</revision>
+    <rdfs:label xml:lang="en">1.00 Preview''</rdfs:label>
+  </Version>
+  <dcs:ToDoList rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#roadmap_1_10">
+    <dcs:item>
+      <rdf:Description>
+        <dcs:timescale xml:lang="en">Once the two modules are more stable.</dcs:timescale>
+        <rdfs:label xml:lang="en">Integrate HTML parsing using HTML::HTML5::Parser and HTML::HTML5::Sanity.</rdfs:label>
+      </rdf:Description>
+    </dcs:item>
+    <dcs:item>
+      <rdf:Description>
+        <dcs:timescale xml:lang="en">Dependent on progress in the W3C RDFa WG. Early to mid 2011?</dcs:timescale>
+        <rdfs:label xml:lang="en">RDFa 1.1 Support.</rdfs:label>
+      </rdf:Description>
+    </dcs:item>
+    <dcs:item>
+      <rdf:Description>
+        <rdfs:label xml:lang="en">Add support for native SVG semantics of &lt;svg:title&gt; and &lt;svg:desc&gt;, perhaps via a separate module a la XML::Atom::OWL.</rdfs:label>
+      </rdf:Description>
+    </dcs:item>
+    <dcs:milestone rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_10"/>
+    <rdfs:label xml:lang="en">Roadmap for RDF::RDFa::Parser 1.10</rdfs:label>
+  </dcs:ToDoList>
   <Project rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#project">
     <bug-database rdf:resource="http://rt.cpan.org/Dist/Display.html?Queue=RDF-RDFa-Parser"/>
     <created rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-13</created>
@@ -405,6 +462,7 @@
     <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_30"/>
     <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_00"/>
     <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_01"/>
+    <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_02"/>
     <repository>
       <SVNRepository>
         <browse rdf:resource="http://goddamn.co.uk/viewvc/perlmods/RDF-RDFa-Parser/"/>
@@ -414,6 +472,7 @@
     <tester rdf:resource="http://tobyinkster.co.uk/#i"/>
   </Project>
   <foaf:Person rdf:about="http://tobyinkster.co.uk/#i">
+    <dcs:tasks rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#roadmap_1_10"/>
     <foaf:homepage rdf:resource="http://tobyinkster.co.uk/"/>
     <foaf:mbox rdf:resource="mailto:tobyink@cpan.org"/>
     <foaf:name>Toby Inkster</foaf:name>
