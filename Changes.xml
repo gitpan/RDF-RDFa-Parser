@@ -17,7 +17,7 @@
   </rdf:Description>
   <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_01">
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-13</dc:issued>
-    <file-release rdf:resource="http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.01.tar.gz"/>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.01.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.01</revision>
     <rdfs:comment xml:lang="en">Forked from Swignition.</rdfs:comment>
     <rdfs:label xml:lang="en">Original version</rdfs:label>
@@ -52,7 +52,7 @@
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-13</dc:issued>
-    <file-release rdf:resource="http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.02.tar.gz"/>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.02.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.02</revision>
   </Version>
   <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_03">
@@ -67,7 +67,7 @@
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-14</dc:issued>
-    <file-release rdf:resource="http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.03.tar.gz"/>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.03.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.03</revision>
   </Version>
   <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_04">
@@ -92,7 +92,7 @@
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-14</dc:issued>
-    <file-release rdf:resource="http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.04.tar.gz"/>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.04.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.04</revision>
   </Version>
   <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_10">
@@ -123,7 +123,7 @@
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-19</dc:issued>
-    <file-release rdf:resource="http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.1.tar.gz"/>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.1.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.10</revision>
   </Version>
   <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_11">
@@ -138,7 +138,7 @@
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-19</dc:issued>
-    <file-release rdf:resource="http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.11.tar.gz"/>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.11.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.11</revision>
   </Version>
   <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_20">
@@ -209,7 +209,7 @@
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-11-24</dc:issued>
-    <file-release rdf:resource="http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.20.tar.gz"/>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.20.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.20</revision>
     <rdfs:comment xml:lang="en">By this point, the module was evolving completely separately from Swignition.</rdfs:comment>
     <rdfs:label xml:lang="en">Version 2 (kinda)</rdfs:label>
@@ -231,7 +231,7 @@
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-11-28</dc:issued>
-    <file-release rdf:resource="http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.21.tar.gz"/>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.21.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.21</revision>
   </Version>
   <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_22">
@@ -281,7 +281,7 @@
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-12-03</dc:issued>
-    <file-release rdf:resource="http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.22.tar.gz"/>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.22.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.22</revision>
   </Version>
   <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_30">
@@ -321,7 +321,7 @@
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-01-18</dc:issued>
-    <file-release rdf:resource="http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.30.tar.gz"/>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.30.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.30</revision>
     <rdfs:label xml:lang="en">Version 3 (kinda)</rdfs:label>
   </Version>
@@ -357,7 +357,7 @@
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-01-29</dc:issued>
-    <file-release rdf:resource="http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00_00.tar.gz"/>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00_00.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00_00</revision>
     <rdfs:label xml:lang="en">1.00 Preview</rdfs:label>
   </Version>
@@ -378,7 +378,7 @@
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-02-04</dc:issued>
-    <file-release rdf:resource="http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00_01.tar.gz"/>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00_01.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00_01</revision>
     <rdfs:label xml:lang="en">1.00 Preview'</rdfs:label>
   </Version>
@@ -414,9 +414,25 @@
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-02-05</dc:issued>
-    <file-release rdf:resource="http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00_02.tar.gz"/>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00_02.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00_02</revision>
     <rdfs:label xml:lang="en">1.00 Preview''</rdfs:label>
+  </Version>
+  <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00">
+    <dcs:changeset>
+      <rdf:Description>
+        <dcs:item>
+          <rdf:Description>
+            <rdfs:label xml:lang="en">Release RDF::RDFa::Parser 1.00 and RDF::RDFa::Parser::Redland 1.00.</rdfs:label>
+          </rdf:Description>
+        </dcs:item>
+        <dcs:versus rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_02"/>
+      </rdf:Description>
+    </dcs:changeset>
+    <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-02-18</dc:issued>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00.tar.gz"/>
+    <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00</revision>
+    <rdfs:label xml:lang="en">Stable</rdfs:label>
   </Version>
   <dcs:ToDoList rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#roadmap_1_10">
     <dcs:item>
@@ -460,6 +476,7 @@
     <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_21"/>
     <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_22"/>
     <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_30"/>
+    <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00"/>
     <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_00"/>
     <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_01"/>
     <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_02"/>

@@ -25,7 +25,7 @@ my:v_0_01
 	a               :Version ;
 	dc:issued       "2009-01-13"^^xsd:date ;
 	:revision       "0.01"^^xsd:string ;
-	:file-release   <http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.01.tar.gz> ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.01.tar.gz> ;
 	rdfs:label      "Original version"@en ;
 	rdfs:comment    "Forked from Swignition."@en ;
 	rdfs:seeAlso    <http://buzzword.org.uk/swignition/rdfa> .
@@ -35,7 +35,7 @@ my:v_0_02
 	a               :Version ;
 	dc:issued       "2009-01-13"^^xsd:date ;
 	:revision       "0.02"^^xsd:string ;
-	:file-release   <http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.02.tar.gz> ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.02.tar.gz> ;
 	dcs:changeset [
 		dcs:versus my:v_0_01 ;
 		dcs:item
@@ -50,7 +50,7 @@ my:v_0_03
 	a               :Version ;
 	dc:issued       "2009-01-14"^^xsd:date ;
 	:revision       "0.03"^^xsd:string ;
-	:file-release   <http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.03.tar.gz> ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.03.tar.gz> ;
 	dcs:changeset [
 		dcs:versus my:v_0_02 ;
 		dcs:item
@@ -62,7 +62,7 @@ my:v_0_04
 	a               :Version ;
 	dc:issued       "2009-01-14"^^xsd:date ;
 	:revision       "0.04"^^xsd:string ;
-	:file-release   <http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.04.tar.gz> ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.04.tar.gz> ;
 	dcs:changeset [
 		dcs:versus my:v_0_03 ;
 		dcs:item
@@ -76,7 +76,7 @@ my:v_0_10
 	a               :Version ;
 	dc:issued       "2009-01-19"^^xsd:date ;
 	:revision       "0.10"^^xsd:string ;
-	:file-release   <http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.1.tar.gz> ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.1.tar.gz> ;
 	dcs:changeset [
 		dcs:versus my:v_0_04 ;
 		dcs:item
@@ -91,7 +91,7 @@ my:v_0_11
 	a               :Version ;
 	dc:issued       "2009-01-19"^^xsd:date ;
 	:revision       "0.11"^^xsd:string ;
-	:file-release   <http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.11.tar.gz> ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.11.tar.gz> ;
 	dcs:changeset [
 		dcs:versus my:v_0_10 ;
 		dcs:item
@@ -103,7 +103,7 @@ my:v_0_20
 	a               :Version ;
 	dc:issued       "2009-11-24"^^xsd:date ;
 	:revision       "0.20"^^xsd:string ;
-	:file-release   <http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.20.tar.gz> ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.20.tar.gz> ;
 	rdfs:label      "Version 2 (kinda)"@en ;
 	rdfs:comment    "By this point, the module was evolving completely separately from Swignition."@en ;
 	dcs:changeset [
@@ -128,7 +128,7 @@ my:v_0_21
 	a               :Version ;
 	dc:issued       "2009-11-28"^^xsd:date ;
 	:revision       "0.21"^^xsd:string ;
-	:file-release   <http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.21.tar.gz> ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.21.tar.gz> ;
 	dcs:changeset [
 		dcs:versus my:v_0_20 ;
 		dcs:item
@@ -141,7 +141,7 @@ my:v_0_22
 	a               :Version ;
 	dc:issued       "2009-12-03"^^xsd:date ;
 	:revision       "0.22"^^xsd:string ;
-	:file-release   <http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.22.tar.gz> ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.22.tar.gz> ;
 	dcs:changeset [
 		dcs:versus my:v_0_21 ;
 		dcs:item
@@ -160,7 +160,7 @@ my:v_0_30
 	a               :Version ;
 	dc:issued       "2010-01-18"^^xsd:date ;
 	:revision       "0.30"^^xsd:string ;
-	:file-release   <http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.30.tar.gz> ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.30.tar.gz> ;
 	rdfs:label      "Version 3 (kinda)"@en ;
 	dcs:changeset [
 		dcs:versus my:v_0_22 ;
@@ -178,7 +178,7 @@ my:v_1_00_00
 	a               :Version ;
 	dc:issued       "2010-01-29"^^xsd:date ;
 	:revision       "1.00_00"^^xsd:string ;
-	:file-release   <http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00_00.tar.gz> ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00_00.tar.gz> ;
 	rdfs:label      "1.00 Preview"@en ;
 	dcs:changeset [
 		dcs:versus my:v_0_30 ;
@@ -195,7 +195,7 @@ my:v_1_00_01
 	a               :Version ;
 	dc:issued       "2010-02-04"^^xsd:date ;
 	:revision       "1.00_01"^^xsd:string ;
-	:file-release   <http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00_01.tar.gz> ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00_01.tar.gz> ;
 	rdfs:label      "1.00 Preview'"@en ;
 	dcs:changeset [
 		dcs:versus my:v_1_00_00 ;
@@ -209,7 +209,7 @@ my:v_1_00_02
 	a               :Version ;
 	dc:issued       "2010-02-05"^^xsd:date ;
 	:revision       "1.00_02"^^xsd:string ;
-	:file-release   <http://backpan.perl.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00_02.tar.gz> ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00_02.tar.gz> ;
 	rdfs:label      "1.00 Preview''"@en ;
 	dcs:changeset [
 		dcs:versus my:v_1_00_01 ;
@@ -220,6 +220,19 @@ my:v_1_00_02
 			[ rdfs:label "Document SVG support better."@en ] ,
 			[ rdfs:label "Document RDF/XML support better."@en ]
 		]  .
+
+my:v_1_00
+
+	a               :Version ;
+	dc:issued       "2010-02-18"^^xsd:date ;
+	:revision       "1.00"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00.tar.gz> ;
+	rdfs:label      "Stable"@en ;
+	dcs:changeset [
+		dcs:versus my:v_1_00_02 ;
+		dcs:item
+			[ rdfs:label "Release RDF::RDFa::Parser 1.00 and RDF::RDFa::Parser::Redland 1.00."@en ]
+		] .
 
 my:roadmap_1_10
 
@@ -251,9 +264,10 @@ my:project
 	:license        <http://dev.perl.org/licenses/> ;
 	:release        my:v_0_01 , my:v_0_02 , my:v_0_03 , my:v_0_04 ,
                         my:v_0_10 , my:v_0_11 ,
-	                my:v_0_20 , my:v_0_21 , my:v_0_22 ,
+                        my:v_0_20 , my:v_0_21 , my:v_0_22 ,
                         my:v_0_30 ,
-                        my:v_1_00_00 , my:v_1_00_01 , my:v_1_00_02 .
+                        my:v_1_00_00 , my:v_1_00_01 , my:v_1_00_02 ,
+                        my:v_1_00 .
 
 #############################################################
 

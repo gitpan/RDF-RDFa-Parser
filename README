@@ -4,11 +4,11 @@ NAME
 SYNOPSIS
      use RDF::RDFa::Parser;
  
-     $parser = RDF::RDFa::Parser->new(undef, $uri)->consume;
+     $parser = RDF::RDFa::Parser->new($xhtml, $uri)->consume;
      $graph  = $parser->graph;
 
 VERSION
-    1.00_02
+    1.00
 
 DESCRIPTION
   Constructor
@@ -92,8 +92,8 @@ DESCRIPTION
         are passed to the callbacks as each one is found; triples are made
         available in the model returned by the "graph" method.
 
-        This function returns the parser object itself, making it easy to
-        abbreviate several of RDF::RDFa::Parser's functions:
+        This method returns the parser object itself, making it easy to
+        abbreviate several of RDF::RDFa::Parser's methods:
 
           my $iterator = RDF::RDFa::Parser->new($xhtml,$uri)
                          ->consume->graph->as_stream;
@@ -114,9 +114,9 @@ DESCRIPTION
         'print' instead of a coderef. This enables built-in callbacks for
         printing Turtle to STDOUT.
 
-        For details of the callback functions, see the section CALLBACKS.
-        "set_callbacks" must be used *before* "consume". "set_callbacks"
-        itself returns a reference to the parser object itself.
+        For details of the callback functions, see the section CALLBACKS. If
+        used, "set_callbacks" must be called *before* "consume".
+        "set_callbacks" returns a reference to the parser object itself.
 
     "$p->graph( [ $graph_name ] )"
         Without a graph name, this method will return an RDF::Trine::Model
@@ -164,7 +164,7 @@ DESCRIPTION
         consequence of passing a relative URI consisting of a zero-length
         string, it in fact makes sense.
 
-  Utility Method
+  Utility Function
     "$structure = RDF::RDFa::Parser::keywords(@bundles)"
         Without any parameters, gets an empty structure for keywords.
         Passing additional strings adds certain bundles of predefined
@@ -289,7 +289,7 @@ CALLBACKS
 
 FEATURES
   HTML Support
-    The constructor function parses incoming markup as well-formed XML and
+    The constructor method parses incoming markup as well-formed XML and
     will croak if given tag-soup HTML (or even valid HTML in most cases).
     However, you can pass the constructor an XML::LibXML::Document object
     instead of markup: this object could have been constructed from an HTML
@@ -332,8 +332,9 @@ FEATURES
     If the 'atom_parser' option is switched on, RDF::RDFa::Parser fully
     parses Atom feeds and entries, using the XML::Atom::OWL package. The two
     modules attempt to work together in assigning blank node identifiers
-    consistently, etc. If XML::Atom::OWL is not installed, then this option
-    will be silently ignored.
+    consistently, etc. Callbacks *should* work properly, but this has not
+    been extensively tested. If XML::Atom::OWL is not installed, then this
+    option will be silently ignored.
 
     The "RDF::RDFa::Parser::OPTS_ATOM" constant provides suggested settings
     for parsing Atom. It switches on the 'atom_elements' option (but not

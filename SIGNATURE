@@ -14,14 +14,14 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 2b3d4bbc0b4b20ba11300636e3f08c9c748e7e4a Changes
-SHA1 7cd6c7110699522f2c720cad9d05b1c15e9ee637 Changes.ttl
-SHA1 70024a4aeae68edf8b51767ab594526653b47c01 Changes.xml
+SHA1 2c7ffc74fdbf40c5c2469256abc8ded2d93c5a60 Changes
+SHA1 c57e8f6ecba022193d93900092980d200f9b771b Changes.ttl
+SHA1 759bdab8144e5da3b893b6f690b32c765178777e Changes.xml
 SHA1 dc5126338ee4f96582b845f1e680851b8968ee43 MANIFEST
 SHA1 606907202ab6cd1581c157f00394b56c0f9de1af MANIFEST.SKIP
-SHA1 8ca71912220e0a34556813fdf62cfaeaccd19d8c META.yml
+SHA1 11b6540db33afb56517d401ee3141d2ff314a7d6 META.yml
 SHA1 1feaf39c3b77e4ea013e0c1cdc4e29111e48925e Makefile.PL
-SHA1 9b1f77cbe4d1ff3cd7e815c71eb72f4d73450002 README
+SHA1 2099bdef5d25efab953d6fa4f3317b88d1a1ffc8 README
 SHA1 e5fb92ac217988bfc7a6af739b0459627020a27e inc/Module/AutoInstall.pm
 SHA1 fd5f3c4f0418efee3b9b16cf8c3902e8374909df inc/Module/Install.pm
 SHA1 5c529e96420d964b192f011b121283a4916f7331 inc/Module/Install/AutoInstall.pm
@@ -37,7 +37,7 @@ SHA1 a1ccb2a21d1118b1bed4f97bd31ebd7dfd8fe43c inc/Module/Install/Share.pm
 SHA1 f7ee667e878bd2faf22ee9358a7b5a2cc8e91ba4 inc/Module/Install/Win32.pm
 SHA1 8ed29d6cf217e0977469575d788599cbfb53a5ca inc/Module/Install/WriteAll.pm
 SHA1 1e6399a0585817abef500c34fce676fb9b0545f0 inc/Test/Signature.pm
-SHA1 a0c06261f1ad906fe29aaa1462b9e0d2acdc672a lib/RDF/RDFa/Parser.pm
+SHA1 8e23777d8d63233cd7e41f52d83a5592a94dc710 lib/RDF/RDFa/Parser.pm
 SHA1 65d694802ebf040e505d2d82925231c978f4fffe share/catalogue/index.xml
 SHA1 19a1208f80c699956c1360237510f11999672c6a share/catalogue/xhtml-base-1.mod
 SHA1 d9f882c23130865e98cd1dd971cc8157c15e07f5 share/catalogue/xhtml-bdo-1.mod
@@ -79,7 +79,7 @@ SHA1 03d4dca1de7d84c2ff220cc4f3d4760d90c99563 t/08atom.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAktsNZgACgkQzr+BKGoqfTkhFgCfUWIcnznlHa7Dqx8YbMRNskQi
-65IAniTUHFkH9+DixBFosZx9njoyY3qp
-=EYY4
+iEYEARECAAYFAkt9VNEACgkQzr+BKGoqfTlREQCdFegqub25N62+NlfMFakp6ZZ5
+fUYAniYfJbTnH0ysSQ852Vxt3pFSyVjn
+=HkWk
 -----END PGP SIGNATURE-----
