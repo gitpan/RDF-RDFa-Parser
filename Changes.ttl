@@ -234,6 +234,18 @@ my:v_1_00
 			[ rdfs:label "Release RDF::RDFa::Parser 1.00 and RDF::RDFa::Parser::Redland 1.00."@en ]
 		] .
 
+my:v_1_00-001
+
+	a               :Version ;
+	dc:issued       "2010-03-26"^^xsd:date ;
+	:revision       "1.00.001"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00.001.tar.gz> ;
+	dcs:changeset [
+		dcs:versus my:v_1_00 ;
+		dcs:item
+			[ rdfs:label "Don't use <img alt> in plain literal stringification."@en ; a dcs:Bugfix ]
+		] .
+
 my:roadmap_1_10
 
 	a                dcs:ToDoList ;
@@ -267,7 +279,7 @@ my:project
                         my:v_0_20 , my:v_0_21 , my:v_0_22 ,
                         my:v_0_30 ,
                         my:v_1_00_00 , my:v_1_00_01 , my:v_1_00_02 ,
-                        my:v_1_00 .
+                        my:v_1_00    , my:v_1_00-001 .
 
 #############################################################
 

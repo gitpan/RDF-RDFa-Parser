@@ -9,7 +9,7 @@
    xmlns:toby="http://tobyinkster.co.uk/#"
    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
    xmlns="http://usefulinc.com/ns/doap#">
-  <rdf:Description rdf:about="file:///home/tai/src/perlmods/RDF-RDFa-Parser/Changes.ttl">
+  <rdf:Description rdf:about="file:///home/tai/src/perlmods/stable/RDF-RDFa-Parser-1.0x/Changes.ttl">
     <dc:creator rdf:resource="http://tobyinkster.co.uk/#i"/>
     <dc:description xml:lang="en">Revision history for Perl extension RDF::RDFa::Parser.</dc:description>
     <dc:subject rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#project"/>
@@ -434,6 +434,21 @@
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00</revision>
     <rdfs:label xml:lang="en">Stable</rdfs:label>
   </Version>
+  <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00-001">
+    <dcs:changeset>
+      <rdf:Description>
+        <dcs:item>
+          <dcs:Bugfix>
+            <rdfs:label xml:lang="en">Don't use &lt;img alt&gt; in plain literal stringification.</rdfs:label>
+          </dcs:Bugfix>
+        </dcs:item>
+        <dcs:versus rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00"/>
+      </rdf:Description>
+    </dcs:changeset>
+    <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-03-26</dc:issued>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00.001.tar.gz"/>
+    <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00.001</revision>
+  </Version>
   <dcs:ToDoList rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#roadmap_1_10">
     <dcs:item>
       <rdf:Description>
@@ -477,6 +492,7 @@
     <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_22"/>
     <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_30"/>
     <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00"/>
+    <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00-001"/>
     <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_00"/>
     <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_01"/>
     <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_02"/>

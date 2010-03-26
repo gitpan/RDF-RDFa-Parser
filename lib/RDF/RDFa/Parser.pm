@@ -26,11 +26,11 @@ use 5.008;
 
 =head1 VERSION
 
-1.00
+1.00.001
 
 =cut
 
-our $VERSION = '1.00';
+our $VERSION = '1.00.001';
 our $HAS_AWOL;
 
 BEGIN
@@ -1303,10 +1303,10 @@ sub stringify
 	{
 		return $dom->getData;
 	}
-	elsif ($dom->nodeType == XML_ELEMENT_NODE && lc($dom->tagName) eq 'img')
-	{
-		return $dom->getAttribute('alt');
-	}
+#	elsif ($dom->nodeType == XML_ELEMENT_NODE && lc($dom->tagName) eq 'img')
+#	{
+#		return $dom->getAttribute('alt');
+#	}
 	elsif ($dom->nodeType == XML_ELEMENT_NODE)
 	{
 		my $rv = '';
