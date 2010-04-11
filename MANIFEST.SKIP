@@ -7,3 +7,4 @@
 ^[^/]+\.(tar\.gz|tar\.bz2|tgz|tbz2|tbz|zip|tar)$
 ^TestSuite/
 ^TrineCompat/
+^MYMETA.yml

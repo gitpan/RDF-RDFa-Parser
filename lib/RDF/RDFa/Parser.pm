@@ -18,6 +18,7 @@ use Encode qw(encode_utf8);
 use File::ShareDir qw(dist_file);
 use LWP::UserAgent;
 use RDF::Trine;
+use Storable qw(dclone);
 use URI::Escape;
 use URI::URL;
 use XML::LibXML qw(:all);
@@ -26,11 +27,11 @@ use 5.008;
 
 =head1 VERSION
 
-1.00.001
+1.00.002
 
 =cut
 
-our $VERSION = '1.00.001';
+our $VERSION = '1.00.002';
 our $HAS_AWOL;
 
 BEGIN
@@ -321,7 +322,7 @@ sub _consume
 	my $skip_element       = 0;
 	my $new_subject        = undef;
 	my $current_object_resource = undef;
-	my $local_uri_mappings = $uri_mappings;
+	my $local_uri_mappings = dclone($uri_mappings);
 	my $local_incomplete_triples = ();
 	my $current_language   = $language;
 	
@@ -957,9 +958,9 @@ sub _consume
 					$base,
 					$parent_subject,
 					$parent_object,
-					$uri_mappings,
+					$local_uri_mappings,
 					$incomplete_triples,
-					$language,
+					$current_language,
 					$graph,
 					$xml_base
 				) || $flag;

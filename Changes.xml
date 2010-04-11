@@ -3,7 +3,7 @@
    xmlns:dc="http://purl.org/dc/terms/"
    xmlns:dcs="http://ontologi.es/doap-changeset#"
    xmlns:foaf="http://xmlns.com/foaf/0.1/"
-   xmlns:my="http://search.cpan.org/dist/RDF-RDFa-Parser/#"
+   xmlns:my="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
    xmlns:toby="http://tobyinkster.co.uk/#"
@@ -12,10 +12,10 @@
   <rdf:Description rdf:about="file:///home/tai/src/perlmods/stable/RDF-RDFa-Parser-1.0x/Changes.ttl">
     <dc:creator rdf:resource="http://tobyinkster.co.uk/#i"/>
     <dc:description xml:lang="en">Revision history for Perl extension RDF::RDFa::Parser.</dc:description>
-    <dc:subject rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#project"/>
+    <dc:subject rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/project"/>
     <dc:title>Changes for RDF::RDFa::Parser</dc:title>
   </rdf:Description>
-  <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_01">
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-01">
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-13</dc:issued>
     <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.01.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.01</revision>
@@ -23,7 +23,7 @@
     <rdfs:label xml:lang="en">Original version</rdfs:label>
     <rdfs:seeAlso rdf:resource="http://buzzword.org.uk/swignition/rdfa"/>
   </Version>
-  <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_02">
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-02">
     <dcs:changeset>
       <rdf:Description>
         <dcs:item>
@@ -48,14 +48,14 @@
             <rdfs:label xml:lang="en">Add KjetilK's patch.</rdfs:label>
           </rdf:Description>
         </dcs:item>
-        <dcs:versus rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_01"/>
+        <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-01"/>
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-13</dc:issued>
     <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.02.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.02</revision>
   </Version>
-  <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_03">
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-03">
     <dcs:changeset>
       <rdf:Description>
         <dcs:item>
@@ -63,14 +63,14 @@
             <rdfs:label xml:lang="en">Bugfix for @property.</rdfs:label>
           </dcs:Bugfix>
         </dcs:item>
-        <dcs:versus rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_02"/>
+        <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-02"/>
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-14</dc:issued>
     <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.03.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.03</revision>
   </Version>
-  <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_04">
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-04">
     <dcs:changeset>
       <rdf:Description>
         <dcs:item>
@@ -88,14 +88,14 @@
             <rdfs:label xml:lang="en">Provide graph() method to output graph.</rdfs:label>
           </dcs:Addition>
         </dcs:item>
-        <dcs:versus rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_03"/>
+        <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-03"/>
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-14</dc:issued>
     <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.04.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.04</revision>
   </Version>
-  <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_10">
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-10">
     <dcs:changeset>
       <rdf:Description>
         <dcs:item>
@@ -119,14 +119,14 @@
             <rdfs:label xml:lang="en">Improve documentation and include it inline in the module code.</rdfs:label>
           </dcs:Addition>
         </dcs:item>
-        <dcs:versus rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_04"/>
+        <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-04"/>
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-19</dc:issued>
     <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.1.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.10</revision>
   </Version>
-  <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_11">
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-11">
     <dcs:changeset>
       <rdf:Description>
         <dcs:item>
@@ -134,14 +134,14 @@
             <rdfs:label xml:lang="en">Make named graphs handling more predictable for triples spread across multiple elements.</rdfs:label>
           </dcs:Update>
         </dcs:item>
-        <dcs:versus rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_10"/>
+        <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-10"/>
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-19</dc:issued>
     <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.11.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.11</revision>
   </Version>
-  <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_20">
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-20">
     <dcs:changeset>
       <rdf:Description>
         <dcs:item>
@@ -205,7 +205,7 @@
             <rdfs:seeAlso rdf:resource="http://goddamn.co.uk/viewvc/perlmods/"/>
           </dcs:Update>
         </dcs:item>
-        <dcs:versus rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_11"/>
+        <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-11"/>
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-11-24</dc:issued>
@@ -214,7 +214,7 @@
     <rdfs:comment xml:lang="en">By this point, the module was evolving completely separately from Swignition.</rdfs:comment>
     <rdfs:label xml:lang="en">Version 2 (kinda)</rdfs:label>
   </Version>
-  <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_21">
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-21">
     <dcs:changeset>
       <rdf:Description>
         <dcs:item>
@@ -227,14 +227,14 @@
             <rdfs:label xml:lang="en">Various test case compliance fixes (passes XHTML test suite).</rdfs:label>
           </dcs:Bugfix>
         </dcs:item>
-        <dcs:versus rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_20"/>
+        <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-20"/>
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-11-28</dc:issued>
     <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.21.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.21</revision>
   </Version>
-  <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_22">
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-22">
     <dcs:changeset>
       <rdf:Description>
         <dcs:item>
@@ -277,14 +277,14 @@
             <rdfs:label xml:lang="en">Make xml:lang support optional (enabled by default).</rdfs:label>
           </dcs:Addition>
         </dcs:item>
-        <dcs:versus rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_21"/>
+        <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-21"/>
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-12-03</dc:issued>
     <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.22.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.22</revision>
   </Version>
-  <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_30">
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-30">
     <dcs:changeset>
       <rdf:Description>
         <dcs:item>
@@ -317,7 +317,7 @@
             <rdfs:label xml:lang="en">Change set_callbacks parameters and support additional callbacks.</rdfs:label>
           </dcs:Addition>
         </dcs:item>
-        <dcs:versus rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_22"/>
+        <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-22"/>
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-01-18</dc:issued>
@@ -325,7 +325,7 @@
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.30</revision>
     <rdfs:label xml:lang="en">Version 3 (kinda)</rdfs:label>
   </Version>
-  <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_00">
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00_00">
     <dcs:changeset>
       <rdf:Description>
         <dcs:item>
@@ -353,7 +353,7 @@
             <rdfs:label xml:lang="en">&amp;named_graphs no longer supported as a way to enable named graph support.</rdfs:label>
           </dcs:Removal>
         </dcs:item>
-        <dcs:versus rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_30"/>
+        <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-30"/>
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-01-29</dc:issued>
@@ -361,7 +361,7 @@
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00_00</revision>
     <rdfs:label xml:lang="en">1.00 Preview</rdfs:label>
   </Version>
-  <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_01">
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00_01">
     <dcs:changeset>
       <rdf:Description>
         <dcs:item>
@@ -374,7 +374,7 @@
             <rdfs:label xml:lang="en">POD NAME section short description to match description in CPAN registered modules list.</rdfs:label>
           </dcs:Update>
         </dcs:item>
-        <dcs:versus rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_00"/>
+        <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00_00"/>
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-02-04</dc:issued>
@@ -382,7 +382,7 @@
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00_01</revision>
     <rdfs:label xml:lang="en">1.00 Preview'</rdfs:label>
   </Version>
-  <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_02">
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00_02">
     <dcs:changeset>
       <rdf:Description>
         <dcs:item>
@@ -410,7 +410,7 @@
             <rdfs:label xml:lang="en">Document RDF/XML support better.</rdfs:label>
           </rdf:Description>
         </dcs:item>
-        <dcs:versus rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_01"/>
+        <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00_01"/>
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-02-05</dc:issued>
@@ -418,7 +418,7 @@
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00_02</revision>
     <rdfs:label xml:lang="en">1.00 Preview''</rdfs:label>
   </Version>
-  <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00">
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00">
     <dcs:changeset>
       <rdf:Description>
         <dcs:item>
@@ -426,7 +426,7 @@
             <rdfs:label xml:lang="en">Release RDF::RDFa::Parser 1.00 and RDF::RDFa::Parser::Redland 1.00.</rdfs:label>
           </rdf:Description>
         </dcs:item>
-        <dcs:versus rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_02"/>
+        <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00_02"/>
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-02-18</dc:issued>
@@ -434,7 +434,7 @@
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00</revision>
     <rdfs:label xml:lang="en">Stable</rdfs:label>
   </Version>
-  <Version rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00-001">
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00-001">
     <dcs:changeset>
       <rdf:Description>
         <dcs:item>
@@ -442,14 +442,29 @@
             <rdfs:label xml:lang="en">Don't use &lt;img alt&gt; in plain literal stringification.</rdfs:label>
           </dcs:Bugfix>
         </dcs:item>
-        <dcs:versus rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00"/>
+        <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00"/>
       </rdf:Description>
     </dcs:changeset>
     <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-03-26</dc:issued>
     <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00.001.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00.001</revision>
   </Version>
-  <dcs:ToDoList rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#roadmap_1_10">
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00-002">
+    <dcs:changeset>
+      <rdf:Description>
+        <dcs:item>
+          <dcs:Bugfix>
+            <rdfs:label xml:lang="en">Properly enforce scoping of prefix mappings (use Storable qw/dclone/).</rdfs:label>
+          </dcs:Bugfix>
+        </dcs:item>
+        <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00-001"/>
+      </rdf:Description>
+    </dcs:changeset>
+    <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-04-09</dc:issued>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00.002.tar.gz"/>
+    <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00.002</revision>
+  </Version>
+  <dcs:ToDoList rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/roadmap_1-10">
     <dcs:item>
       <rdf:Description>
         <dcs:timescale xml:lang="en">Once the two modules are more stable.</dcs:timescale>
@@ -467,10 +482,10 @@
         <rdfs:label xml:lang="en">Add support for native SVG semantics of &lt;svg:title&gt; and &lt;svg:desc&gt;, perhaps via a separate module a la XML::Atom::OWL.</rdfs:label>
       </rdf:Description>
     </dcs:item>
-    <dcs:milestone rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_10"/>
+    <dcs:milestone rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-10"/>
     <rdfs:label xml:lang="en">Roadmap for RDF::RDFa::Parser 1.10</rdfs:label>
   </dcs:ToDoList>
-  <Project rdf:about="http://search.cpan.org/dist/RDF-RDFa-Parser/#project">
+  <Project rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/project">
     <bug-database rdf:resource="http://rt.cpan.org/Dist/Display.html?Queue=RDF-RDFa-Parser"/>
     <created rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-13</created>
     <developer rdf:resource="http://tobyinkster.co.uk/#i"/>
@@ -481,21 +496,22 @@
     <maintainer rdf:resource="http://tobyinkster.co.uk/#i"/>
     <name>RDF-RDFa-Parser</name>
     <programming-language>Perl</programming-language>
-    <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_01"/>
-    <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_02"/>
-    <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_03"/>
-    <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_04"/>
-    <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_10"/>
-    <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_11"/>
-    <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_20"/>
-    <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_21"/>
-    <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_22"/>
-    <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_0_30"/>
-    <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00"/>
-    <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00-001"/>
-    <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_00"/>
-    <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_01"/>
-    <release rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#v_1_00_02"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-01"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-02"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-03"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-04"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-10"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-11"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-20"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-21"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-22"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-30"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00-001"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00-002"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00_00"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00_01"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00_02"/>
     <repository>
       <SVNRepository>
         <browse rdf:resource="http://goddamn.co.uk/viewvc/perlmods/RDF-RDFa-Parser/"/>
@@ -505,7 +521,8 @@
     <tester rdf:resource="http://tobyinkster.co.uk/#i"/>
   </Project>
   <foaf:Person rdf:about="http://tobyinkster.co.uk/#i">
-    <dcs:tasks rdf:resource="http://search.cpan.org/dist/RDF-RDFa-Parser/#roadmap_1_10"/>
+    <dcs:tasks rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/roadmap_1_10"/>
+    <ns1:sameAs xmlns:ns1="http://www.w3.org/2002/07/owl#" rdf:resource="http://purl.org/NET/cpan-uri/person/tobyink"/>
     <foaf:homepage rdf:resource="http://tobyinkster.co.uk/"/>
     <foaf:mbox rdf:resource="mailto:tobyink@cpan.org"/>
     <foaf:name>Toby Inkster</foaf:name>

@@ -23,6 +23,7 @@ requires:
   Carp: 0
   File::ShareDir: 0
   RDF::Trine: 0.112
+  Storable: 0
   URI::Escape: 0
   URI::URL: 0
   XML::LibXML: 1.66
@@ -32,4 +33,4 @@ resources:
   homepage: http://search.cpan.org/dist/RDF-RDFa-Parser/
   license: http://dev.perl.org/licenses/
   repository: http://goddamn.co.uk/viewvc/perlmods/RDF-RDFa-Parser/
-version: 1.00.001
+version: 1.00.002

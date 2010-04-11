@@ -8,7 +8,7 @@ SYNOPSIS
      $graph  = $parser->graph;
 
 VERSION
-    1.00.001
+    1.00.002
 
 DESCRIPTION
   Constructor
