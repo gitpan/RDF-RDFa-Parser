@@ -9,6 +9,10 @@ README
 SIGNATURE
 
 lib/RDF/RDFa/Parser.pm
+lib/RDF/RDFa/Parser/Profile/Null.pm
+lib/RDF/RDFa/Parser/Profile.pm
+lib/RDF/RDFa/Parser/Profile/PrefixCC.pm
+lib/RDF/RDFa/Parser/Profile/RDF.pm
 
 share/catalogue/index.xml
 share/catalogue/xhtml-base-1.mod

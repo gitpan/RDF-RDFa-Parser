@@ -33,7 +33,7 @@ use 5.008;
 
 =cut
 
-our $VERSION = '1.09_00';
+our $VERSION = '1.09_01';
 our $HAS_AWOL;
 
 BEGIN

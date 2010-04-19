@@ -10,16 +10,19 @@ Home page:    <http://search.cpan.org/dist/RDF-RDFa-Parser/>
 Bug tracker:  <http://rt.cpan.org/Dist/Display.html?Queue=RDF-RDFa-Parser>
 Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
 
+1.09_01 [2010-04-19] # RDFa 1.1 Preview 2
+ - (Bugfix) Fix packaging problem (profile modules were not in MANIFEST).
+
 1.09_00 [2010-04-19] # RDFa 1.1 Preview
+ - (Bugfix) Don't use <img alt> in plain literal stringification.
+ - (Addition) Support @vocab attribute to set default attribute.
  - (Bugfix) Properly enforce scoping of prefix mappings (use Storable
    qw/dclone/).
- - (Bugfix) Don't use <img alt> in plain literal stringification.
  - (Addition) Support @profile attribute to load externally-defined
    keywords and terms.
+ - Refactor a lot of code, especially CURIE processing.
  - (Update) Change syntax of @prefix to match current RDFa 1.1 editors'
    drafts.
- - (Addition) Support @vocab attribute to set default attribute.
- - Refactor a lot of code, especially CURIE processing.
 
 1.00.002 [2010-04-09]
  - (Bugfix) Properly enforce scoping of prefix mappings (use Storable
@@ -30,9 +33,9 @@ Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
 
 1.00_02 [2010-02-05] # 1.00 Preview''
  - Document RDF/XML support better.
+ - Document Atom support better.
  - Document SVG support better.
  - Arrange methods in a more sensible order for documentation.
- - Document Atom support better.
  - Document HTML support better.
 
 1.00_01 [2010-02-04] # 1.00 Preview'
@@ -40,23 +43,23 @@ Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
  - (Update) POD NAME section short description to match description in CPAN
    registered modules list.
 
-1.00 [2010-02-18] # Stable
- - Release RDF::RDFa::Parser 1.00 and RDF::RDFa::Parser::Redland 1.00.
-
 1.00_00 [2010-01-29] # 1.00 Preview
+ - Document auto-config in non-XHTML XML.
  - (Removal) &named_graphs no longer supported as a way to enable named
    graph support.
  - Correct name of XML::Atom::OWL module in POD.
- - Document auto-config in non-XHTML XML.
  - (Removal) &set_callbacks no longer supports old argument syntax.
  - Improve named graph documentation.
 
+1.00 [2010-02-18] # Stable
+ - Release RDF::RDFa::Parser 1.00 and RDF::RDFa::Parser::Redland 1.00.
+
 0.30 [2010-01-18] # Version 3 (kinda)
- - (Addition) Special support for RDFa in Atom (Yahoo's weirdly-named
-   'DataRSS').
  - (Update) Copyright 2010.
  - (Addition) Add support for a default prefix (different from empty
    prefix).
+ - (Addition) Special support for RDFa in Atom (Yahoo's weirdly-named
+   'DataRSS').
  - (Update) Upgrade distribution to my new packaging regime (signatures,
    auto-generated changelogs, etc)
  - (Addition) Change set_callbacks parameters and support additional
@@ -64,37 +67,37 @@ Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
  - (Addition) Include a catalogue of doctypes to speed up XML parsing.
 
 0.22 [2009-12-03]
- - (Addition) Allow suffix-less CURIEs without colons (optional).
- - (Addition) Add Auto Config feature.
- - (Bugfix) Various test case compliance fixes (passes HTML4 and HTML5 test
-   suites)
- - (Addition) Flexible keyword extensibility (optional).
  - (Addition) Make xml:lang support optional (enabled by default).
  - (Addition) Allow case-insensitive CURIE prefixes (optional, good for
    HTML).
+ - (Addition) Empty CURIE prefix can be configured (optional).
+ - (Bugfix) Various test case compliance fixes (passes HTML4 and HTML5 test
+   suites)
  - (Addition) Special rel='alternate stylesheet' handling (optional, good
    for HTML5).
- - (Addition) Empty CURIE prefix can be configured (optional).
+ - (Addition) Add Auto Config feature.
+ - (Addition) Flexible keyword extensibility (optional).
+ - (Addition) Allow suffix-less CURIEs without colons (optional).
 
 0.21 [2009-11-28]
  - (Addition) Use RDF::Trine::Node::Literal::XML if it exists.
  - (Bugfix) Various test case compliance fixes (passes XHTML test suite).
 
 0.20 [2009-11-24] # Version 2 (kinda)
- - (Update) The graph() and graphs() methods now return RDF::Trine::Model
-   objects.
- - (Update) Module SVN repository now at
-   <http://goddamn.co.uk/viewvc/perlmods/>
+ - Support for @lang now optional, off by default.
+ - Support for full URIs instead of CURIEs now optional, off by default.
  - (Addition) Allow various parsing options to be passed to constructor.
- - (Addition) Add optional support for xml:base.
  - (Addition) Add optional support for XFN 1.1 keywords.
  - Support for extended @rel/@rev now optional, off by default.
+ - (Update) Module SVN repository now at
+   <http://goddamn.co.uk/viewvc/perlmods/>
  - (Removal) Diallow Safe CURIEs in @src/@href.
- - Support for @prefix now optional, off by default.
- - Support for full URIs instead of CURIEs now optional, off by default.
  - (Addition) Add optional support for embedded RDF/XML.
  - Support for HEAD, BODY and BASE elements now optional, on by default.
- - Support for @lang now optional, off by default.
+ - (Update) The graph() and graphs() methods now return RDF::Trine::Model
+   objects.
+ - Support for @prefix now optional, off by default.
+ - (Addition) Add optional support for xml:base.
 
 0.11 [2009-01-19]
  - (Update) Make named graphs handling more predictable for triples spread
@@ -103,23 +106,23 @@ Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
 0.10 [2009-01-19]
  - (Addition) Improve documentation and include it inline in the module
    code.
- - (Addition) Support for KjetilK's named graph idea.
  - (Bugfix) Fix broken support for XML literals.
+ - (Addition) Support for KjetilK's named graph idea.
  - (Update) More test cases, including XML Literals and named graphs.
 
 0.04 [2009-01-14]
- - (Addition) Include some test cases as part of the installation.
  - (Addition) Provide graph() method to output graph.
+ - (Addition) Include some test cases as part of the installation.
  - Rewrite callback stuff.
 
 0.03 [2009-01-14]
  - (Bugfix) Bugfix for @property.
 
 0.02 [2009-01-13]
- - Add KjetilK's patch.
  - (Bugfix) Fix bug in Turtle output.
- - Make XML parser more tolerant.
  - Disable thing-described-by.org URIs by default.
+ - Add KjetilK's patch.
+ - Make XML parser more tolerant.
 
 0.01 [2009-01-13] # Original version
 

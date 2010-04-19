@@ -276,6 +276,19 @@ my:v_1-09_00
 			[ rdfs:label "Refactor a lot of code, especially CURIE processing."@en ]
 		] .
 
+my:v_1-09_01
+
+	a               :Version ;
+	dc:issued       "2010-04-19"^^xsd:date ;
+	:revision       "1.09_01"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_01.tar.gz> ;
+	rdfs:label      "RDFa 1.1 Preview 2"@en ;
+	dcs:changeset [
+		dcs:versus my:v_1-09_00 ;
+		dcs:item
+			[ rdfs:label "Fix packaging problem (profile modules were not in MANIFEST)."@en ; a dcs:Bugfix ]
+		] .
+
 my:roadmap_1_10
 
 	a                dcs:ToDoList ;
@@ -311,7 +324,7 @@ my:project
                    my:v_0-30 ,
                    my:v_1-00_00 , my:v_1-00_01 , my:v_1-00_02 ,
                    my:v_1-00 , my:v_1-00-001 , my:v_1-00-002 ,
-                   my:v_1-09_00 .
+                   my:v_1-09_00 , my:v_1-09_01 .
 
 #############################################################
 

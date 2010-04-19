@@ -14,12 +14,12 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 540f14cf2c20df413406d54a24325a55d2e1cffc Changes
-SHA1 9f2558a798c156b6bd483dba20b7b22076501ac3 Changes.ttl
-SHA1 002836339b56e7a86b1ae6ee138ce240ce7f4bc8 Changes.xml
-SHA1 dc5126338ee4f96582b845f1e680851b8968ee43 MANIFEST
+SHA1 cd317b030d32ef0d2c588e5ca745ae74afb6ed45 Changes
+SHA1 6b61b9d351af024ebcc9421dcc1e4886b9110cc6 Changes.ttl
+SHA1 6bf210d44fd04343590b06cebd662e063b37776c Changes.xml
+SHA1 b152e61b0de5d8278282843c2245d4f76f3d562f MANIFEST
 SHA1 606907202ab6cd1581c157f00394b56c0f9de1af MANIFEST.SKIP
-SHA1 8d43f98699b9b2c68f50edd5a32abe5c18ac24b5 META.yml
+SHA1 fc31b392bdc494a6787e423a591c86d087c01cb2 META.yml
 SHA1 f5eae9cf776ff504d35541f5aee9a0d33d62dba7 Makefile.PL
 SHA1 509dd675c326c19e200848127bd9a4301cee33ac README
 SHA1 e5fb92ac217988bfc7a6af739b0459627020a27e inc/Module/AutoInstall.pm
@@ -37,7 +37,11 @@ SHA1 a1ccb2a21d1118b1bed4f97bd31ebd7dfd8fe43c inc/Module/Install/Share.pm
 SHA1 f7ee667e878bd2faf22ee9358a7b5a2cc8e91ba4 inc/Module/Install/Win32.pm
 SHA1 8ed29d6cf217e0977469575d788599cbfb53a5ca inc/Module/Install/WriteAll.pm
 SHA1 1e6399a0585817abef500c34fce676fb9b0545f0 inc/Test/Signature.pm
-SHA1 0a03b56c9bdc6af6c5a540dbd188401d5ad0b74b lib/RDF/RDFa/Parser.pm
+SHA1 cf1f868cc3a7483d8379cc5e0afa7696fb6d4ef7 lib/RDF/RDFa/Parser.pm
+SHA1 84ed83ac9d354c8dd1a28814bb7ed90b15637ad6 lib/RDF/RDFa/Parser/Profile.pm
+SHA1 77434f12b7a6b60290249a30495c117df66ddd3e lib/RDF/RDFa/Parser/Profile/Null.pm
+SHA1 570e12a31aa0677e345c379037c124b11018f19b lib/RDF/RDFa/Parser/Profile/PrefixCC.pm
+SHA1 9c7b4e8e06f969390f5ed14915d6e577ed179486 lib/RDF/RDFa/Parser/Profile/RDF.pm
 SHA1 65d694802ebf040e505d2d82925231c978f4fffe share/catalogue/index.xml
 SHA1 19a1208f80c699956c1360237510f11999672c6a share/catalogue/xhtml-base-1.mod
 SHA1 d9f882c23130865e98cd1dd971cc8157c15e07f5 share/catalogue/xhtml-bdo-1.mod
@@ -79,7 +83,7 @@ SHA1 03d4dca1de7d84c2ff220cc4f3d4760d90c99563 t/08atom.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAkvMwiEACgkQzr+BKGoqfTl3+wCgj9QCOpAuvt9pdp7UzQM0x5Ox
-QE4AoIExuzbSOTHZez19TSZyul/ng9e7
-=DABu
+iEYEARECAAYFAkvM0d4ACgkQzr+BKGoqfTn2UgCdF+MJGDQscWG+woTlA/djc8cV
+/j0An29c5FFC9XNkAYAFsnA/IrRCqYfj
+=3dqe
 -----END PGP SIGNATURE-----
