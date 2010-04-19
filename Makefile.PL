@@ -17,12 +17,17 @@ license             'perl';
 test_requires       'Test::More' => '0.61';
 
 requires            'Carp'           => 0;
+requires            'Data::Dumper'   => 0;
+requires            'Encode'         => 0;
 requires            'File::ShareDir' => 0;
-requires            'RDF::Trine'     => 0.112;
+requires            'File::Spec'     => 0;
+requires            'LWP::UserAgent' => 0;
+requires            'RDF::Trine'     => 0.118;
 requires            'Storable'       => 0;
 requires            'URI::Escape'    => 0;
 requires            'URI::URL'       => 0;
 requires            'XML::LibXML'    => 1.66;
+requires            'XML::RegExp'    => 0;
 
 resources(
 	'homepage'   => "http://search.cpan.org/dist/$dist/",

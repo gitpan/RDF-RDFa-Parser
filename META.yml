@@ -21,16 +21,21 @@ no_index:
     - t
 requires:
   Carp: 0
+  Data::Dumper: 0
+  Encode: 0
   File::ShareDir: 0
-  RDF::Trine: 0.112
+  File::Spec: 0
+  LWP::UserAgent: 0
+  RDF::Trine: 0.118
   Storable: 0
   URI::Escape: 0
   URI::URL: 0
   XML::LibXML: 1.66
+  XML::RegExp: 0
   perl: 5.8.0
 resources:
   bugtracker: http://rt.cpan.org/Dist/Display.html?Queue=RDF-RDFa-Parser
   homepage: http://search.cpan.org/dist/RDF-RDFa-Parser/
   license: http://dev.perl.org/licenses/
   repository: http://goddamn.co.uk/viewvc/perlmods/RDF-RDFa-Parser/
-version: 1.00.002
+version: 1.09_00

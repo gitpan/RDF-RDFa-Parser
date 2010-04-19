@@ -9,7 +9,7 @@
    xmlns:toby="http://tobyinkster.co.uk/#"
    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
    xmlns="http://usefulinc.com/ns/doap#">
-  <rdf:Description rdf:about="file:///home/tai/src/perlmods/stable/RDF-RDFa-Parser-1.0x/Changes.ttl">
+  <rdf:Description rdf:about="file:///home/tai/src/perlmods/RDF-RDFa-Parser/Changes.ttl">
     <dc:creator rdf:resource="http://tobyinkster.co.uk/#i"/>
     <dc:description xml:lang="en">Revision history for Perl extension RDF::RDFa::Parser.</dc:description>
     <dc:subject rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/project"/>
@@ -464,7 +464,48 @@
     <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00.002.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00.002</revision>
   </Version>
-  <dcs:ToDoList rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/roadmap_1-10">
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_00">
+    <dcs:changeset>
+      <rdf:Description>
+        <dcs:item>
+          <dcs:Bugfix>
+            <rdfs:label xml:lang="en">Don't use &lt;img alt&gt; in plain literal stringification.</rdfs:label>
+          </dcs:Bugfix>
+        </dcs:item>
+        <dcs:item>
+          <dcs:Bugfix>
+            <rdfs:label xml:lang="en">Properly enforce scoping of prefix mappings (use Storable qw/dclone/).</rdfs:label>
+          </dcs:Bugfix>
+        </dcs:item>
+        <dcs:item>
+          <dcs:Update>
+            <rdfs:label xml:lang="en">Change syntax of @prefix to match current RDFa 1.1 editors' drafts.</rdfs:label>
+          </dcs:Update>
+        </dcs:item>
+        <dcs:item>
+          <dcs:Addition>
+            <rdfs:label xml:lang="en">Support @vocab attribute to set default attribute.</rdfs:label>
+          </dcs:Addition>
+        </dcs:item>
+        <dcs:item>
+          <dcs:Addition>
+            <rdfs:label xml:lang="en">Support @profile attribute to load externally-defined keywords and terms.</rdfs:label>
+          </dcs:Addition>
+        </dcs:item>
+        <dcs:item>
+          <rdf:Description>
+            <rdfs:label xml:lang="en">Refactor a lot of code, especially CURIE processing.</rdfs:label>
+          </rdf:Description>
+        </dcs:item>
+        <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00"/>
+      </rdf:Description>
+    </dcs:changeset>
+    <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-04-19</dc:issued>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_00.tar.gz"/>
+    <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_00</revision>
+    <rdfs:label xml:lang="en">RDFa 1.1 Preview</rdfs:label>
+  </Version>
+  <dcs:ToDoList rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/roadmap_1_10">
     <dcs:item>
       <rdf:Description>
         <dcs:timescale xml:lang="en">Once the two modules are more stable.</dcs:timescale>
@@ -475,6 +516,11 @@
       <rdf:Description>
         <dcs:timescale xml:lang="en">Dependent on progress in the W3C RDFa WG. Early to mid 2011?</dcs:timescale>
         <rdfs:label xml:lang="en">RDFa 1.1 Support.</rdfs:label>
+      </rdf:Description>
+    </dcs:item>
+    <dcs:item>
+      <rdf:Description>
+        <rdfs:label xml:lang="en">Option to automatically follow { &lt;&gt; xhv:meta ?resource . } links.</rdfs:label>
       </rdf:Description>
     </dcs:item>
     <dcs:item>
@@ -512,6 +558,7 @@
     <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00_00"/>
     <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00_01"/>
     <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00_02"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_00"/>
     <repository>
       <SVNRepository>
         <browse rdf:resource="http://goddamn.co.uk/viewvc/perlmods/RDF-RDFa-Parser/"/>

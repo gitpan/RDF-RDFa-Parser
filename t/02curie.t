@@ -27,6 +27,12 @@ $parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/');
 $parser->consume;
 $model = $parser->graph;
 
+#my $iter = $model->as_stream;
+#while (my $st = $iter->next)
+#{
+#	diag $st->as_string;
+#}
+
 ok($model->count_statements(
 		RDF::Trine::Node::Resource->new('http://example.com/ns#r1/foo'),
 		undef,

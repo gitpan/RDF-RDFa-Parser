@@ -8,7 +8,7 @@ SYNOPSIS
      $graph  = $parser->graph;
 
 VERSION
-    1.00.002
+    1.09_00
 
 DESCRIPTION
   Constructor
@@ -24,7 +24,8 @@ DESCRIPTION
         document. If $xhtml is undef, then RDF::RDFa::Parser will fetch
         $baseuri to obtain the document to be parsed.
 
-        Options (mostly booleans) [default in brackets]:
+        Options (mostly booleans) [in brackets default for XHTML+RDFa 1.0,
+        1.1]:
 
         * alt_stylesheet - magic rel="alternate stylesheet". [0]
 
@@ -37,7 +38,7 @@ DESCRIPTION
         * embedded_rdfxml - find plain RDF/XML chunks within document. 0=no,
           1=handle, 2=skip. [0]
 
-        * full_uris - support full URIs in CURIE-only attributes. [0]
+        * full_uris - support full URIs in CURIE-only attributes. [0, 1]
 
         * graph - enable support for named graphs. [0]
 
@@ -50,7 +51,7 @@ DESCRIPTION
 
         * keywords - THIS WILL VOID YOUR WARRANTY!
 
-        * prefix_attr - support @prefix rather than just @xmlns:*. [0]
+        * prefix_attr - support @prefix rather than just @xmlns:*. [0, 1]
 
         * prefix_bare - support CURIEs with no colon+suffix. [0]
 
@@ -59,14 +60,18 @@ DESCRIPTION
         * prefix_empty - URI for empty prefix (e.g. rel=":foo").
           ['http://www.w3.org/1999/xhtml/vocab#']
 
-        * prefix_nocase - ignore case-sensitivity of CURIE prefixes. [0]
+        * prefix_nocase - ignore case-sensitivity of CURIE prefixes. [0, 1]
 
-        * safe_anywhere - allow Safe CURIEs in @rel/@rev/etc. [0]
+        * profiles - support RDFa profiles. [0, 1]
+
+        * safe_anywhere - allow Safe CURIEs in @rel/@rev/etc. [0, 1]
 
         * tdb_service - use thing-described-by.org to name some bnodes. [0]
 
         * use_rtnlx - use RDF::Trine::Node::Literal::XML. 0=no, 1=if
           available. [0]
+
+        * vocab_attr - support @vocab from RDFa 1.1. [0, 1]
 
         * xhtml_base - process <base> element. 0=no, 1=yes, 2=use it for
           RDF/XML too. [1]
@@ -80,8 +85,8 @@ DESCRIPTION
 
         * xml_lang - Support for 'xml:lang' attribute. [1]
 
-        The default options attempt to stick to the XHTML+RDFa spec as
-        rigidly as possible.
+        The default options attempt to stick to the W3C XHTML+RDFa 1.0
+        Recommendation as rigidly as possible.
 
         $storage is an RDF::Trine::Store object. If undef, then a new
         temporary store is created.
@@ -184,22 +189,25 @@ DESCRIPTION
     the same thing. You can mostly think of them as constants though.
 
     RDF::RDFa::Parser::OPTS_XHTML
-        Suggested options hashref for parsing XHTML.
+        Suggested options hashref for parsing XHTML+RDFa 1.0.
+
+    RDF::RDFa::Parser::OPTS_XHTML_11
+        Suggested options hashref for parsing XHTML+RDFa 1.1.
 
     RDF::RDFa::Parser::OPTS_HTML4
-        Suggested options hashref for parsing HTML 4.x.
+        Suggested options hashref for parsing HTML 4.x with RDFa 1.1.
 
     RDF::RDFa::Parser::OPTS_HTML5
-        Suggested options hashref for parsing HTML5.
+        Suggested options hashref for parsing HTML5 with RDFa 1.1.
 
     RDF::RDFa::Parser::OPTS_SVG
         Suggested options hashref for parsing SVG.
 
     RDF::RDFa::Parser::OPTS_ATOM
-        Suggested options hashref for parsing Atom / DataRSS.
+        Suggested options hashref for parsing Atom with RDFa 1.0 / DataRSS.
 
     RDF::RDFa::Parser::OPTS_XML
-        Suggested options hashref for parsing generic XML.
+        Suggested options hashref for parsing generic XML with RDFa 1.0.
 
 CALLBACKS
     Several callback functions are provided. These may be set using the
