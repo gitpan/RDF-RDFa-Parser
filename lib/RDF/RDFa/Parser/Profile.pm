@@ -9,7 +9,7 @@ use 5.008;
 
 our @Modules;
 our %Known;
-our $VERSION = '1.09_01';
+our $VERSION = '1.09_02';
 
 sub new
 {
@@ -66,13 +66,15 @@ RDF::RDFa::Parser::Profile - base class for RDFa profiles
 
 =head1 DESCRIPTION
 
-This is a base class for RDFa profiles. The constructor (C<new>) takes a URI
-for an RDF profile and returns either undef (meaning "I don't want anything to do
-with that profile") or an object with C<get_terms> and C<get_prefixes>
-methods.
+This is a base class for RDFa profiles. You don't need to know anything
+about this module unless you're doing some seriously weird stuff.
 
-C<get_terms> returns a list of arrayrefs such that each arrayref has the following
-entries:
+The constructor (C<new>) takes a URI for an RDF profile and returns either
+undef (meaning "I don't want anything to do with that profile") or an object
+with C<get_terms> and C<get_prefixes> methods.
+
+C<get_terms> returns a list of arrayrefs such that each arrayref has the
+following entries:
 
 =over
 

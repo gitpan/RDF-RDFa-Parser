@@ -9,6 +9,7 @@ README
 SIGNATURE
 
 lib/RDF/RDFa/Parser.pm
+lib/RDF/RDFa/Parser/Config.pm
 lib/RDF/RDFa/Parser/Profile/Null.pm
 lib/RDF/RDFa/Parser/Profile.pm
 lib/RDF/RDFa/Parser/Profile/PrefixCC.pm

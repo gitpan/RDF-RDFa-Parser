@@ -70,8 +70,7 @@ my $atom = <<ATOM;
 </feed>
 ATOM
 
-my $opts = RDF::RDFa::Parser::OPTS_ATOM;
-$opts->{atom_parser} = 1;
+my $opts = RDF::RDFa::Parser::Config->new('atom','1.0',atom_parser=>1);
 my $p = RDF::RDFa::Parser->new($atom, "http://example.com/", $opts);
 $p->consume;
 

@@ -8,88 +8,29 @@ SYNOPSIS
      $graph  = $parser->graph;
 
 VERSION
-    1.09_00
+    1.09_02
 
 DESCRIPTION
   Constructor
-    "$p = RDF::RDFa::Parser->new($xhtml, $baseuri, \%options, $storage)"
+    "$p = RDF::RDFa::Parser->new($xhtml, $baseuri, $config, $storage)"
         This method creates a new RDF::RDFa::Parser object and returns it.
 
         The $xhtml variable may contain an XHTML/XML string, or a
         XML::LibXML::Document. If a string, the document is parsed using
         XML::LibXML::Parser, which will throw an exception if it is not
-        well-formed. RDF::RDFa::Parser does not catch the exception.
+        well-formed. RDF::RDFa::Parser does not catch the exception. If
+        $xhtml is undef, then RDF::RDFa::Parser will fetch $baseuri to
+        obtain the document to be parsed.
 
         The base URI is needed to resolve relative URIs found in the
-        document. If $xhtml is undef, then RDF::RDFa::Parser will fetch
-        $baseuri to obtain the document to be parsed.
+        document.
 
-        Options (mostly booleans) [in brackets default for XHTML+RDFa 1.0,
-        1.1]:
+        $config optionally holds an RDF::RDFa::Parser::Config object which
+        determines the set of rules used to parse the RDFa. It defaults to
+        XHTML+RDFa 1.0.
 
-        * alt_stylesheet - magic rel="alternate stylesheet". [0]
-
-        * atom_elements - process <feed> and <entry> specially. [0]
-
-        * atom_parser - extract Atom 1.0 native semantics. [0]
-
-        * auto_config - see section "Auto Config" [0]
-
-        * embedded_rdfxml - find plain RDF/XML chunks within document. 0=no,
-          1=handle, 2=skip. [0]
-
-        * full_uris - support full URIs in CURIE-only attributes. [0, 1]
-
-        * graph - enable support for named graphs. [0]
-
-        * graph_attr - attribute to use for named graphs. Use Clark Notation
-          to specify a namespace. ['graph']
-
-        * graph_type - graph attribute behaviour ('id' or 'about'). ['id']
-
-        * graph_default - default graph name. ['_:RDFaDefaultGraph']
-
-        * keywords - THIS WILL VOID YOUR WARRANTY!
-
-        * prefix_attr - support @prefix rather than just @xmlns:*. [0, 1]
-
-        * prefix_bare - support CURIEs with no colon+suffix. [0]
-
-        * prefix_default - URI for default prefix (e.g. rel="foo"). [undef]
-
-        * prefix_empty - URI for empty prefix (e.g. rel=":foo").
-          ['http://www.w3.org/1999/xhtml/vocab#']
-
-        * prefix_nocase - ignore case-sensitivity of CURIE prefixes. [0, 1]
-
-        * profiles - support RDFa profiles. [0, 1]
-
-        * safe_anywhere - allow Safe CURIEs in @rel/@rev/etc. [0, 1]
-
-        * tdb_service - use thing-described-by.org to name some bnodes. [0]
-
-        * use_rtnlx - use RDF::Trine::Node::Literal::XML. 0=no, 1=if
-          available. [0]
-
-        * vocab_attr - support @vocab from RDFa 1.1. [0, 1]
-
-        * xhtml_base - process <base> element. 0=no, 1=yes, 2=use it for
-          RDF/XML too. [1]
-
-        * xhtml_elements - process <head> and <body> specially. [1]
-
-        * xhtml_lang - support @lang rather than just @xml:lang. [0]
-
-        * xml_base - support for 'xml:base' attribute. 0=only RDF/XML;
-          1=except @href/@src; 2=always. [0]
-
-        * xml_lang - Support for 'xml:lang' attribute. [1]
-
-        The default options attempt to stick to the W3C XHTML+RDFa 1.0
-        Recommendation as rigidly as possible.
-
-        $storage is an RDF::Trine::Store object. If undef, then a new
-        temporary store is created.
+        $storage optionally holds an RDF::Trine::Store object. If undef,
+        then a new temporary store is created.
 
   Public Methods
     "$p->consume"
@@ -169,45 +110,8 @@ DESCRIPTION
         consequence of passing a relative URI consisting of a zero-length
         string, it in fact makes sense.
 
-  Utility Function
-    "$structure = RDF::RDFa::Parser::keywords(@bundles)"
-        Without any parameters, gets an empty structure for keywords.
-        Passing additional strings adds certain bundles of predefined
-        keywords to the structure.
-
-          my $keyword_structure = RDF::RDFa::Parser::keywords(
-                'xhtml', 'xfn', 'grddl');
-
-        This is useful to create a keyword structure may be provided as an
-        option to the RDF::RDFa::Parser constructor. You probably want to
-        leave this alone unless you know what you're doing.
-
-        Bundles include: rdfa, html5, html4, html32, iana, grddl, xfn.
-
-  Constants
-    These are not really constants, but functions which consistently return
-    the same thing. You can mostly think of them as constants though.
-
-    RDF::RDFa::Parser::OPTS_XHTML
-        Suggested options hashref for parsing XHTML+RDFa 1.0.
-
-    RDF::RDFa::Parser::OPTS_XHTML_11
-        Suggested options hashref for parsing XHTML+RDFa 1.1.
-
-    RDF::RDFa::Parser::OPTS_HTML4
-        Suggested options hashref for parsing HTML 4.x with RDFa 1.1.
-
-    RDF::RDFa::Parser::OPTS_HTML5
-        Suggested options hashref for parsing HTML5 with RDFa 1.1.
-
-    RDF::RDFa::Parser::OPTS_SVG
-        Suggested options hashref for parsing SVG.
-
-    RDF::RDFa::Parser::OPTS_ATOM
-        Suggested options hashref for parsing Atom with RDFa 1.0 / DataRSS.
-
-    RDF::RDFa::Parser::OPTS_XML
-        Suggested options hashref for parsing generic XML with RDFa 1.0.
+    "$p->errors"
+        Returns a list of errors and warnings that occurred during parsing.
 
 CALLBACKS
     Several callback functions are provided. These may be set using the
@@ -295,6 +199,42 @@ CALLBACKS
     return 0 in case future versions of this module assign significance to
     the return value.
 
+  ontoken
+    This is called when a CURIE has been expanded. The parameters are:
+
+    *   A reference to the "RDF::RDFa::Parser" object
+
+    *   A reference to the "XML::LibXML::Element" being parsed
+
+    *   The CURIE or token as a string (e.g. "foaf:name" or "Stylesheet")
+
+    *   The fully expanded URI
+
+    The callback function must return a fully expanded URI, or if it wants
+    the CURIE to be ignored, undef.
+
+  onerror
+    This is called when an error occurs:
+
+    *   A reference to the "RDF::RDFa::Parser" object
+
+    *   The error level (RDF::RDFa::Parser::ERR_ERROR or
+        RDF::RDFa::Parser::ERR_WARNING)
+
+    *   An error code
+
+    *   An error message
+
+    *   A hash of other information
+
+    The return value of this callback is currently ignored, but you should
+    return 0 in case future versions of this module assign significance to
+    the return value.
+
+    If you do not define an onerror callback, then errors will be output via
+    STDERR and warnings will be silent. Either way, you can retrieve errors
+    after parsing using the "errors" method.
+
 FEATURES
   HTML Support
     The constructor method parses incoming markup as well-formed XML and
@@ -317,15 +257,17 @@ FEATURES
       my $document    = $html_parser->parse_string($html);
       my $fixed_doc   = fix_document($document);
   
+      my $config      = RDF::RDFa::Parser::Config->new(
+                          RDF::RDFa::Parser::Config->HOST_HTML5,
+                          RDF::RDFa::Parser::Config->RDFA_11);
       my $rdfa_parser = RDF::RDFa::Parser->new(
                           $fixed_doc,
                           'http://example.com/doc.html',
-                          RDF::RDFa::Parser::OPTS_HTML5);
+                          $config);
 
-    Note that the "RDF::RDFa::Parser::OPTS_HTML4" and
-    "RDF::RDFa::Parser::OPTS_HTML5" constants provide suggested settings for
-    parsing HTML. In particular, they make CURIE prefixes case-insensitive,
-    add support for the HTML lang attribute (instead of or as well as the
+    "RDF::RDFa::Parser::Config" is capable of enabling settings for parsing
+    HTML. In particular, they make CURIE prefixes case-insensitive, add
+    support for the HTML lang attribute (instead of or as well as the
     xml:lang attribute), and bring in support for additional rel/rev
     keywords.
 
@@ -344,12 +286,11 @@ FEATURES
     been extensively tested. If XML::Atom::OWL is not installed, then this
     option will be silently ignored.
 
-    The "RDF::RDFa::Parser::OPTS_ATOM" constant provides suggested settings
-    for parsing Atom. It switches on the 'atom_elements' option (but not
-    'atom_parser'), adds support for IANA-registered rel/rev keywords,
-    switches off support for some XHTML-specific features, enables
-    processing of the xml:base attribute, and adds support for embedded
-    chunks of RDF/XML.
+    "RDF::RDFa::Parser::Config" is capable of enabling settings for parsing
+    Atom. It switches on the 'atom_elements' option (but not 'atom_parser'),
+    adds support for IANA-registered rel/rev keywords, switches off support
+    for some XHTML-specific features, enables processing of the xml:base
+    attribute, and adds support for embedded chunks of RDF/XML.
 
     Generally speaking, adding RDFa attributes to elements in the Atom
     namespace themselves can result in some slightly muddy semantics. It's
@@ -361,10 +302,10 @@ FEATURES
     The SVG Tiny 1.2 specification makes the use of RDFa attributes within
     SVG images valid.
 
-    The "RDF::RDFa::Parser::OPTS_SVG" constant provides suggested settings
-    for parsing SVG. It switches off support for some XHTML-specific
-    features, enables processing of the xml:base attribute, and adds support
-    for embedded chunks of RDF/XML.
+    "RDF::RDFa::Parser::Config" is capable of enabling settings for parsing
+    SVG. It switches off support for some XHTML-specific features, enables
+    processing of the xml:base attribute, and adds support for embedded
+    chunks of RDF/XML.
 
   Embedded RDF/XML
     Though a rarely used feature, XHTML allows other XML markup languages to
@@ -398,10 +339,6 @@ FEATURES
     option in the constructor. For HTML and XHTML, you probably want to set
     embedded_rdfxml to '0' (the default) or '1'. For other XML markup
     languages (e.g. SVG or Atom), then you probably want to set it to '2'.
-
-    If you use the "RDF::RDFa::Parser::OPTS_XHTML",
-    "RDF::RDFa::Parser::OPTS_SVG" etc constants, they should mostly do the
-    right thing.
 
   Named Graphs
     The parser has support for named graphs within a single RDFa document.
@@ -475,6 +412,8 @@ BUGS
             missing, the parser should still work, but will be very slow.
 
 SEE ALSO
+    RDF::RDFa::Parser::Config, RDF::RDFa::Parser::Profile.
+
     XML::LibXML, RDF::Trine, HTML::HTML5::Parser, HTML::HTML5::Sanity,
     XML::Atom::OWL.
 

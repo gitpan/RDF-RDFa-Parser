@@ -497,6 +497,11 @@
             <rdfs:label xml:lang="en">Refactor a lot of code, especially CURIE processing.</rdfs:label>
           </rdf:Description>
         </dcs:item>
+        <dcs:item>
+          <dcs:Regression>
+            <rdfs:label xml:lang="en">Broke support for CURIEs with zero-length suffxes.</rdfs:label>
+          </dcs:Regression>
+        </dcs:item>
         <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00"/>
       </rdf:Description>
     </dcs:changeset>
@@ -520,6 +525,37 @@
     <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_01.tar.gz"/>
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_01</revision>
     <rdfs:label xml:lang="en">RDFa 1.1 Preview 2</rdfs:label>
+  </Version>
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_02">
+    <dcs:changeset>
+      <rdf:Description>
+        <dcs:item>
+          <rdf:Description>
+            <rdfs:label xml:lang="en">Refactor error handling code to add a new 'onerror' callback, and an 'errors' method to get a list of errors.</rdfs:label>
+          </rdf:Description>
+        </dcs:item>
+        <dcs:item>
+          <dcs:Addition>
+            <rdfs:label xml:lang="en">New 'oncurie' callback.</rdfs:label>
+          </dcs:Addition>
+        </dcs:item>
+        <dcs:item>
+          <rdf:Description>
+            <rdfs:label xml:lang="en">Deprecate OPTS_XXXX functions in favour of a new RDF::RDFa::Parser::Config object which allows host languages and RDFa versions to be combined more flexibly.</rdfs:label>
+          </rdf:Description>
+        </dcs:item>
+        <dcs:item>
+          <dcs:Bugfix>
+            <rdfs:label xml:lang="en">Allow CURIEs to have zero-length suffixes.</rdfs:label>
+          </dcs:Bugfix>
+        </dcs:item>
+        <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_01"/>
+      </rdf:Description>
+    </dcs:changeset>
+    <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-04-21</dc:issued>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_02.tar.gz"/>
+    <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_02</revision>
+    <rdfs:label xml:lang="en">RDFa 1.1 Preview 3</rdfs:label>
   </Version>
   <dcs:ToDoList rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/roadmap_1_10">
     <dcs:item>
@@ -576,6 +612,7 @@
     <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00_02"/>
     <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_00"/>
     <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_01"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_02"/>
     <repository>
       <SVNRepository>
         <browse rdf:resource="http://goddamn.co.uk/viewvc/perlmods/RDF-RDFa-Parser/"/>

@@ -13,10 +13,10 @@ RDF::RDFa::Parser - flexible RDFa parser
 
 =cut
 
-use Carp;
 use Encode qw(encode_utf8);
 use File::ShareDir qw(dist_file);
 use LWP::UserAgent;
+use RDF::RDFa::Parser::Config;
 use RDF::RDFa::Parser::Profile;
 use RDF::Trine 0.118;
 use Storable qw/dclone/;
@@ -24,16 +24,36 @@ use URI::Escape;
 use URI::URL;
 use XML::LibXML qw(:all);
 use XML::RegExp;
+use constant {
+	ERR_WARNING  => 'w',
+	ERR_ERROR    => 'e',
+	};
+use constant {
+	ERR_CODE_PROFILE_UNUSABLE      =>  0x0101,
+	ERR_CODE_PROFILE_DISABLED      =>  0x0102,
+	ERR_CODE_RDFXML_MUDDLE         =>  0x0201,
+	ERR_CODE_RDFXML_MESS           =>  0x0202,
+	ERR_CODE_PREFIX_BUILTIN        =>  0x0301,
+	ERR_CODE_PREFIX_ILLEGAL        =>  0x0302,
+	ERR_CODE_PREFIX_DISABLED       =>  0x0303,
+	ERR_CODE_INSTANCEOF_USED       =>  0x0401,
+	ERR_CODE_INSTANCEOF_OVERRULED  =>  0x0402,
+	ERR_CODE_CURIE_FELLTHROUGH     =>  0x0501,
+	ERR_CODE_CURIE_UNDEFINED       =>  0x0502,
+	ERR_CODE_BNODE_WRONGPLACE      =>  0x0601,
+	ERR_CODE_VOCAB_DISABLED        =>  0x0701,
+	ERR_CODE_LANG_INVALID          =>  0x0801,
+	};
 use strict;
 use 5.008;
 
 =head1 VERSION
 
-1.09_00
+1.09_02
 
 =cut
 
-our $VERSION = '1.09_01';
+our $VERSION = '1.09_02';
 our $HAS_AWOL;
 
 BEGIN
@@ -48,7 +68,7 @@ BEGIN
 
 =over 4
 
-=item C<< $p = RDF::RDFa::Parser->new($xhtml, $baseuri, \%options, $storage) >>
+=item C<< $p = RDF::RDFa::Parser->new($xhtml, $baseuri, $config, $storage) >>
 
 This method creates a new RDF::RDFa::Parser object and returns it.
 
@@ -56,74 +76,17 @@ The $xhtml variable may contain an XHTML/XML string, or a
 XML::LibXML::Document. If a string, the document is parsed using
 XML::LibXML::Parser, which will throw an exception if it is not
 well-formed. RDF::RDFa::Parser does not catch the exception.
-
-The base URI is needed to resolve relative URIs found in the document.
 If $xhtml is undef, then RDF::RDFa::Parser will fetch $baseuri to
 obtain the document to be parsed.
 
-Options (mostly booleans) [in brackets default for XHTML+RDFa 1.0, 1.1]:
+The base URI is needed to resolve relative URIs found in the document.
 
-=over 2
+$config optionally holds an RDF::RDFa::Parser::Config object which
+determines the set of rules used to parse the RDFa. It defaults to
+XHTML+RDFa 1.0.
 
-=item * B<alt_stylesheet> - magic rel="alternate stylesheet". [0]
-
-=item * B<atom_elements> - process <feed> and <entry> specially. [0]
-
-=item * B<atom_parser> - extract Atom 1.0 native semantics. [0]
-
-=item * B<auto_config> - see section "Auto Config" [0]
-
-=item * B<embedded_rdfxml> - find plain RDF/XML chunks within document. 0=no, 1=handle, 2=skip. [0]                      
-
-=item * B<full_uris> - support full URIs in CURIE-only attributes. [0, 1]
-
-=item * B<graph> - enable support for named graphs. [0]
-
-=item * B<graph_attr> - attribute to use for named graphs. Use Clark Notation to specify a namespace. ['graph']
-
-=item * B<graph_type> - graph attribute behaviour ('id' or 'about'). ['id']
-
-=item * B<graph_default> - default graph name. ['_:RDFaDefaultGraph']
-
-=item * B<keywords> - THIS WILL VOID YOUR WARRANTY!
-
-=item * B<prefix_attr> - support @prefix rather than just @xmlns:*. [0, 1]
-
-=item * B<prefix_bare> - support CURIEs with no colon+suffix. [0]
-
-=item * B<prefix_default> - URI for default prefix (e.g. rel="foo"). [undef]
-
-=item * B<prefix_empty> - URI for empty prefix (e.g. rel=":foo"). ['http://www.w3.org/1999/xhtml/vocab#']
-
-=item * B<prefix_nocase> - ignore case-sensitivity of CURIE prefixes. [0, 1]
-
-=item * B<profiles> - support RDFa profiles. [0, 1]
-
-=item * B<safe_anywhere> - allow Safe CURIEs in @rel/@rev/etc. [0, 1]
-
-=item * B<tdb_service> - use thing-described-by.org to name some bnodes. [0]
-
-=item * B<use_rtnlx> - use RDF::Trine::Node::Literal::XML. 0=no, 1=if available. [0]
-
-=item * B<vocab_attr> - support @vocab from RDFa 1.1. [0, 1]
-
-=item * B<xhtml_base> - process <base> element. 0=no, 1=yes, 2=use it for RDF/XML too. [1]                      
-
-=item * B<xhtml_elements> - process <head> and <body> specially. [1]
-
-=item * B<xhtml_lang> - support @lang rather than just @xml:lang. [0]
-
-=item * B<xml_base> - support for 'xml:base' attribute. 0=only RDF/XML; 1=except @href/@src; 2=always. [0]
-
-=item * B<xml_lang> - Support for 'xml:lang' attribute. [1]
-
-=back
-
-The default options attempt to stick to the W3C XHTML+RDFa 1.0
-Recommendation as rigidly as possible.
-
-$storage is an RDF::Trine::Store object. If undef, then a new
-temporary store is created.
+$storage optionally holds an RDF::Trine::Store object. If undef, then
+a new temporary store is created.
 
 =back
 
@@ -134,7 +97,7 @@ sub new
 	my $class   = shift;
 	my $xhtml   = shift;
 	my $baseuri = shift;
-	my $options = shift;
+	my $config  = shift;
 	my $store   = shift || undef;
 	my $DOMTree;
 
@@ -145,10 +108,10 @@ sub new
 		$ua->default_header("Accept" => "application/xhtml+xml, application/xml;q=0.1, text/xml;q=0.1");
 		my $response = $ua->get($baseuri);
 		use Data::Dumper;
-		croak "HTTP response not successful\n"
+		die "HTTP response not successful\n"
 			unless $response->is_success;
-		croak "Non-XHTML HTTP response\n"
-			unless $response->content_type =~ m`^(text/(x|ht)ml)|(application/(xhtml\+xml|xml))$`;
+		die "Unknown HTTP response media type\n"
+			unless $response->content_type =~ m`^(text/(x|ht)ml)|(application/(atom\+xml|xhtml\+xml|xml)|image/svg\+xml)$`;
 		$xhtml = $response->decoded_content;
 	}
 	
@@ -169,7 +132,16 @@ sub new
 		
 		$DOMTree = $parser->parse_string($xhtml);
 	}
-	
+
+	if (!defined $config)
+	{
+		$config = RDF::RDFa::Parser::Config->new;
+	}
+	elsif (!UNIVERSAL::isa($config, 'RDF::RDFa::Parser::Config'))
+	{
+		$config = RDF::RDFa::Parser::Config->new(undef, undef, %$config);
+	}
+
 	$store = RDF::Trine::Store::Memory->temporary_store
 		unless defined $store;
 
@@ -177,25 +149,21 @@ sub new
 		'xhtml'    => $xhtml,
 		'baseuri'  => $baseuri,
 		'origbase' => $baseuri,
-		'DOM'      => $DOMTree,
-		'RESULTS'  => RDF::Trine::Model->new($store),
+		'dom'      => $DOMTree,
+		'model'    => RDF::Trine::Model->new($store),
 		'bnodes'   => 0,
 		'sub'      => {},
-		'options'  => &OPTS_XHTML,
+		'options'  => $config,
 		'Graphs'   => {},
+		'errors'   => [],
 		}, $class;
 	
-	foreach my $o (keys %$options)
-	{
-		$self->{'options'}->{$o} = $options->{$o};
-	}
-	
-	$self->_auto_config;
+	$config->auto_config($DOMTree);
 
 	# HTML <base> element.
 	if ($self->{'options'}->{'xhtml_base'})
 	{
-		my @bases = $self->{DOM}->getElementsByTagName('base');
+		my @bases = $self->dom->getElementsByTagName('base');
 		my $base;
 		foreach my $b (@bases)
 		{
@@ -259,7 +227,7 @@ sub consume
 	
 	if ($self->{'options'}->{'atom_parser'} && $HAS_AWOL)
 	{
-		my $awol = XML::Atom::OWL->new( $self->dom , $self->uri , undef, $self->{'RESULTS'} );
+		my $awol = XML::Atom::OWL->new( $self->dom , $self->uri , undef, $self->{'model'} );
 		$awol->{'bnode_generator'} = $self;
 		$awol->set_callbacks( $self->{'sub'} );
 		$awol->consume;
@@ -347,14 +315,38 @@ sub _consume_element
 	if ($self->{'options'}->{'xhtml_lang'}
 	&& $current_element->hasAttribute('lang'))
 	{
-		$current_language = $current_element->getAttribute('lang')
-			if $self->_valid_lang( $current_element->getAttribute('lang') );
+		if ($self->_valid_lang( $current_element->getAttribute('lang') ))
+		{
+			$current_language = $current_element->getAttribute('lang');
+		}
+		else
+		{
+			$self->_log_error(
+				ERR_WARNING,
+				ERR_CODE_LANG_INVALID,
+				sprintf('Language code "%s" is not valid.', $current_element->getAtrribute('lang')),
+				element => $current_element,
+				lang    => $current_element->getAttribute('lang'),
+				) if $@;
+		}
 	}
 	if ($self->{'options'}->{'xml_lang'}
 	&& $current_element->hasAttributeNS(XML_XML_NS, 'lang'))
 	{
-		$current_language = $current_element->getAttributeNS(XML_XML_NS, 'lang')
-			if $self->_valid_lang($current_element->getAttributeNS(XML_XML_NS, 'lang'));
+		if ($self->_valid_lang( $current_element->getAttributeNS(XML_XML_NS, 'lang') ))
+		{
+			$current_language = $current_element->getAttributeNS(XML_XML_NS, 'lang');
+		}
+		else
+		{
+			$self->_log_error(
+				ERR_WARNING,
+				ERR_CODE_LANG_INVALID,
+				sprintf('Language code "%s" is not valid.', $current_element->getAttributeNS(XML_XML_NS, 'lang')),
+				element => $current_element,
+				lang    => $current_element->getAttributeNS(XML_XML_NS, 'lang'),
+				) if $@;
+		}
 	}
 
 	# EXTENSION
@@ -394,44 +386,64 @@ sub _consume_element
 		$rdfxml_base = $xml_base
 			if defined $xml_base;
 		
-		my $parser  = RDF::Trine::Parser->new('rdfxml');
-		my $r       = $parser->parse(
-			$rdfxml_base,
-			$current_element->toStringEC14N,
-			sub {
-				my $st = shift;
-				my ($s, $p, @o);
-				
-				$s = $st->subject->is_blank ?
-					($g.'_'.$st->subject->blank_identifier) :
-					$st->subject->uri_value ;
-				$p = $st->predicate->is_blank ?
-					($g.'_'.$st->predicate->blank_identifier) :
-					$st->predicate->uri_value ;
-				if ($st->object->is_literal)
-				{
-					$o[0] = $st->object->literal_value;
-					$o[1] = $st->object->literal_datatype;
-					$o[2] = $st->object->literal_value_language;
+		eval {
+			my $parser  = RDF::Trine::Parser->new('rdfxml');
+			my $r       = $parser->parse(
+				$rdfxml_base,
+				$current_element->toStringEC14N,
+				sub {
+					my $st = shift;
+					my ($s, $p, @o);
 					
-					$self->rdf_triple_literal(undef, $s, $p, @o,
-						($self->{'options'}->{'graph'} ? $g : undef));
-				}
-				else
-				{
-					$o[0] = $st->object->is_blank ?
-						($g.'_'.$st->object->blank_identifier) :
-						$st->object->uri_value ;
-					$self->rdf_triple(undef, $s, $p, @o,
-						($self->{'options'}->{'graph'} ? $g : undef));
-				}				
-			});
-			
+					$s = $st->subject->is_blank ?
+						($g.'_'.$st->subject->blank_identifier) :
+						$st->subject->uri_value ;
+					$p = $st->predicate->is_blank ?
+						($g.'_'.$st->predicate->blank_identifier) :
+						$st->predicate->uri_value ;
+					if ($st->object->is_literal)
+					{
+						$o[0] = $st->object->literal_value;
+						$o[1] = $st->object->literal_datatype;
+						$o[2] = $st->object->literal_value_language;
+						
+						$self->_insert_triple_literal(undef, $s, $p, @o,
+							($self->{'options'}->{'graph'} ? $g : undef));
+					}
+					else
+					{
+						$o[0] = $st->object->is_blank ?
+							($g.'_'.$st->object->blank_identifier) :
+							$st->object->uri_value ;
+						$self->_insert_triple_resource(undef, $s, $p, @o,
+							($self->{'options'}->{'graph'} ? $g : undef));
+					}				
+				});
+		};
+		
+		$self->_log_error(
+			ERR_WARNING,
+			ERR_CODE_RDFXML_MESS,
+			'Could not parse embedded RDF/XML content.',
+			element => $current_element,
+			) if $@;
+		
 		$current_element->removeAttributeNS(XML_XML_NS, 'lang')
 			if ($fake_lang);
 			
 		return 1;
 	}
+	elsif ($current_element->localname eq 'RDF'
+	and    $current_element->namespaceURI eq 'http://www.w3.org/1999/02/22-rdf-syntax-ns#')
+	{
+		$self->_log_error(
+			ERR_WARNING,
+			ERR_CODE_RDFXML_MUDDLE,
+			'Encountered embedded RDF/XML content, but not configured to parse or skip it.',
+			element => $current_element,
+			);
+	}
+
 	
 	# RDFa 1.1 - @profile
 	if ($self->{'options'}->{'profiles'}
@@ -440,7 +452,7 @@ sub _consume_element
 		my $profile = RDF::RDFa::Parser::Profile->new(
 			$self->uri($current_element->getAttribute('profile')), $self);
 		
-		if (defined $profile)
+		if (UNIVERSAL::isa($profile, 'RDF::RDFa::Parser::Profile'))
 		{
 			foreach my $mapping ($profile->get_prefixes)
 			{
@@ -461,8 +473,25 @@ sub _consume_element
 		}
 		else
 		{
-			carp "Unusable profile '$profile'.";
+			$self->_log_error(
+				ERR_ERROR,
+				ERR_CODE_PROFILE_UNUSABLE,
+				sprintf("Unusable profile '%s'.", $current_element->getAttribute('profile')),
+				uri     => $current_element->getAttribute('profile'),
+				element => $current_element,
+				);
 		}
+	}
+	elsif ($current_element->hasAttribute('profile')
+	and    $current_element->getAttribute('profile') ne 'http://www.w3.org/1999/xhtml/vocab')
+	{
+			$self->_log_error(
+				ERR_WARNING,
+				ERR_CODE_PROFILE_DISABLED,
+				sprintf("Encountered profile '%s', but profiles are disabled.", $current_element->getAttribute('profile')),
+				uri     => $current_element->getAttribute('profile'),
+				element => $current_element,
+				);
 	}
 	
 	# Next the [current element] is parsed for [URI mapping]s and these are
@@ -486,15 +515,36 @@ sub _consume_element
 			my $uri = $A->getValue;
 			if ($pfx =~ /^(xml|xmlns|_)$/i)
 			{
-				carp("Attempt to redefine CURIE prefix '$pfx' not allowed.");
+				$self->_log_error(
+					ERR_ERROR,
+					ERR_CODE_PREFIX_BUILTIN,
+					"Attempt to redefine built-in CURIE prefix '$pfx' not allowed.",
+					element => $current_element,
+					prefix  => $pfx,
+					uri     => $uri,
+					);
 			}
 			elsif ($pfx !~ /^($XML::RegExp::NCName)$/)
 			{
-				carp("Attempt to define non-NCName CURIE prefix '$pfx' not allowed.");
+				$self->_log_error(
+					ERR_ERROR,
+					ERR_CODE_PREFIX_ILLEGAL,
+					"Attempt to define non-NCName CURIE prefix '$pfx' not allowed.",
+					element => $current_element,
+					prefix  => $pfx,
+					uri     => $uri,
+					);
 			}
 			elsif ($uri eq XML_XML_NS || $uri eq XML_XMLNS_NS)
 			{
-				carp("Attempt to define CURIE prefix for '$uri' not allowed.");
+				$self->_log_error(
+					ERR_ERROR,
+					ERR_CODE_PREFIX_BUILTIN,
+					"Attempt to define any CURIE prefix for '$uri' not allowed using \@xmlns.",
+					element => $current_element,
+					prefix  => $pfx,
+					uri     => $uri,
+					);
 			}
 			else
 			{
@@ -519,7 +569,14 @@ sub _consume_element
 			
 			unless ($pfx =~ /^$XML::RegExp::NCName$/)
 			{
-				carp("Attempt to define non-NCName CURIE prefix '$pfx' not allowed.");
+				$self->_log_error(
+					ERR_ERROR,
+					ERR_CODE_PREFIX_ILLEGAL,
+					"Attempt to define non-NCName CURIE prefix '$pfx' not allowed.",
+					element => $current_element,
+					prefix  => $pfx,
+					uri     => $uri,
+					);
 				next;
 			}
 			
@@ -528,12 +585,33 @@ sub _consume_element
 			$local_uri_mappings->{$pfx} = $uri;
 		}
 	}
+	elsif ($current_element->hasAttribute('prefix'))
+	{
+		$self->_log_error(
+			ERR_WARNING,
+			ERR_CODE_PREFIX_DISABLED,
+			"\@prefix found, but support disabled.",
+			element => $current_element,
+			);
+	}
 	
 	# RDFa 1.1 - @vocab support
 	if ($self->{'options'}->{'vocab_attr'}
 	&& $current_element->hasAttribute('vocab'))
 	{
-		$local_uri_mappings->{'*'} = $current_element->getAttribute('vocab');
+		$local_uri_mappings->{'*'} = $self->uri(
+			$current_element->getAttribute('vocab'));
+	}
+	elsif ($current_element->hasAttribute('vocab'))
+	{
+		$self->_log_error(
+			ERR_WARNING,
+			ERR_CODE_VOCAB_DISABLED,
+			"\@vocab found, but support disabled.",
+			element => $current_element,
+			uri     => $self->uri(
+				$current_element->getAttribute('vocab')),
+			);
 	}
 	
 	# EXTENSION
@@ -555,7 +633,7 @@ sub _consume_element
 		elsif ($self->{'options'}->{'graph_type'} eq 'about'
 		&&  $current_element->hasAttributeNS($xmlns, $attr))
 		{
-			$graph = $self->curie(
+			$graph = $self->_expand_curie(
 				$current_element->getAttributeNS($xmlns, $attr),
 				element   => $current_element,
 				attribute => 'graph',
@@ -581,7 +659,7 @@ sub _consume_element
 	}
 	
 	my @REL = map {
-		my $x = $self->curie(
+		my $x = $self->_expand_curie(
 			$_,
 			element   => $current_element,
 			attribute => 'rel',
@@ -592,7 +670,7 @@ sub _consume_element
 		defined $x ? ($x) : ();
 		} @rel;	
 	my @REV = map {
-		my $x = $self->curie(
+		my $x = $self->_expand_curie(
 			$_,
 			element   => $current_element,
 			attribute => 'rev',
@@ -617,7 +695,7 @@ sub _consume_element
 		# the section on CURIE and URI Processing ; 
 		if ($current_element->hasAttribute('about'))
 		{
-			$new_subject = $self->curie(
+			$new_subject = $self->_expand_curie(
 				$current_element->getAttribute('about'),
 				element   => $current_element,
 				attribute => 'about',
@@ -641,7 +719,7 @@ sub _consume_element
 		# according to the section on CURIE and URI Processing ; 
 		if ($current_element->hasAttribute('resource') && !defined $new_subject)
 		{
-			$new_subject = $self->curie(
+			$new_subject = $self->_expand_curie(
 				$current_element->getAttribute('resource'), 
 				element   => $current_element,
 				attribute => 'resource',
@@ -690,6 +768,17 @@ sub _consume_element
 				||  $current_element->hasAttribute('instanceof'))
 			{
 				$new_subject = $self->bnode($current_element);
+				
+				if ($current_element->hasAttribute('instanceof')
+				&& !$current_element->hasAttribute('typeof'))
+				{
+					$self->_log_error(
+						ERR_WARNING,
+						ERR_CODE_INSTANCEOF_USED,
+						"Deprecated \@instanceof found; using it anyway.",
+						element => $current_element,
+						);
+				}
 			}
 			
 			# otherwise, if [parent object] is present, [new subject] is set
@@ -717,7 +806,7 @@ sub _consume_element
 		# to the section on CURIE and URI Processing; 
 		if ($current_element->hasAttribute('about'))
 		{
-			$new_subject = $self->curie(
+			$new_subject = $self->_expand_curie(
 				$current_element->getAttribute('about'),
 				element   => $current_element,
 				attribute => 'about',
@@ -766,6 +855,17 @@ sub _consume_element
 				||  $current_element->hasAttribute('instanceof'))
 			{
 				$new_subject = $self->bnode($current_element);
+				
+				if ($current_element->hasAttribute('instanceof')
+				&& !$current_element->hasAttribute('typeof'))
+				{
+					$self->_log_error(
+						ERR_WARNING,
+						ERR_CODE_INSTANCEOF_USED,
+						"Deprecated \@instanceof found; using it anyway.",
+						element => $current_element,
+						);
+				}
 			}
 			
 			# otherwise, if [parent object] is present, [new subject] is set 
@@ -783,7 +883,7 @@ sub _consume_element
 		# the section on CURIE and URI Processing; 
 		if ($current_element->hasAttribute('resource'))
 		{
-			$current_object_resource = $self->curie(
+			$current_object_resource = $self->_expand_curie(
 				$current_element->getAttribute('resource'), 
 				element   => $current_element,
 				attribute => 'resource',
@@ -813,6 +913,27 @@ sub _consume_element
 	&& (  $current_element->hasAttribute('instanceof')
 		|| $current_element->hasAttribute('typeof')))
 	{
+
+		if ($current_element->hasAttribute('instanceof')
+		&&  $current_element->hasAttribute('typeof'))
+		{
+			$self->_log_error(
+				ERR_WARNING,
+				ERR_CODE_INSTANCEOF_OVERRULED,
+				"Deprecated \@instanceof found; ignored because \@typeof also present.",
+				element => $current_element,
+				);
+		}
+		elsif ($current_element->hasAttribute('instanceof'))
+		{
+			$self->_log_error(
+				ERR_WARNING,
+				ERR_CODE_INSTANCEOF_USED,
+				"Deprecated \@instanceof found; using it anyway.",
+				element => $current_element,
+				);
+		}
+
 		# One or more 'types' for the [ new subject ] can be set by using
 		# @instanceof. If present, the attribute must contain one or more
 		# URIs, obtained according to the section on URI and CURIE Processing...
@@ -822,7 +943,7 @@ sub _consume_element
 		
 		foreach my $curie (@instanceof)
 		{
-			my $rdftype = $self->curie(
+			my $rdftype = $self->_expand_curie(
 				$curie,
 				element   => $current_element,
 				attribute => 'typeof',
@@ -841,7 +962,7 @@ sub _consume_element
 			# object
 			#     full URI of 'type' 
 
-			$self->rdf_triple($current_element, $new_subject, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', $rdftype, $graph);
+			$self->_insert_triple_resource($current_element, $new_subject, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', $rdftype, $graph);
 			$activity++;
 		}
 
@@ -869,7 +990,7 @@ sub _consume_element
 		
 		foreach my $r (@REL)
 		{
-			$self->rdf_triple($current_element, $new_subject, $r, $current_object_resource, $graph);
+			$self->_insert_triple_resource($current_element, $new_subject, $r, $current_object_resource, $graph);
 			$activity++;
 		}
 
@@ -886,7 +1007,7 @@ sub _consume_element
 		
 		foreach my $r (@REV)
 		{
-			$self->rdf_triple($current_element, $current_object_resource, $r, $new_subject, $graph);
+			$self->_insert_triple_resource($current_element, $current_object_resource, $r, $new_subject, $graph);
 			$activity++;
 		}
 	}
@@ -950,7 +1071,7 @@ sub _consume_element
 	my $datatype = -1;
 	if ($current_element->hasAttribute('datatype'))
 	{
-		$datatype = $self->curie(
+		$datatype = $self->_expand_curie(
 			$current_element->getAttribute('datatype'),
 			element   => $current_element,
 			attribute => 'datatype',
@@ -984,7 +1105,7 @@ sub _consume_element
 		elsif ((!$current_element->getElementsByTagName('*')) 
 		||     ($datatype eq ''))
 		{
-			@current_object_literal = ($self->stringify($current_element),
+			@current_object_literal = ($self->_element_to_string($current_element),
 				($datatype == -1 ? undef : $datatype),
 				$current_language);
 		}
@@ -1009,7 +1130,7 @@ sub _consume_element
 		elsif ($datatype eq 'http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral'
 		|| ($datatype==-1 && $current_element->getElementsByTagName('*')))
 		{
-			@current_object_literal = ($self->xmlify($current_element, $current_language),
+			@current_object_literal = ($self->_element_to_xml($current_element, $current_language),
 				'http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral',
 				$current_language);
 			$recurse = 0;
@@ -1035,7 +1156,7 @@ sub _consume_element
 			}
 			else
 			{
-				@current_object_literal = ($self->stringify($current_element),
+				@current_object_literal = ($self->_element_to_string($current_element),
 					($datatype == -1 ? undef : $datatype),
 					$current_language);
 			}
@@ -1059,7 +1180,7 @@ sub _consume_element
 		# object
 		#     [current object literal] 
 
-		my $p = $self->curie(
+		my $p = $self->_expand_curie(
 			$property,
 			element   => $current_element,
 			attribute => 'property',
@@ -1069,7 +1190,7 @@ sub _consume_element
 			);
 		next unless defined $p;
 		
-		$self->rdf_triple_literal($current_element, $new_subject, $p, @current_object_literal, $graph);
+		$self->_insert_triple_literal($current_element, $new_subject, $p, @current_object_literal, $graph);
 		$activity++;
 		
 		# Once the triple has been created, if the [datatype] of the
@@ -1142,12 +1263,12 @@ sub _consume_element
 			
 			if ($direction eq 'forward')
 			{
-				$self->rdf_triple($current_element, $parent_subject, $predicate, $new_subject, $parent_graph);
+				$self->_insert_triple_resource($current_element, $parent_subject, $predicate, $new_subject, $parent_graph);
 				$activity++;
 			}
 			else
 			{
-				$self->rdf_triple($current_element, $new_subject, $predicate, $parent_subject, $parent_graph);
+				$self->_insert_triple_resource($current_element, $new_subject, $predicate, $parent_subject, $parent_graph);
 				$activity++;
 			}
 		}
@@ -1193,7 +1314,7 @@ sub set_callbacks
 	}
 	else
 	{
-		carp "Unsupported set_callbacks call.\n";
+		die "Unsupported set_callbacks call.\n";
 	}
 	
 	return $self;
@@ -1275,8 +1396,7 @@ sub _print1
 	return undef;
 }
 
-sub rdf_triple
-# Function only used internally.
+sub _insert_triple_resource
 {
 	my $self = shift;
 
@@ -1303,11 +1423,10 @@ sub rdf_triple
 	}
 
 	# Run the common function
-	return $self->rdf_triple_common($element, $subject, $predicate, $to, $graph);
+	return $self->_insert_triple_common($element, $subject, $predicate, $to, $graph);
 }
 
-sub rdf_triple_literal
-# Function only used internally.
+sub _insert_triple_literal
 {
 	my $self = shift;
 
@@ -1362,11 +1481,10 @@ sub rdf_triple_literal
 	}
 
 	# Run the common function
-	$self->rdf_triple_common($element, $subject, $predicate, $to, $graph);
+	$self->_insert_triple_common($element, $subject, $predicate, $to, $graph);
 }
 
-sub rdf_triple_common
-# Function only used internally.
+sub _insert_triple_common
 {
 	my $self      = shift;  # A reference to the RDF::RDFa::Parser object
 	my $element   = shift;  # A reference to the XML::LibXML element being parsed
@@ -1417,7 +1535,7 @@ sub rdf_triple_common
 		if ($self->{'sub'}->{'ontriple'});
 	return if $suppress_triple;
 
-	$self->{RESULTS}->add_statement($statement);
+	$self->{model}->add_statement($statement);
 }
 
 sub _atom_magic
@@ -1438,8 +1556,7 @@ sub _split_tokens
 	return @return;
 }
 
-sub stringify
-# Function only used internally.
+sub _element_to_string
 {
 	my $self = shift;
 	my $dom  = shift;
@@ -1452,15 +1569,14 @@ sub stringify
 	{
 		my $rv = '';
 		foreach my $kid ($dom->childNodes)
-			{ $rv .= $self->stringify($kid); }
+			{ $rv .= $self->_element_to_string($kid); }
 		return $rv;
 	}
 
 	return '';
 }
 
-sub xmlify
-# Function only used internally.
+sub _element_to_xml
 {
 	my $self = shift;
 	my $dom  = shift;
@@ -1491,7 +1607,6 @@ sub xmlify
 }
 
 sub bnode
-# Function only used internally.
 {
 	my $self    = shift;
 	my $element = shift;
@@ -1617,14 +1732,20 @@ sub _valid_lang
 	return $r;
 }
 
-sub curie
+sub _expand_curie
 {
 	my ($self, $token, %args) = @_;	
-	my $r = $self->_expand_curie($token, %args);
+	my $r = $self->__expand_curie($token, %args);
+	
+	if (defined $self->{'sub'}->{'oncurie'})
+	{
+		return $self->{'sub'}->{'oncurie'}($self, $args{element}, $token, $r);
+	}
+
 	return $r;
 }
 
-sub _expand_curie
+sub __expand_curie
 {
 	my ($self, $token, %args) = @_;
 
@@ -1640,8 +1761,18 @@ sub _expand_curie
 		
 		if (defined $bnode)
 		{
-			carp "Blank node found in $args{attribute} where URIs are expected as values."
-				if $args{'attribute'} =~ /^(rel|rev|property|datatype)$/i;
+			if ($args{'attribute'} =~ /^(rel|rev|property|datatype)$/i)
+			{
+				$self->_log_error(
+					ERR_ERROR,
+					ERR_CODE_BNODE_WRONGPLACE,
+					"Blank node found in $args{attribute} where URIs are expected as values.",
+					token     => $token,
+					element   => $args{element},
+					attribute => $args{attribute},
+					);
+			}
+
 			return $bnode;
 		}
 	}
@@ -1674,7 +1805,7 @@ sub _expand_curie
 	}
 
 	# CURIEs - prefixed
-	if ($token =~ /^($XML::RegExp::NCName)?:(\S+)$/
+	if ($token =~ /^($XML::RegExp::NCName)?:(\S*)$/
 	and ($is_safe || $args{'attribute'} =~ /^(rel|rev|property|typeof|datatype)$/i || $args{'allow_unsafe_curie'}))
 	{
 		$token =~ /^($XML::RegExp::NCName)?:(\S+)$/;
@@ -1690,7 +1821,15 @@ sub _expand_curie
 
 		if ($is_safe)
 		{
-			carp "CURIE '$token' used but prefix '$prefix' is not defined.";
+			$self->_log_error(
+				ERR_ERROR,
+				ERR_CODE_CURIE_UNDEFINED,
+				"CURIE '$token' used in safe CURIE, but '$prefix' is undefined.",
+				token     => $token,
+				element   => $args{element},
+				attribute => $args{attribute},
+				prefix    => $prefix,
+				);
 			return undef;
 		}
 	}
@@ -1712,7 +1851,7 @@ sub _expand_curie
 	}
 
 	# Absolute URIs
-	if ($token =~ /^[A-Za-z]+:/ and !$is_safe
+	if ($token =~ /^[A-Z][A-Z0-9\.\+-]*:/i and !$is_safe
 	and ($self->{'options'}->{'full_uris'} || $args{'attribute'} =~ /^(about|resource|graph)$/i))
 	{
 		return $token;
@@ -1739,6 +1878,15 @@ sub _expand_curie
 		return $self->uri($token, {'element'=>$args{'element'}, 'xml_base'=>$args{'xml_base'}});
 	}
 	
+	$self->_log_error(
+		ERR_WARNING,
+		ERR_CODE_CURIE_FELLTHROUGH,
+		"Couldn't make sense of token '$token'.",
+		token     => $token,
+		element   => $args{element},
+		attribute => $args{attribute},
+		);
+
 	return undef;
 }
 
@@ -1776,7 +1924,7 @@ sub graph
 		}
 		my $storage = RDF::Trine::Store::DBI->temporary_store;
 		my $m = RDF::Trine::Model->new($storage);
-		my $i = $self->{RESULTS}->get_statements(undef, undef, undef, $tg);
+		my $i = $self->{model}->get_statements(undef, undef, undef, $tg);
 		while (my $statement = $i->next)
 		{
 			$m->add_statement($statement);
@@ -1785,7 +1933,7 @@ sub graph
 	}
 	else
 	{
-		return $self->{RESULTS};
+		return $self->{model};
 	}
 }
 
@@ -1822,7 +1970,7 @@ Returns the parsed XML::LibXML::Document.
 sub dom
 {
 	my $self = shift;
-	return $self->{DOM};
+	return $self->{dom};
 }
 
 =item C<< $p->xhtml >>
@@ -1893,402 +2041,96 @@ sub uri
 	return $rv;
 }
 
-sub _auto_config
-# Internal use only.
-{
-	my $self  = shift;
-	my $count = 0;
-	
-	return undef unless ($self->{'options'}->{'auto_config'});
+=item C<< $p->errors >>
 
-	my $xpc = XML::LibXML::XPathContext->new;
-	$xpc->registerNs('x', 'http://www.w3.org/1999/xhtml');
-	my $nodes   = $xpc->find('//x:meta[@name="http://search.cpan.org/dist/RDF-RDFa-Parser/#auto_config"]/@content', $self->{'DOM'}->documentElement);
-	my $optstr = '';
-	foreach my $node ($nodes->get_nodelist)
-	{
-		$optstr .= '&' . $node->getValue;
-	}
-	$optstr =~ s/^\&//;
-	my $options = _parse_axwfue($optstr);
-	
-	foreach my $o (keys %$options)
-	{
-		next unless $o=~ /^(alt_stylesheet | embedded_rdfxml | full_uris |
-			keywords | prefix_attr | prefix_bare | prefix_empty | prefix_nocase |
-			safe_anywhere | tdb_service | xhtml_base | xhtml_elements | xhtml_lang |
-			xml_base | xml_lang | graph | graph_attr | graph_type | graph_default |
-			prefix_default )$/ix;
-		
-		$count++;
-			
-		if ($o =~ /^keywords$/i)
-		{
-			$self->{'options'}->{lc $o} = keywords($options->{$o});
-		}
-		else
-		{
-			$self->{'options'}->{lc $o} = $options->{$o};
-		}
-	}
-	
-	return $count;
-}
-
-sub _parse_axwfue
-# Internal use only
-{
-	my $axwfue = shift;
-	$axwfue =~ tr/;/&/;
-	$axwfue =~ s/(^&+|&+$)//g;
-	my $rv = {};
-	for (split /&/, $axwfue)
-	{
-		my ($k, $v) = split /=/, $_, 2;
-		next unless length $k;
-		$rv->{uri_unescape($k)} = uri_unescape($v);
-	}
-	return $rv;
-}
-
-=back
-
-=head2 Utility Function
-
-=over 4
-
-=item C<< $structure = RDF::RDFa::Parser::keywords(@bundles) >>
-
-Without any parameters, gets an empty structure for keywords. Passing
-additional strings adds certain bundles of predefined keywords to the
-structure.
-
-  my $keyword_structure = RDF::RDFa::Parser::keywords(
-	'xhtml', 'xfn', 'grddl');
-
-This is useful to create a keyword structure may be provided as an
-option to the RDF::RDFa::Parser constructor. You probably want to
-leave this alone unless you know what you're doing.
-
-Bundles include: rdfa, html5, html4, html32, iana, grddl, xfn.
-
-=back
+Returns a list of errors and warnings that occurred during parsing.
 
 =cut
 
-sub keywords
+sub errors
 {
-	my $terms = join(' ', @_);
-	
-	my $KW = {
-		'about'     => {},
-		'resource'  => {},
-		'rel'       => {},
-		'rev'       => {},
-		'property'  => {},
-		'datatype'  => {},
-		'typeof'    => {},
-		'graph'     => {},
-		'*'         => {},
-		};
-	my $KW2 = {
-		'about'     => {},
-		'resource'  => {},
-		'rel'       => {},
-		'rev'       => {},
-		'property'  => {},
-		'datatype'  => {},
-		'typeof'    => {},
-		'graph'     => {},
-		'*'         => {},
-		};
-
-	if ($terms =~ /\b(rdfa)\b/i)
-	{
-		foreach my $attr (qw(rel rev))
-		{
-			foreach my $word (qw(alternate appendix bookmark cite
-				chapter contents copyright first glossary help
-				icon index last license meta next p3pv1
-				prev role section stylesheet subsection start top up))
-			{
-				$KW->{ $attr }->{ lc $word } = 'http://www.w3.org/1999/xhtml/vocab#' . (lc $word)
-					unless defined $KW->{ $attr }->{ lc $word };
-			}
-		}
-	}
-
-	if ($terms =~ /\b(html5)\b/i)
-	{
-		foreach my $attr (qw(rel rev))
-		{
-			foreach my $word (qw(alternate archives author bookmark
-				external feed first help icon index last license next
-				nofollow noreferrer pingback prefetch prev search
-				stylesheet sidebar tag up ALTERNATE-STYLESHEET))
-			{
-				$KW->{ $attr }->{ lc $word } = 'http://www.w3.org/1999/xhtml/vocab#' . $word
-					unless defined $KW->{ $attr }->{ lc $word };
-			}
-		}
-	}
-	
-	if ($terms =~ /\b(html4)\b/i)
-	{
-		foreach my $attr (qw(rel rev))
-		{
-			foreach my $word (qw(Alternate Stylesheet Start Next Prev
-				Contents Index Glossary Copyright Chapter Section
-				Subsection Appendix Help Bookmark))
-			{
-				$KW->{ $attr }->{ lc $word } = 'http://www.w3.org/1999/xhtml/vocab#' . (lc $word)
-					unless defined $KW->{ $attr }->{ lc $word };
-			}
-		}
-	}
-	
-	if ($terms =~ /\b(html32)\b/i)
-	{
-		foreach my $attr (qw(rel rev))
-		{
-			foreach my $word (qw(top contents index glossary copyright
-				next previous help search chapter made))
-			{
-				$KW->{ $attr }->{ lc $word } = 'http://www.w3.org/1999/xhtml/vocab#' . $word
-					unless defined $KW->{ $attr }->{ lc $word };
-			}
-		}
-	}
-	
-	if ($terms =~ /\b(iana)\b/i)
-	{
-		foreach my $attr (qw(rel rev))
-		{
-			foreach my $word (qw(alternate appendix bookmark chapter
-				contents copyright current describedby edit edit-media
-				enclosure first glossary help index last license
-				next next-archive payment prev previous prev-archive
-				related replies section self service start stylesheet
-				subsection up via))
-			{
-				$KW->{ $attr }->{ lc $word } = 'http://www.iana.org/assignments/relation/' . $word
-					unless defined $KW->{ $attr }->{ lc $word };
-			}
-		}
-	}
-
-	if ($terms =~ /\b(grddl)\b/i)
-	{
-		foreach my $attr (qw(rel rev))
-		{
-			foreach my $word (qw(transformation profileTransformation namespaceTransformation))
-			{
-				$KW->{ $attr }->{ lc $word } = 'http://www.w3.org/2003/g/data-view#' . $word
-					unless defined $KW->{ $attr }->{ lc $word };
-			}
-		}
-	}
-	
-	if ($terms =~ /\b(xfn)\b/i)
-	{
-		foreach my $attr (qw(rel rev))
-		{
-			foreach my $word (qw(contact acquaintance friend met
-				co-worker colleague co-resident neighbor child
-				parent sibling spouse kin muse crush date
-				sweetheart me))
-			{
-				$KW->{ $attr }->{ lc $word } = 'http://vocab.sindice.com/xfn#' . $word . "-hyperlink"
-					unless defined $KW->{ $attr }->{ lc $word };
-			}
-		}
-	}
-	
-	return { 'insensitive' => $KW , 'sensitive' => $KW2 };
+	my $self = shift;
+	return @{$self->{errors}};
 }
 
-=head2 Constants
-
-These are not really constants, but functions which consistently return the same thing.
-You can mostly think of them as constants though.
-
-=over 4
-
-=item RDF::RDFa::Parser::OPTS_XHTML
-
-Suggested options hashref for parsing XHTML+RDFa 1.0.
-
-=cut
+sub _log_error
+{
+	my ($self, $level, $code, $message, %args) = @_;
+	
+	if (defined $self->{'sub'}->{'onerror'})
+	{
+		$self->{'sub'}->{'onerror'}(@_);
+	}
+	elsif ($level eq ERR_ERROR)
+	{
+		warn "${code}: ${message}\n";
+		warn sprintf("... with URI <%s>\n",
+			$args{'uri'})
+			if defined $args{'uri'};
+		warn sprintf("... on element '%s' with path '%s'\n",
+			$args{'element'}->localname,
+			$args{'element'}->nodePath)
+			if UNIVERSAL::isa($args{'element'}, 'XML::LibXML::Node');
+	}
+	
+	push @{$self->{errors}}, [$level, $code, $message, \%args];
+}
 
 sub OPTS_XHTML
 {
-	my %args = @_;
-	my $opts = {
-		'alt_stylesheet'        => 0,
-		'atom_elements'         => 0,
-		'atom_parser'           => 0,
-		'auto_config'           => 0,
-		'embedded_rdfxml'       => 0,
-		'full_uris'             => 0,
-		'keywords'              => keywords('rdfa'),
-		'graph'                 => 0,
-		'graph_attr'            => 'graph',
-		'graph_type'            => 'id',
-		'graph_default'         => '_:RDFaDefaultGraph',
-		'graph_default_trine'   => undef,  # not officially exposed
-		'prefix_attr'           => 0,
-		'prefix_bare'           => 0,
-		'prefix_default'        => 0,
-		'prefix_empty'          => 'http://www.w3.org/1999/xhtml/vocab#',
-		'prefix_nocase'         => 0,
-		'profiles'              => 0,
-		'safe_anywhere'         => 0,
-		'tdb_service'           => 0,
-		'use_rtnlx'             => 0,
-		'vocab_attr'            => 0,
-		'xhtml_base'            => 1,
-		'xhtml_elements'        => 1,
-		'xhtml_lang'            => 0,
-		'xml_base'              => 0,
-		'xml_lang'              => 1,
-	};
-	while (my ($k, $v) = each %args)
-	{
-		$opts->{$k} = $v;
-	}
-	return $opts;
+	warn "OPTS_XHTML is deprecated.\n";
+	return RDF::RDFa::Parser::Config->new(
+		RDF::RDFa::Parser::Config->HOST_XHTML,
+		RDF::RDFa::Parser::Config->RDFA_10,
+		@_);
 }
-
-=item RDF::RDFa::Parser::OPTS_XHTML_11
-
-Suggested options hashref for parsing XHTML+RDFa 1.1.
-
-=cut
-
 sub OPTS_XHTML_11
 {
-	my %args = @_;
-	my $opts = &OPTS_XHTML;	
-	$opts->{full_uris}     = 1;
-	$opts->{prefix_attr}   = 1;
-	$opts->{prefix_nocase} = 1;
-	$opts->{profiles}      = 1;
-	$opts->{safe_anywhere} = 1;
-	$opts->{vocab_attr}    = 1;
-	while (my ($k, $v) = each %args)
-	{
-		$opts->{$k} = $v;
-	}
-	return $opts;
+	warn "OPTS_XHTML_11 is deprecated.\n";
+	return RDF::RDFa::Parser::Config->new(
+		RDF::RDFa::Parser::Config->HOST_XHTML,
+		RDF::RDFa::Parser::Config->RDFA_11,
+		@_);
 }
-
-=item RDF::RDFa::Parser::OPTS_HTML4
-
-Suggested options hashref for parsing HTML 4.x with RDFa 1.1.
-
-=cut
-
 sub OPTS_HTML4
 {
-	my %args = @_;
-	my $opts = &OPTS_XHTML;	
-	$opts->{full_uris}     = 1;
-	$opts->{keywords}      = keywords('rdfa html4');
-	$opts->{prefix_attr}   = 1;
-	$opts->{prefix_nocase} = 1;
-	$opts->{profiles}      = 1;
-	$opts->{safe_anywhere} = 1;
-	$opts->{vocab_attr}    = 1;
-	$opts->{xhtml_lang}    = 1;
-	$opts->{xml_lang}      = 0;
-	while (my ($k, $v) = each %args)
-	{
-		$opts->{$k} = $v;
-	}
-	return $opts;
+	warn "OPTS_HTML4 is deprecated.\n";
+	return RDF::RDFa::Parser::Config->new(
+		RDF::RDFa::Parser::Config->HOST_HTML4,
+		RDF::RDFa::Parser::Config->RDFA_11,
+		@_);
 }
-
-=item RDF::RDFa::Parser::OPTS_HTML5
-
-Suggested options hashref for parsing HTML5 with RDFa 1.1.
-
-=cut
-
 sub OPTS_HTML5
 {
-	my %args = @_;
-	my $opts = &OPTS_XHTML;	
-	$opts->{alt_stylesheet}= 1;
-	$opts->{full_uris}     = 1;
-	$opts->{keywords}      = keywords('rdfa html5');
-	$opts->{prefix_attr}   = 1;
-	$opts->{prefix_nocase} = 1;
-	$opts->{profiles}      = 1;
-	$opts->{safe_anywhere} = 1;
-	$opts->{vocab_attr}    = 1;
-	$opts->{xhtml_lang}    = 1;
-	while (my ($k, $v) = each %args)
-	{
-		$opts->{$k} = $v;
-	}
-	return $opts;
+	warn "OPTS_HTML5 is deprecated.\n";
+	return RDF::RDFa::Parser::Config->new(
+		RDF::RDFa::Parser::Config->HOST_HTML5,
+		RDF::RDFa::Parser::Config->RDFA_11,
+		@_);
 }
-
-=item RDF::RDFa::Parser::OPTS_SVG
-
-Suggested options hashref for parsing SVG.
-
-=cut
-
 sub OPTS_SVG
 {
-	my %args = @_;
-	my $opts = &OPTS_XML;	
-	while (my ($k, $v) = each %args)
-	{
-		$opts->{$k} = $v;
-	}
-	return $opts;
+	warn "OPTS_SVG is deprecated.\n";
+	return RDF::RDFa::Parser::Config->new(
+		RDF::RDFa::Parser::Config->HOST_SVG,
+		RDF::RDFa::Parser::Config->RDFA_10,
+		@_);
 }
-
-=item RDF::RDFa::Parser::OPTS_ATOM
-
-Suggested options hashref for parsing Atom with RDFa 1.0 / DataRSS.
-
-=cut
-
 sub OPTS_ATOM
 {
-	my %args = @_;
-	my $opts = &OPTS_XML;	
-	$opts->{atom_elements} = 1;
-	$opts->{keywords}      = keywords('rdfa iana');
-	while (my ($k, $v) = each %args)
-	{
-		$opts->{$k} = $v;
-	}
-	return $opts;
+	warn "OPTS_ATOM is deprecated.\n";
+	return RDF::RDFa::Parser::Config->new(
+		RDF::RDFa::Parser::Config->HOST_ATOM,
+		RDF::RDFa::Parser::Config->RDFA_10,
+		@_);
 }
-
-=item RDF::RDFa::Parser::OPTS_XML
-
-Suggested options hashref for parsing generic XML with RDFa 1.0.
-
-=cut
-
 sub OPTS_XML
 {
-	my %args = @_;
-	my $opts = &OPTS_XHTML;
-	$opts->{'xhtml_elements'}  = 0;
-	$opts->{'xml_base'}        = 2;
-	$opts->{'xhtml_base'}      = 0;
-	$opts->{'embedded_rdfxml'} = 1;
-	while (my ($k, $v) = each %args)
-	{
-		$opts->{$k} = $v;
-	}
-	return $opts;
+	warn "OPTS_XML is deprecated.\n";
+	return RDF::RDFa::Parser::Config->new(
+		RDF::RDFa::Parser::Config->HOST_XML,
+		RDF::RDFa::Parser::Config->RDFA_10,
+		@_);
 }
 
 1;
@@ -2399,6 +2241,51 @@ to the callback function are:
 The return value of this callback is currently ignored, but you should return
 0 in case future versions of this module assign significance to the return value.
 
+=head2 ontoken
+
+This is called when a CURIE has been expanded. The parameters are:
+
+=over 4
+
+=item * A reference to the C<RDF::RDFa::Parser> object
+
+=item * A reference to the C<XML::LibXML::Element> being parsed
+
+=item * The CURIE or token as a string (e.g. "foaf:name" or "Stylesheet")
+
+=item * The fully expanded URI
+
+=back
+
+The callback function must return a fully expanded URI, or if it
+wants the CURIE to be ignored, undef.
+
+=head2 onerror
+
+This is called when an error occurs:
+
+=over 4
+
+=item * A reference to the C<RDF::RDFa::Parser> object
+
+=item * The error level (RDF::RDFa::Parser::ERR_ERROR or
+RDF::RDFa::Parser::ERR_WARNING)
+
+=item * An error code
+
+=item * An error message
+
+=item * A hash of other information
+
+=back
+
+The return value of this callback is currently ignored, but you should return
+0 in case future versions of this module assign significance to the return value.
+
+If you do not define an onerror callback, then errors will be output via STDERR
+and warnings will be silent. Either way, you can retrieve errors after parsing
+using the C<errors> method.
+
 =head1 FEATURES
 
 =head2 HTML Support
@@ -2421,13 +2308,15 @@ an example of using both with RDF::RDFa::Parser:
   my $document    = $html_parser->parse_string($html);
   my $fixed_doc   = fix_document($document);
   
+  my $config      = RDF::RDFa::Parser::Config->new(
+                      RDF::RDFa::Parser::Config->HOST_HTML5,
+                      RDF::RDFa::Parser::Config->RDFA_11);
   my $rdfa_parser = RDF::RDFa::Parser->new(
                       $fixed_doc,
                       'http://example.com/doc.html',
-                      RDF::RDFa::Parser::OPTS_HTML5);
+                      $config);
 
-Note that the C<RDF::RDFa::Parser::OPTS_HTML4> and
-C<RDF::RDFa::Parser::OPTS_HTML5> constants provide suggested
+C<RDF::RDFa::Parser::Config> is capable of enabling 
 settings for parsing HTML. In particular, they make CURIE
 prefixes case-insensitive, add support for the HTML lang
 attribute (instead of or as well as the xml:lang attribute),
@@ -2447,7 +2336,7 @@ in assigning blank node identifiers consistently, etc. Callbacks I<should> work 
 but this has not been extensively tested. If XML::Atom::OWL is not installed, then this
 option will be silently ignored.
 
-The C<RDF::RDFa::Parser::OPTS_ATOM> constant provides suggested
+C<RDF::RDFa::Parser::Config> is capable of enabling 
 settings for parsing Atom. It switches on the 'atom_elements' option
 (but not 'atom_parser'), adds support for IANA-registered rel/rev
 keywords, switches off support for some XHTML-specific features,
@@ -2464,7 +2353,7 @@ example of this. See L<http://developer.yahoo.com/searchmonkey/smguide/datarss.h
 The SVG Tiny 1.2 specification makes the use of RDFa attributes within
 SVG images valid.
 
-The C<RDF::RDFa::Parser::OPTS_SVG> constant provides suggested
+C<RDF::RDFa::Parser::Config> is capable of enabling 
 settings for parsing SVG. It switches off support for some
 XHTML-specific features, enables processing of the xml:base attribute,
 and adds support for embedded chunks of RDF/XML.
@@ -2509,10 +2398,6 @@ option in the constructor. For HTML and XHTML, you probably want
 to set embedded_rdfxml to '0' (the default) or '1'. For other XML
 markup languages (e.g. SVG or Atom), then you probably want to
 set it to '2'.
-
-If you use the C<RDF::RDFa::Parser::OPTS_XHTML>, 
-C<RDF::RDFa::Parser::OPTS_SVG> etc constants, they should mostly
-do the right thing.
 
 =head2 Named Graphs
 
@@ -2593,6 +2478,8 @@ If this is missing, the parser should still work, but will be very slow.
 =back
 
 =head1 SEE ALSO
+
+L<RDF::RDFa::Parser::Config>, L<RDF::RDFa::Parser::Profile>. 
 
 L<XML::LibXML>, L<RDF::Trine>, L<HTML::HTML5::Parser>, L<HTML::HTML5::Sanity>,
 L<XML::Atom::OWL>.

@@ -273,7 +273,8 @@ my:v_1-09_00
 			[ rdfs:label "Change syntax of @prefix to match current RDFa 1.1 editors' drafts."@en ; a dcs:Update ] ,
 			[ rdfs:label "Support @vocab attribute to set default attribute."@en ; a dcs:Addition ] ,
 			[ rdfs:label "Support @profile attribute to load externally-defined keywords and terms."@en ; a dcs:Addition ] ,
-			[ rdfs:label "Refactor a lot of code, especially CURIE processing."@en ]
+			[ rdfs:label "Refactor a lot of code, especially CURIE processing."@en ] ,
+			[ rdfs:label "Broke support for CURIEs with zero-length suffxes."@en ; a dcs:Regression ]
 		] .
 
 my:v_1-09_01
@@ -287,6 +288,22 @@ my:v_1-09_01
 		dcs:versus my:v_1-09_00 ;
 		dcs:item
 			[ rdfs:label "Fix packaging problem (profile modules were not in MANIFEST)."@en ; a dcs:Bugfix ]
+		] .
+		
+my:v_1-09_02
+
+	a               :Version ;
+	dc:issued       "2010-04-21"^^xsd:date ;
+	:revision       "1.09_02"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_02.tar.gz> ;
+	rdfs:label      "RDFa 1.1 Preview 3"@en ;
+	dcs:changeset [
+		dcs:versus my:v_1-09_01 ;
+		dcs:item
+			[ rdfs:label "Refactor error handling code to add a new 'onerror' callback, and an 'errors' method to get a list of errors."@en ] ,
+			[ rdfs:label "New 'oncurie' callback."@en ; a dcs:Addition ] ,
+			[ rdfs:label "Deprecate OPTS_XXXX functions in favour of a new RDF::RDFa::Parser::Config object which allows host languages and RDFa versions to be combined more flexibly."@en ] ,
+			[ rdfs:label "Allow CURIEs to have zero-length suffixes."@en ; a dcs:Bugfix ]
 		] .
 
 my:roadmap_1_10
@@ -322,9 +339,9 @@ my:project
                    my:v_0-10 , my:v_0-11 ,
                    my:v_0-20 , my:v_0-21 , my:v_0-22 ,
                    my:v_0-30 ,
-                   my:v_1-00_00 , my:v_1-00_01 , my:v_1-00_02 ,
-                   my:v_1-00 , my:v_1-00-001 , my:v_1-00-002 ,
-                   my:v_1-09_00 , my:v_1-09_01 .
+                   my:v_1-00_00 , my:v_1-00_01 ,  my:v_1-00_02 ,
+                   my:v_1-00 ,    my:v_1-00-001 , my:v_1-00-002 ,
+                   my:v_1-09_00 , my:v_1-09_01 ,  my:v_1-09_02 .
 
 #############################################################
 

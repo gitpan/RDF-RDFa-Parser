@@ -4,7 +4,7 @@ use base qw(RDF::RDFa::Parser::Profile);
 use strict;
 use 5.008;
 
-our $VERSION = '1.09_01';
+our $VERSION = '1.09_02';
 
 BEGIN
 {
@@ -23,7 +23,10 @@ sub new
 		|| $uri =~ m'^http://gmpg.org/xfn/1'i
 		|| $uri =~ m'^http://purl.org/uF/'i
 		|| $uri eq 'http://dublincore.org/documents/2008/08/04/dc-html/'
-		|| $uri eq 'http://purl.org/NET/erdf/profile';
+		|| $uri eq 'http://purl.org/NET/erdf/profile'
+		|| $uri eq 'http://www.w3.org/1999/xhtml/vocab'
+		|| $uri eq 'http://www.w3.org/2005/10/profile'
+		;
 	
 	return undef;
 }

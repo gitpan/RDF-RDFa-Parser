@@ -1,6 +1,6 @@
 # Test the very basics.
 
-use Test::More tests => 5;
+use Test::More tests => 6;
 BEGIN { use_ok('RDF::RDFa::Parser') };
 
 use RDF::Trine;
@@ -16,7 +16,7 @@ my $xhtml = <<EOF;
 	</head>
 
 	<body xmlns:dc="http://purl.org/dc/elements/1.1/">
-		<div rel="foaf:primaryTopic" rev="foaf:page" xml:lang="de">
+		<div rel="foaf:primaryTopic foam:topic" rev="foaf:page" xml:lang="de">
 			<h1 about="#topic" typeof="foaf:Person" property="foaf:name">Albert Einstein</h1>
 		</div>
 		<address rel="foaf:maker dc:creator" rev="foaf:made">
@@ -36,6 +36,13 @@ $parser->set_callbacks({pretriple_literal => sub{
 		ok($_[4] eq 'Joe Bloggs', 'Callbacks working OK.');
 	}
 	return 0;
+},
+oncurie => sub{
+	if ($_[2] eq 'foam:topic')
+	{
+		return 'http://xmlns.com/foaf/0.1/topic';
+	}
+	return $_[3];
 }});
 
 ok(lc($parser->dom->documentElement->tagName) eq 'html', 'DOM Tree returned OK.');
@@ -56,3 +63,11 @@ ok($model->count_statements(
 		RDF::Trine::Node::Literal->new('Albert Einstein', 'de')
 		),
 	'RDFa graph looks OK (tested a literal).');
+
+ok($model->count_statements(
+		RDF::Trine::Node::Resource->new('http://example.com/einstein'),
+		RDF::Trine::Node::Resource->new('http://xmlns.com/foaf/0.1/topic'),
+		RDF::Trine::Node::Resource->new('http://example.com/einstein#topic')
+		),
+	'oncurie CURIE rewriting worked.');
+
