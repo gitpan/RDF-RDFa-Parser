@@ -38,4 +38,4 @@ resources:
   homepage: http://search.cpan.org/dist/RDF-RDFa-Parser/
   license: http://dev.perl.org/licenses/
   repository: http://goddamn.co.uk/viewvc/perlmods/RDF-RDFa-Parser/
-version: 1.09_02
+version: 1.09_03

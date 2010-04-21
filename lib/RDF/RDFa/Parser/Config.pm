@@ -17,7 +17,7 @@ use strict;
 use 5.008;
 
 our @EXPORT_OK = qw(HOST_ATOM HOST_HTML4 HOST_HTML5 HOST_SVG HOST_XHTML HOST_XML RDFA_10 RDFA_11);
-our $VERSION = '1.09_02';
+our $VERSION = '1.09_03';
 our $CONFIGS = {
 	'host' => {
 		HOST_ATOM() => {
@@ -74,14 +74,15 @@ our $CONFIGS = {
 			'prefix_empty'          => 'http://www.w3.org/1999/xhtml/vocab#',
 			'prefix_nocase'         => 0,
 			'profiles'              => 0,
+			'role_attr'             => 0,
 			'safe_anywhere'         => 0,
 			'tdb_service'           => 0,
 			'use_rtnlx'             => 0,
 			'vocab_attr'            => 0,
-			'xhtml_base'            => 0, #xhtml=1
-			'xhtml_elements'        => 0, #xhtml=1
+			'xhtml_base'            => 0,
+			'xhtml_elements'        => 0,
 			'xhtml_lang'            => 0,
-			'xml_base'              => 2, #xhtml=0
+			'xml_base'              => 2,
 			'xml_lang'              => 1,
 		},
 		RDFA_11() => {
@@ -103,6 +104,7 @@ our $CONFIGS = {
 			'prefix_empty'          => 'http://www.w3.org/1999/xhtml/vocab#',
 			'prefix_nocase'         => 1, #diff
 			'profiles'              => 1, #diff
+			'role_attr'             => 0,
 			'safe_anywhere'         => 1, #diff
 			'tdb_service'           => 0,
 			'use_rtnlx'             => 0,
@@ -240,6 +242,7 @@ sub _expand_keywords
 		'resource'  => {},
 		'rel'       => {},
 		'rev'       => {},
+		'role'      => {},
 		'property'  => {},
 		'datatype'  => {},
 		'typeof'    => {},
@@ -251,6 +254,7 @@ sub _expand_keywords
 		'resource'  => {},
 		'rel'       => {},
 		'rev'       => {},
+		'role'      => {},
 		'property'  => {},
 		'datatype'  => {},
 		'typeof'    => {},
@@ -258,7 +262,7 @@ sub _expand_keywords
 		'*'         => {},
 		};
 
-	if ($terms =~ /\b(rdfa)\b/i)
+	if ($terms =~ /\b(rdfa|xhv)\b/i)
 	{
 		foreach my $attr (qw(rel rev))
 		{
@@ -321,10 +325,11 @@ sub _expand_keywords
 		{
 			foreach my $word (qw(alternate appendix bookmark chapter
 				contents copyright current describedby edit edit-media
-				enclosure first glossary help index last license next
-				next-archive payment prev previous prev-archive related
-				replies section self service start stylesheet subsection
-				up via))
+				enclosure first glossary help hub index last latest-version
+				license next next-archive payment predecessor-version
+				prev previous prev-archive related replies section self
+				service start stylesheet subsection successor-version
+				up version-history via working-copy working-copy-of))
 			{
 				$KW->{ $attr }->{ lc $word } = 'http://www.iana.org/assignments/relation/' . $word
 					unless defined $KW->{ $attr }->{ lc $word };
@@ -343,21 +348,47 @@ sub _expand_keywords
 			}
 		}
 	}
-	
-	if ($terms =~ /\b(xfn)\b/i)
+
+	if ($terms =~ /\b(xhtml-role|xhv)\b/i)
 	{
-		foreach my $attr (qw(rel rev))
+		foreach my $word (qw(banner complementary contentinfo
+			definition main navigation note search))
 		{
-			foreach my $word (qw(contact acquaintance friend
-				met co-worker colleague co-resident neighbor
-				child parent sibling spouse kin muse crush date
-				sweetheart me))
-			{
-				$KW->{ $attr }->{ lc $word } = 'http://vocab.sindice.com/xfn#' . $word . "-hyperlink"
-					unless defined $KW->{ $attr }->{ lc $word };
-			}
+			$KW->{'role'}->{ lc $word } = 'http://www.w3.org/1999/xhtml/vocab#' . $word
+				unless defined $KW->{'role'}->{ lc $word };
 		}
 	}
+
+	if ($terms =~ /\b(aria-role|xhv)\b/i)
+	{
+		foreach my $word (qw(alert alertdialog application article
+			button checkbox columnheader combobox dialog directory
+			document grid gridcell group heading img link list listbox
+			listitem log marquee math menu menubar menuitem
+			menuitemcheckbox menuitemradio option presentation
+			progressbar radio radiogroup region row rowheader separator
+			slider spinbutton status tab tablist tabpanel textbox timer
+			toolbar tooltip tree treegrid treeitem))
+		{
+			$KW->{'role'}->{ lc $word } = 'http://www.w3.org/1999/xhtml/vocab#' . $word
+				unless defined $KW->{'role'}->{ lc $word };
+		}
+	}
+
+#	if ($terms =~ /\b(xfn)\b/i)
+#	{
+#		foreach my $attr (qw(rel rev))
+#		{
+#			foreach my $word (qw(contact acquaintance friend
+#				met co-worker colleague co-resident neighbor
+#				child parent sibling spouse kin muse crush date
+#				sweetheart me))
+#			{
+#				$KW->{ $attr }->{ lc $word } = 'http://vocab.sindice.com/xfn#' . $word . "-hyperlink"
+#					unless defined $KW->{ $attr }->{ lc $word };
+#			}
+#		}
+#	}
 	
 	$self->{'keywords'} = { 'insensitive' => $KW , 'sensitive' => $KW2 };
 }
@@ -441,7 +472,7 @@ in brackets.
 
 =item * B<graph_default> - default graph name. ['_:RDFaDefaultGraph']
 
-=item * B<keywords> - THIS WILL VOID YOUR WARRANTY!
+=item * B<keyword_bundles> - space-separated list of bundles of keywords ('rdfa', 'html32', 'html4', 'html5', 'xhtml-role', 'aria-role', 'iana', 'xhv') ['rdfa']
 
 =item * B<prefix_attr> - support @prefix rather than just @xmlns:*. [0, 1]
 
@@ -454,6 +485,8 @@ in brackets.
 =item * B<prefix_nocase> - ignore case-sensitivity of CURIE prefixes. [0, 1]
 
 =item * B<profiles> - support RDFa profiles. [0, 1]
+
+=item * B<role_attr> - support for XHTML @role [0]
 
 =item * B<safe_anywhere> - allow Safe CURIEs in @rel/@rev/etc. [0, 1]
 

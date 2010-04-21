@@ -85,7 +85,7 @@ my:v_0-10
 			[ rdfs:label "More test cases, including XML Literals and named graphs."@en ; a dcs:Addition , dcs:Update ] ,
 			[ rdfs:label "Improve documentation and include it inline in the module code."@en ; a dcs:Addition ]
 		] .
-		
+
 my:v_0-11
 
 	a               :Version ;
@@ -306,6 +306,20 @@ my:v_1-09_02
 			[ rdfs:label "Allow CURIEs to have zero-length suffixes."@en ; a dcs:Bugfix ]
 		] .
 
+my:v_1-09_03
+
+	a               :Version ;
+	dc:issued       "2010-04-21"^^xsd:date ;
+	:revision       "1.09_03"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_03.tar.gz> ;
+	rdfs:label      "RDFa 1.1 Preview 4"@en ;
+	dcs:changeset [
+		dcs:versus my:v_1-09_02 ;
+		dcs:item
+			[ rdfs:label "Support @role attribute."@en ; a dcs:Addition ] ,
+			[ rdfs:label "Use latest list of IANA terms from draft-nottingham-http-link-header-09.txt."@en ; a dcs:Update ]
+		] .
+
 my:roadmap_1_10
 
 	a                dcs:ToDoList ;
@@ -341,7 +355,8 @@ my:project
                    my:v_0-30 ,
                    my:v_1-00_00 , my:v_1-00_01 ,  my:v_1-00_02 ,
                    my:v_1-00 ,    my:v_1-00-001 , my:v_1-00-002 ,
-                   my:v_1-09_00 , my:v_1-09_01 ,  my:v_1-09_02 .
+                   my:v_1-09_00 , my:v_1-09_01 ,  my:v_1-09_02 ,
+                   my:v_1-09_03 .
 
 #############################################################
 

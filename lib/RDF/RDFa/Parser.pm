@@ -49,11 +49,11 @@ use 5.008;
 
 =head1 VERSION
 
-1.09_02
+1.09_03
 
 =cut
 
-our $VERSION = '1.09_02';
+our $VERSION = '1.09_03';
 our $HAS_AWOL;
 
 BEGIN
@@ -643,6 +643,42 @@ sub _consume_element
 				);			
 			$graph = $self->{'options'}->{'graph_default'}
 				unless defined $graph;
+		}
+	}
+
+	# EXTENSION: @role
+	if ($self->{'options'}->{'role_attr'}
+	&&  $current_element->hasAttribute('role'))
+	{
+		my @role = $self->_split_tokens( $current_element->getAttribute('role') );
+		my @ROLE = map {
+			my $x = $self->_expand_curie(
+				$_,
+				element   => $current_element,
+				attribute => 'role',
+				prefixes  => $local_uri_mappings,
+				terms     => $local_term_mappings,
+				xml_base  => $xml_base,
+				);
+			defined $x ? ($x) : ();
+			} @role;	
+		if (@ROLE)
+		{
+			my $element_subject;
+			if ($current_element->hasAttribute('id'))
+			{
+				$element_subject = $self->uri(sprintf('#%s',
+					$current_element->getAttribute('id')));
+			}
+			else
+			{
+				$element_subject = $self->bnode;
+			}
+			
+			foreach my $r (@ROLE)
+			{
+				$self->_insert_triple_resource($current_element, $element_subject, 'http://www.w3.org/1999/xhtml/vocab#role', $r, $graph);
+			}
 		}
 	}
 	
@@ -1786,7 +1822,7 @@ sub __expand_curie
 	
 	# Keywords / terms / whatever-they're-called
 	if ($token =~ /^($XML::RegExp::NCName)$/
-	and ($is_safe || $args{'attribute'} =~ /^(rel|rev|property|typeof|datatype)$/i || $args{'allow_unsafe_term'}))
+	and ($is_safe || $args{'attribute'} =~ /^(rel|rev|property|typeof|datatype|role)$/i || $args{'allow_unsafe_term'}))
 	{
 		my $terms = $args{'terms'};
 		my $attr  = $args{'attribute'};
@@ -1806,7 +1842,7 @@ sub __expand_curie
 
 	# CURIEs - prefixed
 	if ($token =~ /^($XML::RegExp::NCName)?:(\S*)$/
-	and ($is_safe || $args{'attribute'} =~ /^(rel|rev|property|typeof|datatype)$/i || $args{'allow_unsafe_curie'}))
+	and ($is_safe || $args{'attribute'} =~ /^(rel|rev|property|typeof|datatype|role)$/i || $args{'allow_unsafe_curie'}))
 	{
 		$token =~ /^($XML::RegExp::NCName)?:(\S+)$/;
 		my $prefix = (defined $1 && length $1) ? $1 : '-';
@@ -1837,7 +1873,7 @@ sub __expand_curie
 	# CURIEs - bare prefixes
 	if ($self->{'options'}->{'prefix_bare'}
 	and $token =~ /^($XML::RegExp::NCName)$/
-	and ($is_safe || $args{'attribute'} =~ /^(rel|rev|property|typeof|datatype)$/i || $args{'allow_unsafe_curie'}))
+	and ($is_safe || $args{'attribute'} =~ /^(rel|rev|property|typeof|datatype|role)$/i || $args{'allow_unsafe_curie'}))
 	{
 		my $prefix = $token;
 		my $suffix = '';
@@ -1859,7 +1895,7 @@ sub __expand_curie
 
 	# CURIEs - default vocab
 	if ($token =~ /^($XML::RegExp::NCName)$/
-	and ($is_safe || $args{'attribute'} =~ /^(rel|rev|property|typeof|datatype)$/i || $args{'allow_unsafe_default_vocab'}))
+	and ($is_safe || $args{'attribute'} =~ /^(rel|rev|property|typeof|datatype|role)$/i || $args{'allow_unsafe_default_vocab'}))
 	{
 		my $prefix = '*';
 		my $suffix = $token;
