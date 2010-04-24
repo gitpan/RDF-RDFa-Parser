@@ -8,13 +8,22 @@ RDF::RDFa::Parser - flexible RDFa parser
 
  use RDF::RDFa::Parser;
  
- $parser = RDF::RDFa::Parser->new($xhtml, $uri)->consume;
- $graph  = $parser->graph;
+ ### Create an object...
+ $p = RDF::RDFa::Parser->new_from_url($url);
+ # or: $p = RDF::RDFa::Parser->new($markup, $base_url);
+ 
+ ### Get an RDF::Trine::Model containing the document's data...
+ $data = $p->graph;
+ 
+ ### Get Open Graph Protocol data...
+ $title = $p->opengraph('title');
 
 =cut
 
 use Encode qw(encode_utf8);
 use File::ShareDir qw(dist_file);
+use HTML::HTML5::Parser;
+use HTML::HTML5::Sanity qw(fix_document);
 use LWP::UserAgent;
 use RDF::RDFa::Parser::Config;
 use RDF::RDFa::Parser::Profile;
@@ -49,11 +58,11 @@ use 5.008;
 
 =head1 VERSION
 
-1.09_03
+1.09_04
 
 =cut
 
-our $VERSION = '1.09_03';
+our $VERSION = '1.09_04';
 our $HAS_AWOL;
 
 BEGIN
@@ -64,29 +73,34 @@ BEGIN
 
 =head1 DESCRIPTION
 
-=head2 Constructor
+=head2 Constructors
 
 =over 4
 
-=item C<< $p = RDF::RDFa::Parser->new($xhtml, $baseuri, $config, $storage) >>
+=item C<< $p = RDF::RDFa::Parser->new($markup, $base, [$config], [$storage]) >>
 
 This method creates a new RDF::RDFa::Parser object and returns it.
 
-The $xhtml variable may contain an XHTML/XML string, or a
+The $markup variable may contain an XHTML/XML string, or a
 XML::LibXML::Document. If a string, the document is parsed using
-XML::LibXML::Parser, which will throw an exception if it is not
-well-formed. RDF::RDFa::Parser does not catch the exception.
-If $xhtml is undef, then RDF::RDFa::Parser will fetch $baseuri to
-obtain the document to be parsed.
+XML::LibXML::Parser or HTML::HTML5::Parser, depending on the
+configuration in $config. XML well-formedness errors will cause the
+function to die.
 
-The base URI is needed to resolve relative URIs found in the document.
+$base is a URL used to resolve relative links found in the document.
+
+If $markup is undef, then RDF::RDFa::Parser will fetch $base to
+obtain the document to be parsed. This is probably not a feature you
+should exploit, as it may behave unexpectedly in certain circumstances
+(e.g. if it follows a redirect trail). Use C<new_from_uri> if you
+want to fetch and parse a page in one step.
 
 $config optionally holds an RDF::RDFa::Parser::Config object which
 determines the set of rules used to parse the RDFa. It defaults to
 XHTML+RDFa 1.0.
 
-$storage optionally holds an RDF::Trine::Store object. If undef, then
-a new temporary store is created.
+B<Advanced usage note:> $storage optionally holds an RDF::Trine::Store
+object. If undef, then a new temporary store is created.
 
 =back
 
@@ -94,71 +108,99 @@ a new temporary store is created.
 
 sub new
 {
-	my $class   = shift;
-	my $xhtml   = shift;
-	my $baseuri = shift;
-	my $config  = shift;
-	my $store   = shift || undef;
-	my $DOMTree;
+	my ($class, $markup, $base_uri, $config, $store)= @_;
+	
+	# Rationalise $config
+	# ===================
+	# If $config is undefined, then use the default configuration
+	if (!defined $config)
+		{ $config = RDF::RDFa::Parser::Config->new; }
+	# If it's a hashref (for backcompat), then use default plus those options
+	elsif ('HASH' eq ref $config)
+		{ $config = RDF::RDFa::Parser::Config->new(undef, undef, %$config); }
+	# If it's something odd, then bail.
+	elsif (!UNIVERSAL::isa($config, 'RDF::RDFa::Parser::Config'))
+		{ die "Unrecognised configuration\n"; }
 
-	unless (defined $xhtml)
+	# Rationalise $base_uri
+	# =====================
+	unless ($base_uri =~ /^[a-z][a-z0-9\+\-\.]*:/i)
+		{ die "Need a valid base URI.\n"; }
+
+	# Rationalise $markup and set $dom
+	# ================================
+	unless (defined $markup)
 	{
+		my $uastr = sprintf('%s/%s ', __PACKAGE__, $VERSION);
+		if (defined $config->{'user_agent'})
+		{
+			if ($config->{'user_agent'} =~ /\s+$/)
+			{
+				$uastr = $config->{'user_agent'} . " $uastr";
+			}
+			else
+			{
+				$uastr = $config->{'user_agent'};
+			}
+		}
+		
 		my $ua = LWP::UserAgent->new;
-		$ua->agent(sprintf('%s/%s ', __PACKAGE__, $VERSION));
-		$ua->default_header("Accept" => "application/xhtml+xml, application/xml;q=0.1, text/xml;q=0.1");
-		my $response = $ua->get($baseuri);
-		use Data::Dumper;
+		$ua->agent($uastr);
+		$ua->default_header("Accept" => "application/xhtml+xml, text/html;q=0.9, image/svg+xml;q=0.9, application/atom+xml;q=0.9, application/xml;q=0.1, text/xml;q=0.1");
+		my $response = $ua->get($base_uri);
 		die "HTTP response not successful\n"
 			unless $response->is_success;
 		die "Unknown HTTP response media type\n"
 			unless $response->content_type =~ m`^(text/(x|ht)ml)|(application/(atom\+xml|xhtml\+xml|xml)|image/svg\+xml)$`;
-		$xhtml = $response->decoded_content;
+		$markup = $response->decoded_content;
+		
+		$config->{'dom_parser'} = 'html'
+			if $response->content_type eq 'text/html';
 	}
 	
-	if (UNIVERSAL::isa($xhtml, 'XML::LibXML::Document'))
+	my $dom;
+	if (UNIVERSAL::isa($markup, 'XML::LibXML::Document'))
 	{
-		$DOMTree = $xhtml;
-		$xhtml = $DOMTree->toString;
+		$dom    = $markup;
+		$markup = $dom->toString;
+	}
+	elsif ($config->{'dom_parser'} =~ /html/i)
+	{
+		my $parser = HTML::HTML5::Parser->new;
+		$dom = fix_document( $parser->parse_string($markup) );
 	}
 	else
 	{
 		my $parser  = XML::LibXML->new;
-		$parser->validation(0);
-		$parser->recover(1);
 		
 		my $catalogue = dist_file('RDF-RDFa-Parser', 'catalogue/index.xml');
 		$parser->load_catalog($catalogue)
 			if -r $catalogue;
+		$parser->validation(0);
+		$parser->recover(1);
 		
-		$DOMTree = $parser->parse_string($xhtml);
+		$dom = $parser->parse_string($markup);
 	}
 
-	if (!defined $config)
-	{
-		$config = RDF::RDFa::Parser::Config->new;
-	}
-	elsif (!UNIVERSAL::isa($config, 'RDF::RDFa::Parser::Config'))
-	{
-		$config = RDF::RDFa::Parser::Config->new(undef, undef, %$config);
-	}
-
+	# Rationalise $store
+	# ==================
 	$store = RDF::Trine::Store::Memory->temporary_store
 		unless defined $store;
 
 	my $self = bless {
-		'xhtml'    => $xhtml,
-		'baseuri'  => $baseuri,
-		'origbase' => $baseuri,
-		'dom'      => $DOMTree,
+		'baseuri'  => $base_uri,
+		'origbase' => $base_uri,
+		'dom'      => $dom,
 		'model'    => RDF::Trine::Model->new($store),
 		'bnodes'   => 0,
 		'sub'      => {},
 		'options'  => $config,
 		'Graphs'   => {},
 		'errors'   => [],
+		'consumed' => 0,
 		}, $class;
 	
-	$config->auto_config($DOMTree);
+	$config->auto_config($dom);
 
 	# HTML <base> element.
 	if ($self->{'options'}->{'xhtml_base'})
@@ -180,21 +222,327 @@ sub new
 	return $self;
 }
 
+=over 4
+
+=item C<< $p = RDF::RDFa::Parser->new_from_url($url, [$config], [$storage]) >>
+
+$url is a URL to fetch and parse.
+
+$config optionally holds an RDF::RDFa::Parser::Config object which
+determines the set of rules used to parse the RDFa. The default is
+to determine the configuration by looking at the HTTP response
+Content-Type header; it's probably sensible to keep the default.
+
+$storage optionally holds an RDF::Trine::Store object. If undef, then
+a new temporary store is created.
+
+This function can also be called as C<new_from_uri>. Same thing.
+
+=back
+
+=cut
+
+sub new_from_url
+{
+	my ($class, $url, $config, $store)= @_;
+	
+	my $uastr = sprintf('%s/%s ', __PACKAGE__, $VERSION);
+	if (defined $config && defined $config->{'user_agent'})
+	{
+		if ($config->{'user_agent'} =~ /\s+$/)
+		{
+			$uastr = $config->{'user_agent'} . " $uastr";
+		}
+		else
+		{
+			$uastr = $config->{'user_agent'};
+		}
+	}
+	
+	my $ua = LWP::UserAgent->new;
+	$ua->agent($uastr);
+	$ua->default_header("Accept" => "application/xhtml+xml, text/html;q=0.9, image/svg+xml;q=0.9, application/atom+xml;q=0.9, application/xml;q=0.1, text/xml;q=0.1");
+	my $response = $ua->get($url);
+
+	my $host = 'xml';
+	$host = 'html5' if $response->content_type eq 'text/html';
+	$host = 'xhtml' if $response->content_type eq 'application/xhtml+xml';
+	$host = 'atom'  if $response->content_type eq 'application/atom+xml';
+	$host = 'svg'   if $response->content_type eq 'image/svg+xml';
+	
+	if (UNIVERSAL::isa($config, 'RDF::RDFa::Parser::Config'))
+		{ $config = $config->rehost($host); }
+	elsif (ref $config eq 'HASH')
+		{ $config = RDF::RDFa::Parser::Config->new($host, undef, %$config); }
+	else
+		{ $config = RDF::RDFa::Parser::Config->new($host); }
+
+	return $class->new(
+		$response->decoded_content,
+		$response->base.'',
+		$config,
+		$store,
+		);
+}
+
+*new_from_uri = \&new_from_url;
+
 =head2 Public Methods
 
 =over 4
 
+=item C<< $p->graph  >>
+
+This will return an RDF::Trine::Model containing all the RDFa
+data found on the page.
+
+B<Advanced usage note:> If passed a graph URI as a parameter,
+will return a single named graph from within the page. This
+feature is only useful if you're using named graphs.
+
+=cut
+
+sub graph
+{
+	my $self  = shift;
+	my $graph = shift;
+	
+	$self->consume;
+	
+	if (defined($graph))
+	{
+		my $tg;
+		if ($graph =~ m/^_:(.*)/)
+		{
+			$tg = RDF::Trine::Node::Blank->new($1);
+		}
+		else
+		{
+			$tg = RDF::Trine::Node::Resource->new($graph, $self->{baseuri});
+		}
+		my $m = RDF::Trine::Model->temporary_model;
+		my $i = $self->{model}->get_statements(undef, undef, undef, $tg);
+		while (my $statement = $i->next)
+		{
+			$m->add_statement($statement);
+		}
+		return $m;
+	}
+	else
+	{
+		return $self->{model};
+	}
+}
+
+=item C<< $p->graphs >>
+
+B<Advanced usage only.>
+
+Will return a hashref of all named graphs, where the graph name is a
+key and the value is a RDF::Trine::Model tied to a temporary storage.
+
+This method is only useful if you're using named graphs.
+
+=cut
+
+sub graphs
+{
+	my $self = shift;
+	$self->consume;
+	
+	my @graphs = keys(%{$self->{Graphs}});
+	my %result;
+	foreach my $graph (@graphs)
+	{
+		$result{$graph} = $self->graph($graph);
+	}
+	return \%result;
+}
+
+=item C<< $p->opengraph([$property])  >>
+
+If $property is provided, will return the value or list of values (if
+called in list context) for that Open Graph Protocol property. (In pure
+RDF terms, it returns the non-bnode objects of triples where the
+subject is the document base URI; and the predicate is $property,
+with non-URI $property strings taken as having the implicit prefix
+'http://opengraphprotocol.org/schema/'. There is no distinction between
+literal and non-literal values.)
+
+If $property is omitted, returns a list of possible properties.
+
+Example:
+
+  foreach my $property (sort $p->opengraph)
+  {
+    print "$property :\n";
+    foreach my $val (sort $p->opengraph($property))
+    {
+      print "  * $val\n";
+    }
+  }
+
+See also: L<http://opengraphprotocol.org/>.
+
+=cut
+
+sub opengraph
+{
+	my $self = shift;
+	$self->consume;
+	
+	my $property = shift;
+	$property = $1
+		if defined $property && $property =~ m'^http://opengraphprotocol\.org/schema/(.*)$';
+	
+		
+	my $rtp;
+	if (defined $property && $property =~ /^[a-z][a-z0-9\-\.\+]*:/i)
+		{ $rtp = RDF::Trine::Node::Resource->new($property); }
+	elsif (defined $property)
+		{ $rtp = RDF::Trine::Node::Resource->new('http://opengraphprotocol.org/schema/'.$property); }
+		
+	my $iter = $self->graph->get_statements(
+		RDF::Trine::Node::Resource->new($self->uri), $rtp, undef);
+	my $data = {};
+	while (my $st = $iter->next)
+	{
+		my $propkey = $st->predicate->uri;
+		$propkey = $1
+			if $propkey =~ m'^http://opengraphprotocol\.org/schema/(.*)$';
+		
+		if ($st->object->is_resource)
+			{ push @{ $data->{$propkey} }, $st->object->uri; }	
+		elsif ($st->object->is_literal)
+			{ push @{ $data->{$propkey} }, $st->object->literal_value; }
+	}
+	
+	my @return;
+	if (defined $property)
+		{ @return = @{$data->{$property}} if defined $data->{$property}; }
+	else
+		{ @return = keys %$data; }
+	
+	return (wantarray ? @return : $return[0]);	
+}
+
+=item C<< $p->dom >>
+
+Returns the parsed XML::LibXML::Document.
+
+=cut
+
+sub dom
+{
+	my $self = shift;
+	return $self->{dom};
+}
+
+sub xhtml
+{
+	my $self = shift;
+	warn "The ->xhtml method is deprecated. Use ->dom->toString instead.\n";
+	return $self->dom->toString;
+}
+
+=item C<< $p->uri( [$other_uri] ) >>
+
+Returns the base URI of the document being parsed. This will usually be the
+same as the base URI provided to the constructor, but may differ if the
+document contains a <base> HTML element.
+
+Optionally it may be passed a parameter - an absolute or relative URI - in
+which case it returns the same URI which it was passed as a parameter, but
+as an absolute URI, resolved relative to the document's base URI.
+
+This seems like two unrelated functions, but if you consider the consequence
+of passing a relative URI consisting of a zero-length string, it in fact makes
+sense.
+
+=cut
+
+sub uri
+{
+	my $self  = shift;
+	my $param = shift || '';
+	my $opts  = shift || {};
+	
+	if ((ref $opts) =~ /^XML::LibXML/)
+	{
+		my $x = {'element' => $opts};
+		$opts = $x;
+	}
+	
+	if ($param =~ /^([a-z][a-z0-9\+\.\-]*)\:/i)
+	{
+		# seems to be an absolute URI, so can safely return "as is".
+		return $param;
+	}
+	elsif ($opts->{'require-absolute'})
+	{
+		return undef;
+	}
+	
+	my $base = $self->{baseuri};
+	if ($self->{'options'}->{'xml_base'})
+	{
+		$base = $opts->{'xml_base'} || $self->{baseuri};
+	}
+	
+	my $url = url $param, $base;
+	my $rv  = $url->abs->as_string;
+
+	# This is needed to pass test case 0114.
+	while ($rv =~ m!^(http://.*)(\.\./|\.)+(\.\.|\.)?$!i)
+	{
+		$rv = $1;
+	}
+	
+	return $rv;
+}
+
+=item C<< $p->errors >>
+
+Returns a list of errors and warnings that occurred during parsing.
+
+=cut
+
+sub errors
+{
+	my $self = shift;
+	return @{$self->{errors}};
+}
+
+sub _log_error
+{
+	my ($self, $level, $code, $message, %args) = @_;
+	
+	if (defined $self->{'sub'}->{'onerror'})
+	{
+		$self->{'sub'}->{'onerror'}(@_);
+	}
+	elsif ($level eq ERR_ERROR)
+	{
+		warn "${code}: ${message}\n";
+		warn sprintf("... with URI <%s>\n",
+			$args{'uri'})
+			if defined $args{'uri'};
+		warn sprintf("... on element '%s' with path '%s'\n",
+			$args{'element'}->localname,
+			$args{'element'}->nodePath)
+			if UNIVERSAL::isa($args{'element'}, 'XML::LibXML::Node');
+	}
+	
+	push @{$self->{errors}}, [$level, $code, $message, \%args];
+}
+
 =item C<< $p->consume >>
 
-The document is parsed for RDFa. Triples extracted from the document are passed
-to the callbacks as each one is found; triples are made available in the model returned
-by the C<graph> method.
+B<Advanced usage only.>
 
-This method returns the parser object itself, making it easy to abbreviate several of
-RDF::RDFa::Parser's methods:
-
-  my $iterator = RDF::RDFa::Parser->new($xhtml,$uri)
-                 ->consume->graph->as_stream;
+The document is parsed for RDFa. As of RDF::RDFa::Parser 1.09_04,
+this is called automatically when needed; you probably don't need
+to touch it unless you're doing interesting things with callbacks.
 
 =cut
 
@@ -202,6 +550,9 @@ sub consume
 {
 	my $self = shift;
 	
+	return if $self->{'consumed'};
+	$self->{'consumed'}++;
+		
 	if ($self->{'options'}->{'graph'})
 	{
 		$self->{'options'}->{'graph_attr'} = 'graph'
@@ -1316,6 +1667,8 @@ sub _consume_element
 
 =item C<< $p->set_callbacks(\%callbacks) >>
 
+B<Advanced usage only.>
+
 Set callback functions for the parser to call on certain events. These are only necessary if
 you want to do something especially unusual.
 
@@ -1926,192 +2279,6 @@ sub __expand_curie
 	return undef;
 }
 
-=item C<< $p->graph( [ $graph_name ] )  >>
-
-Without a graph name, this method will return an RDF::Trine::Model
-object with all statements of the full graph. As per the RDFa
-specification, it will always return an graph containing all the statements
-of the RDFa document. If the model contains multiple graphs, all
-statements will be returned unless a graph name is specified.
-
-It will also take an optional graph URI as argument, and return an
-RDF::Trine::Model tied to a temporary storage with all statements in that
-graph. This feature is only useful if you're using named graphs.
-
-It makes sense to call C<consume> before calling C<graph>. Otherwise
-you'll just get an empty graph.
-
-=cut
-
-sub graph
-{
-	my $self = shift;
-	my $graph = shift;
-	if (defined($graph))
-	{
-		my $tg;
-		if ($graph =~ m/^_:(.*)/)
-		{
-			$tg = RDF::Trine::Node::Blank->new($1);
-		}
-		else
-		{
-			$tg = RDF::Trine::Node::Resource->new($graph, $self->{baseuri});
-		}
-		my $storage = RDF::Trine::Store::DBI->temporary_store;
-		my $m = RDF::Trine::Model->new($storage);
-		my $i = $self->{model}->get_statements(undef, undef, undef, $tg);
-		while (my $statement = $i->next)
-		{
-			$m->add_statement($statement);
-		}
-		return $m;
-	}
-	else
-	{
-		return $self->{model};
-	}
-}
-
-=item C<< $p->graphs >>
-
-Will return a hashref of all named graphs, where the graph name is a
-key and the value is a RDF::Trine::Model tied to a temporary storage.
-
-This method is only useful if you're using named graphs.
-
-It makes sense to call C<consume> before calling C<graphs>. Otherwise
-you'll just get an empty hashref.
-
-=cut
-
-sub graphs
-{
-	my $self = shift;
-	my @graphs = keys(%{$self->{Graphs}});
-	my %result;
-	foreach my $graph (@graphs)
-	{
-		$result{$graph} = $self->graph($graph);
-	}
-	return \%result;
-}
-
-=item C<< $p->dom >>
-
-Returns the parsed XML::LibXML::Document.
-
-=cut
-
-sub dom
-{
-	my $self = shift;
-	return $self->{dom};
-}
-
-=item C<< $p->xhtml >>
-
-Returns the XHTML/XML source of the document being parsed.
-
-=cut
-
-sub xhtml
-{
-	my $self = shift;
-	return $self->{xhtml};
-}
-
-=item C<< $p->uri( [$other_uri] ) >>
-
-Returns the base URI of the document being parsed. This will usually be the
-same as the base URI provided to the constructor, but may differ if the
-document contains a <base> HTML element.
-
-Optionally it may be passed a parameter - an absolute or relative URI - in
-which case it returns the same URI which it was passed as a parameter, but
-as an absolute URI, resolved relative to the document's base URI.
-
-This seems like two unrelated functions, but if you consider the consequence
-of passing a relative URI consisting of a zero-length string, it in fact makes
-sense.
-
-=cut
-
-sub uri
-{
-	my $self  = shift;
-	my $param = shift || '';
-	my $opts  = shift || {};
-	
-	if ((ref $opts) =~ /^XML::LibXML/)
-	{
-		my $x = {'element' => $opts};
-		$opts = $x;
-	}
-	
-	if ($param =~ /^([a-z][a-z0-9\+\.\-]*)\:/i)
-	{
-		# seems to be an absolute URI, so can safely return "as is".
-		return $param;
-	}
-	elsif ($opts->{'require-absolute'})
-	{
-		return undef;
-	}
-	
-	my $base = $self->{baseuri};
-	if ($self->{'options'}->{'xml_base'})
-	{
-		$base = $opts->{'xml_base'} || $self->{baseuri};
-	}
-	
-	my $url = url $param, $base;
-	my $rv  = $url->abs->as_string;
-
-	# This is needed to pass test case 0114.
-	while ($rv =~ m!^(http://.*)(\.\./|\.)+(\.\.|\.)?$!i)
-	{
-		$rv = $1;
-	}
-	
-	return $rv;
-}
-
-=item C<< $p->errors >>
-
-Returns a list of errors and warnings that occurred during parsing.
-
-=cut
-
-sub errors
-{
-	my $self = shift;
-	return @{$self->{errors}};
-}
-
-sub _log_error
-{
-	my ($self, $level, $code, $message, %args) = @_;
-	
-	if (defined $self->{'sub'}->{'onerror'})
-	{
-		$self->{'sub'}->{'onerror'}(@_);
-	}
-	elsif ($level eq ERR_ERROR)
-	{
-		warn "${code}: ${message}\n";
-		warn sprintf("... with URI <%s>\n",
-			$args{'uri'})
-			if defined $args{'uri'};
-		warn sprintf("... on element '%s' with path '%s'\n",
-			$args{'element'}->localname,
-			$args{'element'}->nodePath)
-			if UNIVERSAL::isa($args{'element'}, 'XML::LibXML::Node');
-	}
-	
-	push @{$self->{errors}}, [$level, $code, $message, \%args];
-}
-
 sub OPTS_XHTML
 {
 	warn "OPTS_XHTML is deprecated.\n";
@@ -2326,37 +2493,10 @@ using the C<errors> method.
 
 =head2 HTML Support
 
-The constructor method parses incoming markup as well-formed XML and will
-croak if given tag-soup HTML (or even valid HTML in most cases). However,
-you can pass the constructor an XML::LibXML::Document object instead of
-markup: this object could have been constructed from an HTML document.
-
-The L<HTML::HTML5::Parser> module is able to create an XML::LibXML::Document
-from tag-soup HTML; and the L<HTML::HTML5::Sanity> module may be able
-to assist you in fixing namespace and other oddities in the resulting document. Here's
-an example of using both with RDF::RDFa::Parser:
-
-  use HTML::HTML5::Parser;
-  use HTML::HTML5::Sanity qw(fix_document);
-  use RDF::RDFa::Parser;
-  
-  my $html_parser = HTML::HTML5::Parser->new;
-  my $document    = $html_parser->parse_string($html);
-  my $fixed_doc   = fix_document($document);
-  
-  my $config      = RDF::RDFa::Parser::Config->new(
-                      RDF::RDFa::Parser::Config->HOST_HTML5,
-                      RDF::RDFa::Parser::Config->RDFA_11);
-  my $rdfa_parser = RDF::RDFa::Parser->new(
-                      $fixed_doc,
-                      'http://example.com/doc.html',
-                      $config);
-
-C<RDF::RDFa::Parser::Config> is capable of enabling 
-settings for parsing HTML. In particular, they make CURIE
-prefixes case-insensitive, add support for the HTML lang
-attribute (instead of or as well as the xml:lang attribute),
-and bring in support for additional rel/rev keywords.
+This module is able to handle well-formed XML/XHTML and tag-soup HTML. How the
+input markup is parsed depends on the configuration settings passed to the
+constructor. If you use an XML or XHTML configuration but pass non-well-formed
+markup, the the parser will die.
 
 =head2 Atom / DataRSS
 

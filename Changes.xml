@@ -549,6 +549,11 @@
             <rdfs:label xml:lang="en">Allow CURIEs to have zero-length suffixes.</rdfs:label>
           </dcs:Bugfix>
         </dcs:item>
+        <dcs:item>
+          <dcs:Regression>
+            <rdfs:label xml:lang="en">Broke auto_config.</rdfs:label>
+          </dcs:Regression>
+        </dcs:item>
         <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_01"/>
       </rdf:Description>
     </dcs:changeset>
@@ -578,7 +583,48 @@
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_03</revision>
     <rdfs:label xml:lang="en">RDFa 1.1 Preview 4</rdfs:label>
   </Version>
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_04">
+    <dcs:changeset>
+      <rdf:Description>
+        <dcs:item>
+          <dcs:Bugfix>
+            <rdfs:label xml:lang="en">Fix auto_config.</rdfs:label>
+          </dcs:Bugfix>
+        </dcs:item>
+        <dcs:item>
+          <dcs:Update>
+            <rdfs:label xml:lang="en">Provide more inclusive XML DTD catalogue.</rdfs:label>
+          </dcs:Update>
+        </dcs:item>
+        <dcs:item>
+          <dcs:Update>
+            <rdfs:label xml:lang="en">Integrate official RDFa test suite into module tests.</rdfs:label>
+          </dcs:Update>
+        </dcs:item>
+        <dcs:item>
+          <dcs:Addition>
+            <rdfs:label xml:lang="en">new_from_url shortcut.</rdfs:label>
+          </dcs:Addition>
+        </dcs:item>
+        <dcs:item>
+          <dcs:Addition>
+            <rdfs:label xml:lang="en">Special Open Graph Protocol support.</rdfs:label>
+          </dcs:Addition>
+        </dcs:item>
+        <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_03"/>
+      </rdf:Description>
+    </dcs:changeset>
+    <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-04-24</dc:issued>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_04.tar.gz"/>
+    <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_04</revision>
+    <rdfs:label xml:lang="en">RDFa 1.1 Preview 5</rdfs:label>
+  </Version>
   <dcs:ToDoList rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/roadmap_1_10">
+    <dcs:item>
+      <rdf:Description>
+        <rdfs:label xml:lang="en">Add support for native SVG semantics of &lt;svg:title&gt; and &lt;svg:desc&gt;, perhaps via a separate module a la XML::Atom::OWL.</rdfs:label>
+      </rdf:Description>
+    </dcs:item>
     <dcs:item>
       <rdf:Description>
         <dcs:timescale xml:lang="en">Once the two modules are more stable.</dcs:timescale>
@@ -594,11 +640,6 @@
     <dcs:item>
       <rdf:Description>
         <rdfs:label xml:lang="en">Option to automatically follow { &lt;&gt; xhv:meta ?resource . } links.</rdfs:label>
-      </rdf:Description>
-    </dcs:item>
-    <dcs:item>
-      <rdf:Description>
-        <rdfs:label xml:lang="en">Add support for native SVG semantics of &lt;svg:title&gt; and &lt;svg:desc&gt;, perhaps via a separate module a la XML::Atom::OWL.</rdfs:label>
       </rdf:Description>
     </dcs:item>
     <dcs:milestone rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-10"/>
@@ -635,6 +676,7 @@
     <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_01"/>
     <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_02"/>
     <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_03"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_04"/>
     <repository>
       <SVNRepository>
         <browse rdf:resource="http://goddamn.co.uk/viewvc/perlmods/RDF-RDFa-Parser/"/>

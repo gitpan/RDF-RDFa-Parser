@@ -10,34 +10,42 @@ Home page:    <http://search.cpan.org/dist/RDF-RDFa-Parser/>
 Bug tracker:  <http://rt.cpan.org/Dist/Display.html?Queue=RDF-RDFa-Parser>
 Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
 
+1.09_04 [2010-04-24] # RDFa 1.1 Preview 5
+ - (Update) Integrate official RDFa test suite into module tests.
+ - (Bugfix) Fix auto_config.
+ - (Addition) Special Open Graph Protocol support.
+ - (Update) Provide more inclusive XML DTD catalogue.
+ - (Addition) new_from_url shortcut.
+
 1.09_03 [2010-04-21] # RDFa 1.1 Preview 4
  - (Addition) Support @role attribute.
  - (Update) Use latest list of IANA terms from
    draft-nottingham-http-link-header-09.txt.
 
 1.09_02 [2010-04-21] # RDFa 1.1 Preview 3
- - Refactor error handling code to add a new 'onerror' callback, and an
-   'errors' method to get a list of errors.
- - (Addition) New 'oncurie' callback.
  - Deprecate OPTS_XXXX functions in favour of a new
    RDF::RDFa::Parser::Config object which allows host languages and RDFa
    versions to be combined more flexibly.
+ - (Regression) Broke auto_config.
+ - (Addition) New 'oncurie' callback.
  - (Bugfix) Allow CURIEs to have zero-length suffixes.
+ - Refactor error handling code to add a new 'onerror' callback, and an
+   'errors' method to get a list of errors.
 
 1.09_01 [2010-04-19] # RDFa 1.1 Preview 2
  - (Bugfix) Fix packaging problem (profile modules were not in MANIFEST).
 
 1.09_00 [2010-04-19] # RDFa 1.1 Preview
+ - (Regression) Broke support for CURIEs with zero-length suffxes.
+ - (Addition) Support @vocab attribute to set default attribute.
  - (Bugfix) Properly enforce scoping of prefix mappings (use Storable
    qw/dclone/).
- - Refactor a lot of code, especially CURIE processing.
- - (Addition) Support @vocab attribute to set default attribute.
- - (Regression) Broke support for CURIEs with zero-length suffxes.
- - (Bugfix) Don't use <img alt> in plain literal stringification.
- - (Update) Change syntax of @prefix to match current RDFa 1.1 editors'
-   drafts.
  - (Addition) Support @profile attribute to load externally-defined
    keywords and terms.
+ - Refactor a lot of code, especially CURIE processing.
+ - (Update) Change syntax of @prefix to match current RDFa 1.1 editors'
+   drafts.
+ - (Bugfix) Don't use <img alt> in plain literal stringification.
 
 1.00.002 [2010-04-09]
  - (Bugfix) Properly enforce scoping of prefix mappings (use Storable
@@ -48,9 +56,9 @@ Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
 
 1.00_02 [2010-02-05] # 1.00 Preview''
  - Arrange methods in a more sensible order for documentation.
+ - Document SVG support better.
  - Document HTML support better.
  - Document RDF/XML support better.
- - Document SVG support better.
  - Document Atom support better.
 
 1.00_01 [2010-02-04] # 1.00 Preview'
@@ -71,71 +79,71 @@ Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
 
 0.30 [2010-01-18] # Version 3 (kinda)
  - (Addition) Include a catalogue of doctypes to speed up XML parsing.
- - (Update) Upgrade distribution to my new packaging regime (signatures,
-   auto-generated changelogs, etc)
- - (Addition) Special support for RDFa in Atom (Yahoo's weirdly-named
-   'DataRSS').
- - (Addition) Change set_callbacks parameters and support additional
-   callbacks.
- - (Update) Copyright 2010.
  - (Addition) Add support for a default prefix (different from empty
    prefix).
+ - (Addition) Change set_callbacks parameters and support additional
+   callbacks.
+ - (Addition) Special support for RDFa in Atom (Yahoo's weirdly-named
+   'DataRSS').
+ - (Update) Upgrade distribution to my new packaging regime (signatures,
+   auto-generated changelogs, etc)
+ - (Update) Copyright 2010.
 
 0.22 [2009-12-03]
- - (Addition) Allow suffix-less CURIEs without colons (optional).
- - (Bugfix) Various test case compliance fixes (passes HTML4 and HTML5 test
-   suites)
- - (Addition) Make xml:lang support optional (enabled by default).
- - (Addition) Flexible keyword extensibility (optional).
- - (Addition) Add Auto Config feature.
- - (Addition) Empty CURIE prefix can be configured (optional).
  - (Addition) Special rel='alternate stylesheet' handling (optional, good
    for HTML5).
+ - (Bugfix) Various test case compliance fixes (passes HTML4 and HTML5 test
+   suites)
+ - (Addition) Empty CURIE prefix can be configured (optional).
+ - (Addition) Add Auto Config feature.
+ - (Addition) Allow suffix-less CURIEs without colons (optional).
  - (Addition) Allow case-insensitive CURIE prefixes (optional, good for
    HTML).
+ - (Addition) Flexible keyword extensibility (optional).
+ - (Addition) Make xml:lang support optional (enabled by default).
 
 0.21 [2009-11-28]
- - (Bugfix) Various test case compliance fixes (passes XHTML test suite).
  - (Addition) Use RDF::Trine::Node::Literal::XML if it exists.
+ - (Bugfix) Various test case compliance fixes (passes XHTML test suite).
 
 0.20 [2009-11-24] # Version 2 (kinda)
- - (Addition) Add optional support for xml:base.
- - Support for @prefix now optional, off by default.
- - (Addition) Add optional support for embedded RDF/XML.
- - Support for HEAD, BODY and BASE elements now optional, on by default.
- - Support for extended @rel/@rev now optional, off by default.
- - (Addition) Allow various parsing options to be passed to constructor.
+ - (Addition) Add optional support for XFN 1.1 keywords.
  - Support for @lang now optional, off by default.
+ - Support for @prefix now optional, off by default.
  - (Removal) Diallow Safe CURIEs in @src/@href.
- - Support for full URIs instead of CURIEs now optional, off by default.
+ - (Addition) Allow various parsing options to be passed to constructor.
+ - Support for extended @rel/@rev now optional, off by default.
  - (Update) The graph() and graphs() methods now return RDF::Trine::Model
    objects.
  - (Update) Module SVN repository now at
    <http://goddamn.co.uk/viewvc/perlmods/>
- - (Addition) Add optional support for XFN 1.1 keywords.
+ - Support for HEAD, BODY and BASE elements now optional, on by default.
+ - (Addition) Add optional support for xml:base.
+ - Support for full URIs instead of CURIEs now optional, off by default.
+ - (Addition) Add optional support for embedded RDF/XML.
 
 0.11 [2009-01-19]
  - (Update) Make named graphs handling more predictable for triples spread
    across multiple elements.
 
 0.10 [2009-01-19]
+ - (Update) More test cases, including XML Literals and named graphs.
  - (Addition) Improve documentation and include it inline in the module
    code.
- - (Bugfix) Fix broken support for XML literals.
- - (Update) More test cases, including XML Literals and named graphs.
  - (Addition) Support for KjetilK's named graph idea.
+ - (Bugfix) Fix broken support for XML literals.
 
 0.04 [2009-01-14]
- - Rewrite callback stuff.
  - (Addition) Include some test cases as part of the installation.
+ - Rewrite callback stuff.
  - (Addition) Provide graph() method to output graph.
 
 0.03 [2009-01-14]
  - (Bugfix) Bugfix for @property.
 
 0.02 [2009-01-13]
- - Make XML parser more tolerant.
  - Disable thing-described-by.org URIs by default.
+ - Make XML parser more tolerant.
  - Add KjetilK's patch.
  - (Bugfix) Fix bug in Turtle output.
 

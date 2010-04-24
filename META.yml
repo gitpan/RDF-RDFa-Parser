@@ -25,6 +25,9 @@ requires:
   Encode: 0
   File::ShareDir: 0
   File::Spec: 0
+  HTML::HTML5::Parser: 0
+  HTML::HTML5::Sanity: 0
+  HTTP::Cache::Transparent: 0
   LWP::UserAgent: 0
   RDF::Trine: 0.118
   Storable: 0
@@ -38,4 +41,4 @@ resources:
   homepage: http://search.cpan.org/dist/RDF-RDFa-Parser/
   license: http://dev.perl.org/licenses/
   repository: http://goddamn.co.uk/viewvc/perlmods/RDF-RDFa-Parser/
-version: 1.09_03
+version: 1.09_04

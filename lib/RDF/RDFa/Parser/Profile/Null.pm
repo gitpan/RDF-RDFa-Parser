@@ -4,7 +4,7 @@ use base qw(RDF::RDFa::Parser::Profile);
 use strict;
 use 5.008;
 
-our $VERSION = '1.09_03';
+our $VERSION = '1.09_04';
 
 BEGIN
 {

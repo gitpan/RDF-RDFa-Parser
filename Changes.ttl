@@ -303,7 +303,8 @@ my:v_1-09_02
 			[ rdfs:label "Refactor error handling code to add a new 'onerror' callback, and an 'errors' method to get a list of errors."@en ] ,
 			[ rdfs:label "New 'oncurie' callback."@en ; a dcs:Addition ] ,
 			[ rdfs:label "Deprecate OPTS_XXXX functions in favour of a new RDF::RDFa::Parser::Config object which allows host languages and RDFa versions to be combined more flexibly."@en ] ,
-			[ rdfs:label "Allow CURIEs to have zero-length suffixes."@en ; a dcs:Bugfix ]
+			[ rdfs:label "Allow CURIEs to have zero-length suffixes."@en ; a dcs:Bugfix ] ,
+			[ rdfs:label "Broke auto_config."@en ; a dcs:Regression ]
 		] .
 
 my:v_1-09_03
@@ -318,6 +319,23 @@ my:v_1-09_03
 		dcs:item
 			[ rdfs:label "Support @role attribute."@en ; a dcs:Addition ] ,
 			[ rdfs:label "Use latest list of IANA terms from draft-nottingham-http-link-header-09.txt."@en ; a dcs:Update ]
+		] .
+
+my:v_1-09_04
+
+	a               :Version ;
+	dc:issued       "2010-04-24"^^xsd:date ;
+	:revision       "1.09_04"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_04.tar.gz> ;
+	rdfs:label      "RDFa 1.1 Preview 5"@en ;
+	dcs:changeset [
+		dcs:versus my:v_1-09_03 ;
+		dcs:item
+			[ rdfs:label "Fix auto_config."@en ; a dcs:Bugfix ] ,
+			[ rdfs:label "Provide more inclusive XML DTD catalogue."@en ; a dcs:Update ] ,
+			[ rdfs:label "Integrate official RDFa test suite into module tests."@en ; a dcs:Update ] ,
+			[ rdfs:label "new_from_url shortcut."@en ; a dcs:Addition ] ,
+			[ rdfs:label "Special Open Graph Protocol support."@en ; a dcs:Addition ]
 		] .
 
 my:roadmap_1_10
@@ -356,7 +374,7 @@ my:project
                    my:v_1-00_00 , my:v_1-00_01 ,  my:v_1-00_02 ,
                    my:v_1-00 ,    my:v_1-00-001 , my:v_1-00-002 ,
                    my:v_1-09_00 , my:v_1-09_01 ,  my:v_1-09_02 ,
-                   my:v_1-09_03 .
+                   my:v_1-09_03 , my:v_1-09_04 .
 
 #############################################################
 

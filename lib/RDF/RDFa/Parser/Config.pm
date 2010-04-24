@@ -17,7 +17,7 @@ use strict;
 use 5.008;
 
 our @EXPORT_OK = qw(HOST_ATOM HOST_HTML4 HOST_HTML5 HOST_SVG HOST_XHTML HOST_XML RDFA_10 RDFA_11);
-our $VERSION = '1.09_03';
+our $VERSION = '1.09_04';
 our $CONFIGS = {
 	'host' => {
 		HOST_ATOM() => {
@@ -25,6 +25,7 @@ our $CONFIGS = {
 			'keyword_bundles'       => 'rdfa iana',
 		},
 		HOST_HTML4() => {
+			'dom_parser'            => 'html',
 			'embedded_rdfxml'       => 0,
 			'prefix_nocase'         => 1,
 			'keyword_bundles'       => 'rdfa html4',
@@ -35,6 +36,7 @@ our $CONFIGS = {
 			'xml_lang'              => 0,
 		},
 		HOST_HTML5() => {
+			'dom_parser'            => 'html',
 			'embedded_rdfxml'       => 0,
 			'prefix_nocase'         => 1,
 			'keyword_bundles'       => 'rdfa html5',
@@ -60,6 +62,7 @@ our $CONFIGS = {
 			'atom_elements'         => 0,
 			'atom_parser'           => 0,
 			'auto_config'           => 0,
+			'dom_parser'            => 'xml',
 			'embedded_rdfxml'       => 1,
 			'full_uris'             => 0,
 			'keyword_bundles'       => 'rdfa',
@@ -90,6 +93,7 @@ our $CONFIGS = {
 			'atom_elements'         => 0,
 			'atom_parser'           => 0,
 			'auto_config'           => 0,
+			'dom_parser'            => 'xml',
 			'embedded_rdfxml'       => 1,
 			'full_uris'             => 1, #diff
 			'keyword_bundles'       => '', #diff
@@ -145,7 +149,20 @@ sub new
 	
 	$self->_expand_keywords;
 	
+	$self->{'_host'} = $host;
+	$self->{'_rdfa'} = $version;
+	$self->{'_opts'} = \%options;
+	
 	return $self;
+}
+
+sub rehost
+{
+	my ($self, $host, $version) = @_;
+	$version ||= $self->{'_rdfa'};
+	my $opts   = $self->{'_opts'};
+	my $class  = __PACKAGE__;
+	return $class->new($host, $version, %$opts);
 }
 
 sub merge_options
@@ -157,7 +174,7 @@ sub merge_options
 
 sub auto_config
 {
-	my ($self, $dom) = shift;
+	my ($self, $dom) = @_;
 	my $count;
 	
 	return undef unless $self->{'auto_config'};
