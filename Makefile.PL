@@ -14,7 +14,8 @@ readme_from         $fn;
 author              'Toby Inkster <tobyink@cpan.org>';
 license             'perl';
 
-test_requires       'Test::More' => '0.61';
+test_requires       'Test::More'     => '0.61';
+test_requires       'File::Slurp'    => 0;
 
 requires            'Carp'           => 0;
 requires            'Data::Dumper'   => 0;

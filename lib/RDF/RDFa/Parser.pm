@@ -58,11 +58,11 @@ use 5.008;
 
 =head1 VERSION
 
-1.09_04
+1.09_05
 
 =cut
 
-our $VERSION = '1.09_04';
+our $VERSION = '1.09_05';
 our $HAS_AWOL;
 
 BEGIN

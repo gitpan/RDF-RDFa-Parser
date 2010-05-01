@@ -338,6 +338,19 @@ my:v_1-09_04
 			[ rdfs:label "Special Open Graph Protocol support."@en ; a dcs:Addition ]
 		] .
 
+my:v_1-09_05
+
+	a               :Version ;
+	dc:issued       "2010-05-01"^^xsd:date ;
+	:revision       "1.09_05"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_05.tar.gz> ;
+	rdfs:label      "RDFa 1.1 Preview 6"@en ;
+	dcs:changeset [
+		dcs:versus my:v_1-09_04 ;
+		dcs:item
+			[ rdfs:label "Tests require File::Slurp. Add this dep to Makefile.PL."@en ; a dcs:Bugfix ]
+		] .
+
 my:roadmap_1_10
 
 	a                dcs:ToDoList ;
@@ -374,7 +387,7 @@ my:project
                    my:v_1-00_00 , my:v_1-00_01 ,  my:v_1-00_02 ,
                    my:v_1-00 ,    my:v_1-00-001 , my:v_1-00-002 ,
                    my:v_1-09_00 , my:v_1-09_01 ,  my:v_1-09_02 ,
-                   my:v_1-09_03 , my:v_1-09_04 .
+                   my:v_1-09_03 , my:v_1-09_04 ,  my:v_1-09_05 .
 
 #############################################################
 

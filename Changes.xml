@@ -619,18 +619,23 @@
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_04</revision>
     <rdfs:label xml:lang="en">RDFa 1.1 Preview 5</rdfs:label>
   </Version>
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_05">
+    <dcs:changeset>
+      <rdf:Description>
+        <dcs:item>
+          <dcs:Bugfix>
+            <rdfs:label xml:lang="en">Tests require File::Slurp. Add this dep to Makefile.PL.</rdfs:label>
+          </dcs:Bugfix>
+        </dcs:item>
+        <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_04"/>
+      </rdf:Description>
+    </dcs:changeset>
+    <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-05-01</dc:issued>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_05.tar.gz"/>
+    <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_05</revision>
+    <rdfs:label xml:lang="en">RDFa 1.1 Preview 6</rdfs:label>
+  </Version>
   <dcs:ToDoList rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/roadmap_1_10">
-    <dcs:item>
-      <rdf:Description>
-        <rdfs:label xml:lang="en">Add support for native SVG semantics of &lt;svg:title&gt; and &lt;svg:desc&gt;, perhaps via a separate module a la XML::Atom::OWL.</rdfs:label>
-      </rdf:Description>
-    </dcs:item>
-    <dcs:item>
-      <rdf:Description>
-        <dcs:timescale xml:lang="en">Once the two modules are more stable.</dcs:timescale>
-        <rdfs:label xml:lang="en">Integrate HTML parsing using HTML::HTML5::Parser and HTML::HTML5::Sanity.</rdfs:label>
-      </rdf:Description>
-    </dcs:item>
     <dcs:item>
       <rdf:Description>
         <dcs:timescale xml:lang="en">Dependent on progress in the W3C RDFa WG. Early to mid 2011?</dcs:timescale>
@@ -640,6 +645,17 @@
     <dcs:item>
       <rdf:Description>
         <rdfs:label xml:lang="en">Option to automatically follow { &lt;&gt; xhv:meta ?resource . } links.</rdfs:label>
+      </rdf:Description>
+    </dcs:item>
+    <dcs:item>
+      <rdf:Description>
+        <rdfs:label xml:lang="en">Add support for native SVG semantics of &lt;svg:title&gt; and &lt;svg:desc&gt;, perhaps via a separate module a la XML::Atom::OWL.</rdfs:label>
+      </rdf:Description>
+    </dcs:item>
+    <dcs:item>
+      <rdf:Description>
+        <dcs:timescale xml:lang="en">Once the two modules are more stable.</dcs:timescale>
+        <rdfs:label xml:lang="en">Integrate HTML parsing using HTML::HTML5::Parser and HTML::HTML5::Sanity.</rdfs:label>
       </rdf:Description>
     </dcs:item>
     <dcs:milestone rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-10"/>
@@ -677,6 +693,7 @@
     <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_02"/>
     <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_03"/>
     <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_04"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_05"/>
     <repository>
       <SVNRepository>
         <browse rdf:resource="http://goddamn.co.uk/viewvc/perlmods/RDF-RDFa-Parser/"/>
