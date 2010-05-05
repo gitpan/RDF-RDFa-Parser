@@ -4,11 +4,17 @@ use File::Slurp;
 use File::ShareDir qw(dist_file);
 use HTML::HTML5::Parser;
 use HTML::HTML5::Sanity;
-use RDF::Query;
 use RDF::Trine;
 use Test::More;
 use XML::LibXML;
 use strict;
+
+BEGIN
+{
+	eval 'use RDF::Query;';
+	plan skip_all => 'Need RDF::Query to run these tests.'
+		if $@;
+}
 
 sub doit
 {

@@ -17,7 +17,7 @@ use strict;
 use 5.008;
 
 our @EXPORT_OK = qw(HOST_ATOM HOST_HTML4 HOST_HTML5 HOST_SVG HOST_XHTML HOST_XML RDFA_10 RDFA_11);
-our $VERSION = '1.09_05';
+our $VERSION = '1.09_06';
 our $CONFIGS = {
 	'host' => {
 		HOST_ATOM() => {
@@ -27,7 +27,7 @@ our $CONFIGS = {
 		HOST_HTML4() => {
 			'dom_parser'            => 'html',
 			'embedded_rdfxml'       => 0,
-			'prefix_nocase'         => 1,
+			'prefix_nocase_xmlns'   => 1,
 			'keyword_bundles'       => 'rdfa html4',
 			'xhtml_base'            => 1,
 			'xhtml_elements'        => 1,
@@ -38,7 +38,7 @@ our $CONFIGS = {
 		HOST_HTML5() => {
 			'dom_parser'            => 'html',
 			'embedded_rdfxml'       => 0,
-			'prefix_nocase'         => 1,
+			'prefix_nocase_xmlns'   => 1,
 			'keyword_bundles'       => 'rdfa html5',
 			'xhtml_base'            => 1,
 			'xhtml_elements'        => 1,
@@ -75,7 +75,8 @@ our $CONFIGS = {
 			'prefix_bare'           => 0,
 			'prefix_default'        => 0,
 			'prefix_empty'          => 'http://www.w3.org/1999/xhtml/vocab#',
-			'prefix_nocase'         => 0,
+			'prefix_nocase_attr'    => 0,
+			'prefix_nocase_xmlns'   => 0,
 			'profiles'              => 0,
 			'role_attr'             => 0,
 			'safe_anywhere'         => 0,
@@ -87,6 +88,7 @@ our $CONFIGS = {
 			'xhtml_lang'            => 0,
 			'xml_base'              => 2,
 			'xml_lang'              => 1,
+			'xmlns_attr'            => 1,
 		},
 		RDFA_11() => {
 			'alt_stylesheet'        => 0,
@@ -106,7 +108,8 @@ our $CONFIGS = {
 			'prefix_bare'           => 0,
 			'prefix_default'        => 0,
 			'prefix_empty'          => 'http://www.w3.org/1999/xhtml/vocab#',
-			'prefix_nocase'         => 1, #diff
+			'prefix_nocase_attr'    => 1, #diff
+			'prefix_nocase_xmlns'   => 1, #diff
 			'profiles'              => 1, #diff
 			'role_attr'             => 0,
 			'safe_anywhere'         => 1, #diff
@@ -118,6 +121,7 @@ our $CONFIGS = {
 			'xhtml_lang'            => 0,
 			'xml_base'              => 2,
 			'xml_lang'              => 1,
+			'xmlns_attr'            => 1,
 		},
 	},
 };
@@ -241,6 +245,11 @@ sub _merge_options
 		&&  length $self->{$key})
 		{
 			$self->{$key} .= " $value"; 
+		}
+		elsif ($key eq 'prefix_nocase')
+		{
+			$self->{'prefix_nocase_attr'}  = $value;
+			$self->{'prefix_nocase_xmlns'} = $value;
 		}
 		else
 		{
@@ -499,7 +508,11 @@ in brackets.
 
 =item * B<prefix_empty> - URI for empty prefix (e.g. rel=":foo"). ['http://www.w3.org/1999/xhtml/vocab#']
 
-=item * B<prefix_nocase> - ignore case-sensitivity of CURIE prefixes. [0, 1]
+=item * B<prefix_nocase> - DEPRECATED - shortcut for prefix_nocase_attr and prefix_nocase_xmlns.
+
+=item * B<prefix_nocase_attr> - ignore case-sensitivity of CURIE prefixes defined via @prefix attribute. [0, 1]
+
+=item * B<prefix_nocase_xmlns> - ignore case-sensitivity of CURIE prefixes defined via xmlns. [0, 1]
 
 =item * B<profiles> - support RDFa profiles. [0, 1]
 
@@ -522,6 +535,8 @@ in brackets.
 =item * B<xml_base> - support for 'xml:base' attribute. 0=only RDF/XML; 1=except @href/@src; 2=always. [0]
 
 =item * B<xml_lang> - Support for 'xml:lang' attribute. [1]
+
+=item * B<xmlns_attr> - Support for 'xmlns:foo' to define CURIE prefixes. [1]
 
 =back
 

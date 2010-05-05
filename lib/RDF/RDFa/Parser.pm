@@ -62,7 +62,7 @@ use 5.008;
 
 =cut
 
-our $VERSION = '1.09_05';
+our $VERSION = '1.09_06';
 our $HAS_AWOL;
 
 BEGIN
@@ -800,37 +800,46 @@ sub _consume_element
 	if ($self->{'options'}->{'profiles'}
 	and $current_element->hasAttribute('profile'))
 	{
-		my $profile = RDF::RDFa::Parser::Profile->new(
-			$self->uri($current_element->getAttribute('profile')), $self);
+		my @profiles = reverse $self->_split_tokens( $current_element->getAttribute('profile') );
 		
-		if (UNIVERSAL::isa($profile, 'RDF::RDFa::Parser::Profile'))
+		foreach my $uri (@profiles)
 		{
-			foreach my $mapping ($profile->get_prefixes)
+			my $profile = RDF::RDFa::Parser::Profile->new(
+				$self->uri($uri, {'element'=>$current_element,'xml_base'=>$xml_base}),
+				$self);
+			
+			if (UNIVERSAL::isa($profile, 'RDF::RDFa::Parser::Profile'))
 			{
-				$local_uri_mappings->{ $mapping->[0] } = $mapping->[1];				
-			}
-			foreach my $mapping ($profile->get_terms)
-			{
-				my ($term, $uri, $insensitive, $attrs) = @$mapping;
-				$term = lc $term if $insensitive;
-				$insensitive = $insensitive ? 'insensitive' : 'sensitive';
-				$attrs = [ split /\s*/, ($attrs||'*') ];
-				
-				foreach my $attr (@$attrs)
+				foreach my $mapping ($profile->get_prefixes)
 				{
-					$local_term_mappings->{$insensitive}->{$attr}->{$term} = $uri;
+					my ($prefix, $uri, $insensitive) = @$mapping;
+					$prefix = lc $prefix if $insensitive;
+					$insensitive = $insensitive ? 'insensitive' : 'sensitive';
+					$local_uri_mappings->{$insensitive}->{$prefix} = $uri;				
+				}
+				foreach my $mapping ($profile->get_terms)
+				{
+					my ($term, $uri, $insensitive, $attrs) = @$mapping;
+					$term = lc $term if $insensitive;
+					$insensitive = $insensitive ? 'insensitive' : 'sensitive';
+					$attrs = [ split /\s*/, ($attrs||'*') ];
+					
+					foreach my $attr (@$attrs)
+					{
+						$local_term_mappings->{$insensitive}->{$attr}->{$term} = $uri;
+					}
 				}
 			}
-		}
-		else
-		{
-			$self->_log_error(
-				ERR_ERROR,
-				ERR_CODE_PROFILE_UNUSABLE,
-				sprintf("Unusable profile '%s'.", $current_element->getAttribute('profile')),
-				uri     => $current_element->getAttribute('profile'),
-				element => $current_element,
-				);
+			else
+			{
+				$self->_log_error(
+					ERR_ERROR,
+					ERR_CODE_PROFILE_UNUSABLE,
+					sprintf("Unusable profile '%s'.", $current_element->getAttribute('profile')),
+					uri     => $current_element->getAttribute('profile'),
+					element => $current_element,
+					);
+			}
 		}
 	}
 	elsif ($current_element->hasAttribute('profile')
@@ -856,53 +865,58 @@ sub _consume_element
 	# in particular if it is a relative path it is not resolved against
 	# the current [base]. Authors are advised to follow best practice
 	# for using namespaces, which includes not using relative paths.
-	foreach my $A ($current_element->getAttributes)
+	if ($self->{'options'}->{'xmlns_attr'})
 	{
-		my $attr = $A->getName;
-		
-		if ($attr =~ /^xmlns\:(.+)$/i)
+		foreach my $A ($current_element->getAttributes)
 		{
-			my $pfx = $self->{'options'}->{'prefix_nocase'} ? (lc $1) : $1;
-			my $uri = $A->getValue;
-			if ($pfx =~ /^(xml|xmlns|_)$/i)
+			my $attr = $A->getName;
+			
+			if ($attr =~ /^xmlns\:(.+)$/i)
 			{
-				$self->_log_error(
-					ERR_ERROR,
-					ERR_CODE_PREFIX_BUILTIN,
-					"Attempt to redefine built-in CURIE prefix '$pfx' not allowed.",
-					element => $current_element,
-					prefix  => $pfx,
-					uri     => $uri,
-					);
-			}
-			elsif ($pfx !~ /^($XML::RegExp::NCName)$/)
-			{
-				$self->_log_error(
-					ERR_ERROR,
-					ERR_CODE_PREFIX_ILLEGAL,
-					"Attempt to define non-NCName CURIE prefix '$pfx' not allowed.",
-					element => $current_element,
-					prefix  => $pfx,
-					uri     => $uri,
-					);
-			}
-			elsif ($uri eq XML_XML_NS || $uri eq XML_XMLNS_NS)
-			{
-				$self->_log_error(
-					ERR_ERROR,
-					ERR_CODE_PREFIX_BUILTIN,
-					"Attempt to define any CURIE prefix for '$uri' not allowed using \@xmlns.",
-					element => $current_element,
-					prefix  => $pfx,
-					uri     => $uri,
-					);
-			}
-			else
-			{
-				$self->{'sub'}->{'onprefix'}($self, $current_element, $pfx, $uri)
-					if defined $self->{'sub'}->{'onprefix'};
+				my $pfx = $self->{'options'}->{'prefix_nocase_xmlns'} ? (lc $1) : $1;
+				my $cls = $self->{'options'}->{'prefix_nocase_xmlns'} ? 'insensitive' : 'sensitive';
+				my $uri = $A->getValue;
 				
-				$local_uri_mappings->{$pfx} = $uri;
+				if ($pfx =~ /^(xml|xmlns|_)$/i)
+				{
+					$self->_log_error(
+						ERR_ERROR,
+						ERR_CODE_PREFIX_BUILTIN,
+						"Attempt to redefine built-in CURIE prefix '$pfx' not allowed.",
+						element => $current_element,
+						prefix  => $pfx,
+						uri     => $uri,
+						);
+				}
+				elsif ($pfx !~ /^($XML::RegExp::NCName)$/)
+				{
+					$self->_log_error(
+						ERR_ERROR,
+						ERR_CODE_PREFIX_ILLEGAL,
+						"Attempt to define non-NCName CURIE prefix '$pfx' not allowed.",
+						element => $current_element,
+						prefix  => $pfx,
+						uri     => $uri,
+						);
+				}
+				elsif ($uri eq XML_XML_NS || $uri eq XML_XMLNS_NS)
+				{
+					$self->_log_error(
+						ERR_ERROR,
+						ERR_CODE_PREFIX_BUILTIN,
+						"Attempt to define any CURIE prefix for '$uri' not allowed using \@xmlns.",
+						element => $current_element,
+						prefix  => $pfx,
+						uri     => $uri,
+						);
+				}
+				else
+				{
+					$self->{'sub'}->{'onprefix'}($self, $current_element, $pfx, $uri, $cls)
+						if defined $self->{'sub'}->{'onprefix'};
+					
+					$local_uri_mappings->{$cls}->{$pfx} = $uri;
+				}
 			}
 		}
 	}
@@ -915,7 +929,8 @@ sub _consume_element
 		my $pfx_attr = $current_element->getAttribute('prefix');
 		while ($pfx_attr =~ /^\s*(\S+):[\s\r\n]*(\S*)[\s\r\n]+/gs)
 		{
-			my $pfx = $self->{'options'}->{'prefix_nocase'} ? (lc $1) : $1;
+			my $pfx = $self->{'options'}->{'prefix_nocase_attr'} ? (lc $1) : $1;
+			my $cls = $self->{'options'}->{'prefix_nocase_attr'} ? 'insensitive' : 'sensitive';
 			my $uri = $2;
 			
 			unless ($pfx =~ /^$XML::RegExp::NCName$/)
@@ -931,9 +946,9 @@ sub _consume_element
 				next;
 			}
 			
-			$self->{'sub'}->{'onprefix'}($self, $current_element, $pfx, $uri)
+			$self->{'sub'}->{'onprefix'}($self, $current_element, $pfx, $uri, $cls)
 				if defined $self->{'sub'}->{'onprefix'};
-			$local_uri_mappings->{$pfx} = $uri;
+			$local_uri_mappings->{$cls}->{$pfx} = $uri;
 		}
 	}
 	elsif ($current_element->hasAttribute('prefix'))
@@ -951,7 +966,8 @@ sub _consume_element
 	&& $current_element->hasAttribute('vocab'))
 	{
 		$local_uri_mappings->{'*'} = $self->uri(
-			$current_element->getAttribute('vocab'));
+			$current_element->getAttribute('vocab'),
+			{'element'=>$current_element,'xml_base'=>$xml_base});
 	}
 	elsif ($current_element->hasAttribute('vocab'))
 	{
@@ -961,7 +977,8 @@ sub _consume_element
 			"\@vocab found, but support disabled.",
 			element => $current_element,
 			uri     => $self->uri(
-				$current_element->getAttribute('vocab')),
+				$current_element->getAttribute('vocab'),
+				{'element'=>$current_element,'xml_base'=>$xml_base}),
 			);
 	}
 	
@@ -1019,7 +1036,8 @@ sub _consume_element
 			if ($current_element->hasAttribute('id'))
 			{
 				$element_subject = $self->uri(sprintf('#%s',
-					$current_element->getAttribute('id')));
+					$current_element->getAttribute('id')),
+					{'element'=>$current_element,'xml_base'=>$xml_base});
 			}
 			else
 			{
@@ -2201,12 +2219,12 @@ sub __expand_curie
 		my $prefix = (defined $1 && length $1) ? $1 : '-';
 		my $suffix = $2;
 		
-		$prefix = lc $prefix if $self->{'options'}->{'prefix_nocase'};
-		
-		if (defined $args{'prefixes'}->{$prefix})
-		{
-			return $args{'prefixes'}->{$prefix} . $suffix;
-		}
+		if (defined $args{'prefixes'}->{'-'} && $prefix eq '-')
+			{ return $args{'prefixes'}->{'-'} . $suffix; }
+		elsif (defined $args{'prefixes'}->{'sensitive'}->{$prefix})
+			{ return $args{'prefixes'}->{'sensitive'}->{$prefix} . $suffix; }
+		elsif (defined $args{'prefixes'}->{'insensitive'}->{lc $prefix})
+			{ return $args{'prefixes'}->{'insensitive'}->{lc $prefix} . $suffix; }
 
 		if ($is_safe)
 		{
@@ -2231,12 +2249,10 @@ sub __expand_curie
 		my $prefix = $token;
 		my $suffix = '';
 		
-		$prefix = lc $prefix if $self->{'options'}->{'prefix_nocase'};
-		
-		if (defined $args{'prefixes'}->{$prefix})
-		{
-			return $args{'prefixes'}->{$prefix} . $suffix;
-		}
+		if (defined $args{'prefixes'}->{'sensitive'}->{$prefix})
+			{ return $args{'prefixes'}->{'sensitive'}->{$prefix} . $suffix; }
+		elsif (defined $args{'prefixes'}->{'insensitive'}->{lc $prefix})
+			{ return $args{'prefixes'}->{'insensitive'}->{lc $prefix} . $suffix; }
 	}
 
 	# Absolute URIs
@@ -2250,13 +2266,10 @@ sub __expand_curie
 	if ($token =~ /^($XML::RegExp::NCName)$/
 	and ($is_safe || $args{'attribute'} =~ /^(rel|rev|property|typeof|datatype|role)$/i || $args{'allow_unsafe_default_vocab'}))
 	{
-		my $prefix = '*';
 		my $suffix = $token;
 		
-		if (defined $args{'prefixes'}->{$prefix})
-		{
-			return $args{'prefixes'}->{$prefix} . $suffix;
-		}
+		if (defined $args{'prefixes'}->{'*'})
+			{ return $args{'prefixes'}->{'*'} . $suffix; }
 	
 		return undef if $is_safe;
 	}
