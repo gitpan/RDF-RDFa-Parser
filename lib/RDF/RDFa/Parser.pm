@@ -58,11 +58,11 @@ use 5.008;
 
 =head1 VERSION
 
-1.09_07
+1.09_08
 
 =cut
 
-our $VERSION = '1.09_07';
+our $VERSION = '1.09_08';
 our $HAS_AWOL;
 
 BEGIN
@@ -146,7 +146,7 @@ sub new
 				}
 			}
 			
-			my $config->{lwp_ua} = LWP::UserAgent->new;
+			$config->{lwp_ua} = LWP::UserAgent->new;
 			$config->{lwp_ua}->agent($uastr);
 			$config->{lwp_ua}->default_header("Accept" => "application/xhtml+xml, text/html;q=0.9, image/svg+xml;q=0.9, application/atom+xml;q=0.9, application/xml;q=0.1, text/xml;q=0.1");
 		}
@@ -265,7 +265,7 @@ sub new_from_url
 			}
 		}
 		
-		my $config->{lwp_ua} = LWP::UserAgent->new;
+		$config->{lwp_ua} = LWP::UserAgent->new;
 		$config->{lwp_ua}->agent($uastr);
 		$config->{lwp_ua}->default_header("Accept" => "application/xhtml+xml, text/html;q=0.9, image/svg+xml;q=0.9, application/atom+xml;q=0.9, application/xml;q=0.1, text/xml;q=0.1");
 	}

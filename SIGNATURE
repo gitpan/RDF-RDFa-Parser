@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.61.
+signed via the Module::Signature module, version 0.63.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -14,35 +14,35 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 4c577bdeec7f1e32c2386a4139e723299f4669a2 Changes
-SHA1 ab0b1ff402d9dfc2fad701bae4137d2d00bba665 Changes.ttl
-SHA1 cc420bf4bb963202aae1aa723e5267f405d34b78 Changes.xml
+SHA1 43abe77b9dcdc8151b1fe38ae0ce3cfb6e5c4174 Changes
+SHA1 5373d5ef89ce74cc6a9b8800d1e456cc9096e42c Changes.ttl
+SHA1 61cd71e9c7f687214350d401f4f05223802dd9ea Changes.xml
 SHA1 85305d38856c439392c29ac8891dda859845c2d6 MANIFEST
 SHA1 3dad6b3d3e01b7bcd5db5f715e4443c47bd2a970 MANIFEST.SKIP
-SHA1 5f9188fb9cb7bca9d36df56416d2e51f1d63c0f6 META.yml
+SHA1 92abf0211b6223062caf13c418d3d3cb309478ee META.yml
 SHA1 709de47f3940934301fa58f7b826918d5f106ba7 Makefile.PL
-SHA1 fa3bf0e98ae47b7c2b8702922b8cd53fa7642b36 README
-SHA1 e5fb92ac217988bfc7a6af739b0459627020a27e inc/Module/AutoInstall.pm
-SHA1 fd5f3c4f0418efee3b9b16cf8c3902e8374909df inc/Module/Install.pm
-SHA1 5c529e96420d964b192f011b121283a4916f7331 inc/Module/Install/AutoInstall.pm
-SHA1 7cd7c349afdf3f012e475507b1017bdfa796bfbd inc/Module/Install/Base.pm
-SHA1 ba186541bbf6439111f01fc70769cf24d22869bf inc/Module/Install/Can.pm
+SHA1 ba65fa0b78d4553ddeb956790cede014a43ccf80 README
+SHA1 8842ca38ce27ccf75e1ce8f5dfb93fa62d933b2e inc/Module/AutoInstall.pm
+SHA1 1ebec4119486a032a5612a403e8d7b7be973e938 inc/Module/Install.pm
+SHA1 bec3c7f9af6e1a3cb4d143249956c98af30f0552 inc/Module/Install/AutoInstall.pm
+SHA1 24038af925a69df41972971356ccce885b0fe2ad inc/Module/Install/Base.pm
+SHA1 8f96eddfef548c9328457fbb17a121631cda356b inc/Module/Install/Can.pm
 SHA1 b19da2715a136aba51510f687a7b4e431e0a4bec inc/Module/Install/DOAPChangeSets.pm
-SHA1 aaa50eca0d7751db7a4d953fac9bc72c6294e238 inc/Module/Install/Fetch.pm
-SHA1 219da5a95c290312a81477b226f005997d97dcfd inc/Module/Install/Include.pm
-SHA1 3e83972921d54198d1246f7278f08664006cd65d inc/Module/Install/Makefile.pm
-SHA1 12bf1867955480d47d5171a9e9c6a96fabe0b58f inc/Module/Install/Metadata.pm
+SHA1 ec29048e48edd9c9c55f9de7b773bd7c904335ad inc/Module/Install/Fetch.pm
+SHA1 01862227830d2547f38275eaee0eb9f5add5a252 inc/Module/Install/Include.pm
+SHA1 0384525d85d51e99532e3ad8729d870113646d14 inc/Module/Install/Makefile.pm
+SHA1 38c657de4d91f5a60ff8e6c6f6a5547daf7c4ab2 inc/Module/Install/Metadata.pm
 SHA1 a615bb050ca0b2d79bfa0224addcb83019a53b09 inc/Module/Install/ReadmeFromPod.pm
-SHA1 a1ccb2a21d1118b1bed4f97bd31ebd7dfd8fe43c inc/Module/Install/Share.pm
-SHA1 f7ee667e878bd2faf22ee9358a7b5a2cc8e91ba4 inc/Module/Install/Win32.pm
-SHA1 8ed29d6cf217e0977469575d788599cbfb53a5ca inc/Module/Install/WriteAll.pm
+SHA1 e638746517232df3485ff384d5751a34b4747a95 inc/Module/Install/Share.pm
+SHA1 5c25f1104c0038041e3b93e0660c39171e4caf2b inc/Module/Install/Win32.pm
+SHA1 94d47349c803c4bd2a9230d25e4db0b6aaf1acd8 inc/Module/Install/WriteAll.pm
 SHA1 1e6399a0585817abef500c34fce676fb9b0545f0 inc/Test/Signature.pm
-SHA1 cfe50b321bd5852a2b5436169d0f9b85505bf832 lib/RDF/RDFa/Parser.pm
-SHA1 a705ca569e9afd62a1ec2b1517fab529a590a2d4 lib/RDF/RDFa/Parser/Config.pm
-SHA1 9f9be58bb442dbad82153853b16c0b9ac4879349 lib/RDF/RDFa/Parser/Profile.pm
-SHA1 e7a5281aa5f21f385b92d2869ce9ad8cd225254f lib/RDF/RDFa/Parser/Profile/Null.pm
-SHA1 a86bc8d52cfbb814338a0572e5b85aba4c1e2e29 lib/RDF/RDFa/Parser/Profile/PrefixCC.pm
-SHA1 c5768899536c8519552114090313b536450c39a9 lib/RDF/RDFa/Parser/Profile/RDF.pm
+SHA1 c0407244a0ea9c304061279e451b3c7327b77258 lib/RDF/RDFa/Parser.pm
+SHA1 14b00a11defc13b4050a12b6414461f06e736e16 lib/RDF/RDFa/Parser/Config.pm
+SHA1 59be5d605233255a121b525839c8237a5c3cb1e7 lib/RDF/RDFa/Parser/Profile.pm
+SHA1 b6e32031c607cecd9e9cc23dcc1c67d7727e0979 lib/RDF/RDFa/Parser/Profile/Null.pm
+SHA1 d94dd43c3f0c9fe34b12a0f511b852aac1ef20ca lib/RDF/RDFa/Parser/Profile/PrefixCC.pm
+SHA1 243182502ec7c5e19bdf79231685299b0a573927 lib/RDF/RDFa/Parser/Profile/RDF.pm
 SHA1 ef2d6d99d8dfea7159e583f9b5ad35d5814f2271 share/catalogue/index.xml
 SHA1 9a3157a5419d575ea91bd0b912d139573423c94c share/catalogue/www.w3.org/MarkUp/DTD/aria-attributes-1.mod
 SHA1 88053f10e8d2fd58ccbab81dc2bbdfdf90016c3c share/catalogue/www.w3.org/MarkUp/DTD/html4-rdfa-1.dtd
@@ -545,7 +545,7 @@ SHA1 09b128a21a90a14f0a42b94e82244e3e0f6c4f71 t/xhtml1-manifest.rdf
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAkv2hEoACgkQzr+BKGoqfTmorwCfZ73QInPiYddxRHQGJlI4zV1o
-xP8An1E4U5kiorZyzPL+miuTadJdtfAZ
-=73z4
+iEYEARECAAYFAkv2+UYACgkQzr+BKGoqfTnZ3wCfek/XkH0/bKOR1/W0/Qd4DmqZ
+Vo0An3b0Yq1O0XoRIP7y+byZsLYQsqr3
+=P5xe
 -----END PGP SIGNATURE-----

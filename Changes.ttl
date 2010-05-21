@@ -380,6 +380,19 @@ my:v_1-09_07
 			[ rdfs:label "Allow an LWP::UserAgent to be supplied when configuring the parser."@en ]
 		] .
 
+my:v_1-09_08
+
+	a               :Version ;
+	dc:issued       "2010-05-21"^^xsd:date ;
+	:revision       "1.09_08"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_08.tar.gz> ;
+	rdfs:label      "RDFa 1.1 Preview 8 - bugfix edition"@en ;
+	dcs:changeset [
+		dcs:versus my:v_1-09_07 ;
+		dcs:item
+			[ rdfs:label "Remove 'my' from a couple of lines."@en ; a dcs:Bugfix ]
+		] .
+
 my:roadmap_1_10
 
 	a                dcs:ToDoList ;
@@ -416,7 +429,7 @@ my:project
                    my:v_1-00 ,    my:v_1-00-001 , my:v_1-00-002 ,
                    my:v_1-09_00 , my:v_1-09_01 ,  my:v_1-09_02 ,
                    my:v_1-09_03 , my:v_1-09_04 ,  my:v_1-09_05 ,
-                   my:v_1-09_06 , my:v_1-09_07 .
+                   my:v_1-09_06 , my:v_1-09_07 , my:v_1-09_08 .
 
 #############################################################
 

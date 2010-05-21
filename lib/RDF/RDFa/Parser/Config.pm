@@ -17,7 +17,7 @@ use strict;
 use 5.008;
 
 our @EXPORT_OK = qw(HOST_ATOM HOST_HTML4 HOST_HTML5 HOST_SVG HOST_XHTML HOST_XML RDFA_10 RDFA_11);
-our $VERSION = '1.09_07';
+our $VERSION = '1.09_08';
 our $CONFIGS = {
 	'host' => {
 		HOST_ATOM() => {
