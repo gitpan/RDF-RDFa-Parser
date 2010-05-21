@@ -666,6 +666,22 @@
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_06</revision>
     <rdfs:label xml:lang="en">RDFa 1.1 Preview 7</rdfs:label>
   </Version>
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_07">
+    <dcs:changeset>
+      <rdf:Description>
+        <dcs:item>
+          <rdf:Description>
+            <rdfs:label xml:lang="en">Allow an LWP::UserAgent to be supplied when configuring the parser.</rdfs:label>
+          </rdf:Description>
+        </dcs:item>
+        <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_06"/>
+      </rdf:Description>
+    </dcs:changeset>
+    <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-05-21</dc:issued>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_07.tar.gz"/>
+    <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_07</revision>
+    <rdfs:label xml:lang="en">RDFa 1.1 Preview 8</rdfs:label>
+  </Version>
   <dcs:ToDoList rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/roadmap_1_10">
     <dcs:item>
       <rdf:Description>
@@ -720,6 +736,7 @@
     <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_04"/>
     <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_05"/>
     <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_06"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_07"/>
     <repository>
       <SVNRepository>
         <browse rdf:resource="http://goddamn.co.uk/viewvc/perlmods/RDF-RDFa-Parser/"/>

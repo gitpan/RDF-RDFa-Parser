@@ -10,7 +10,7 @@ use base qw(RDF::RDFa::Parser::Profile);
 use strict;
 use 5.008;
 
-our $VERSION = '1.09_06';
+our $VERSION = '1.09_07';
 
 BEGIN
 {
@@ -24,7 +24,7 @@ sub new
 {
 	my ($class, $uri, $parser) = @_;
 	
-	my $ua       = LWP::UserAgent->new( agent => __PACKAGE__.' ' );
+	my $ua       = $parser->{'options'}->{'lwp_ua'};
 	my $response = $ua->get($uri);
 	
 	my $model;

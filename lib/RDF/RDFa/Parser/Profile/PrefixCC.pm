@@ -2,13 +2,12 @@ package RDF::RDFa::Parser::Profile::PrefixCC;
 
 use File::Spec;
 use HTTP::Cache::Transparent;
-use LWP::UserAgent;
 
 use base qw(RDF::RDFa::Parser::Profile);
 use strict;
 use 5.008;
 
-our $VERSION = '1.09_06';
+our $VERSION = '1.09_07';
 
 BEGIN
 {
@@ -52,7 +51,7 @@ sub new
 
 	if (@still_unknown)
 	{
-		my $ua       = LWP::UserAgent->new( agent => __PACKAGE__.' ' );
+		my $ua       = $parser->{'options'}->{'lwp_ua'};
 		my $response = $ua->get(
 			sprintf(
 				'http://prefix.cc/%s.txt.plain',

@@ -17,7 +17,7 @@ use strict;
 use 5.008;
 
 our @EXPORT_OK = qw(HOST_ATOM HOST_HTML4 HOST_HTML5 HOST_SVG HOST_XHTML HOST_XML RDFA_10 RDFA_11);
-our $VERSION = '1.09_06';
+our $VERSION = '1.09_07';
 our $CONFIGS = {
 	'host' => {
 		HOST_ATOM() => {
@@ -486,6 +486,8 @@ in brackets.
 
 =item * B<auto_config> - see section "Auto Config" [0]
 
+=item *B<dom_parser> - parser to use to turn a markup string into a DOM. 'html' or 'xml'. ['xml']
+
 =item * B<embedded_rdfxml> - find plain RDF/XML chunks within document. 0=no, 1=handle, 2=skip. [0]                      
 
 =item * B<full_uris> - support full URIs in CURIE-only attributes. [0, 1]
@@ -499,6 +501,8 @@ in brackets.
 =item * B<graph_default> - default graph name. ['_:RDFaDefaultGraph']
 
 =item * B<keyword_bundles> - space-separated list of bundles of keywords ('rdfa', 'html32', 'html4', 'html5', 'xhtml-role', 'aria-role', 'iana', 'xhv') ['rdfa']
+
+=item *B<lwp_ua> - an LWP::UserAgent to use for HTTP requests. [undef]
 
 =item * B<prefix_attr> - support @prefix rather than just @xmlns:*. [0, 1]
 
@@ -521,6 +525,8 @@ in brackets.
 =item * B<safe_anywhere> - allow Safe CURIEs in @rel/@rev/etc. [0, 1]
 
 =item * B<tdb_service> - use thing-described-by.org to name some bnodes. [0]
+
+=item *B<user_agent> - a User-Agent header to use for HTTP requests. Ignored if lwp_ua is provided. [undef]
 
 =item * B<use_rtnlx> - use RDF::Trine::Node::Literal::XML. 0=no, 1=if available. [0]
 

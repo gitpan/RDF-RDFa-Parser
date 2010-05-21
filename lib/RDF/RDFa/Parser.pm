@@ -58,11 +58,11 @@ use 5.008;
 
 =head1 VERSION
 
-1.09_05
+1.09_07
 
 =cut
 
-our $VERSION = '1.09_06';
+our $VERSION = '1.09_07';
 our $HAS_AWOL;
 
 BEGIN
@@ -131,23 +131,27 @@ sub new
 	# ================================
 	unless (defined $markup)
 	{
-		my $uastr = sprintf('%s/%s ', __PACKAGE__, $VERSION);
-		if (defined $config->{'user_agent'})
+		unless (ref $config->{lwp_ua})
 		{
-			if ($config->{'user_agent'} =~ /\s+$/)
+			my $uastr = sprintf('%s/%s ', __PACKAGE__, $VERSION);
+			if (defined $config->{'user_agent'})
 			{
-				$uastr = $config->{'user_agent'} . " $uastr";
+				if ($config->{'user_agent'} =~ /\s+$/)
+				{
+					$uastr = $config->{'user_agent'} . " $uastr";
+				}
+				else
+				{
+					$uastr = $config->{'user_agent'};
+				}
 			}
-			else
-			{
-				$uastr = $config->{'user_agent'};
-			}
+			
+			my $config->{lwp_ua} = LWP::UserAgent->new;
+			$config->{lwp_ua}->agent($uastr);
+			$config->{lwp_ua}->default_header("Accept" => "application/xhtml+xml, text/html;q=0.9, image/svg+xml;q=0.9, application/atom+xml;q=0.9, application/xml;q=0.1, text/xml;q=0.1");
 		}
 		
-		my $ua = LWP::UserAgent->new;
-		$ua->agent($uastr);
-		$ua->default_header("Accept" => "application/xhtml+xml, text/html;q=0.9, image/svg+xml;q=0.9, application/atom+xml;q=0.9, application/xml;q=0.1, text/xml;q=0.1");
-		my $response = $ua->get($base_uri);
+		my $response = $config->{lwp_ua}->get($base_uri);
 		die "HTTP response not successful\n"
 			unless $response->is_success;
 		die "Unknown HTTP response media type\n"
@@ -246,23 +250,27 @@ sub new_from_url
 {
 	my ($class, $url, $config, $store)= @_;
 	
-	my $uastr = sprintf('%s/%s ', __PACKAGE__, $VERSION);
-	if (defined $config && defined $config->{'user_agent'})
+	unless (ref $config->{lwp_ua})
 	{
-		if ($config->{'user_agent'} =~ /\s+$/)
+		my $uastr = sprintf('%s/%s ', __PACKAGE__, $VERSION);
+		if (defined $config->{'user_agent'})
 		{
-			$uastr = $config->{'user_agent'} . " $uastr";
+			if ($config->{'user_agent'} =~ /\s+$/)
+			{
+				$uastr = $config->{'user_agent'} . " $uastr";
+			}
+			else
+			{
+				$uastr = $config->{'user_agent'};
+			}
 		}
-		else
-		{
-			$uastr = $config->{'user_agent'};
-		}
+		
+		my $config->{lwp_ua} = LWP::UserAgent->new;
+		$config->{lwp_ua}->agent($uastr);
+		$config->{lwp_ua}->default_header("Accept" => "application/xhtml+xml, text/html;q=0.9, image/svg+xml;q=0.9, application/atom+xml;q=0.9, application/xml;q=0.1, text/xml;q=0.1");
 	}
-	
-	my $ua = LWP::UserAgent->new;
-	$ua->agent($uastr);
-	$ua->default_header("Accept" => "application/xhtml+xml, text/html;q=0.9, image/svg+xml;q=0.9, application/atom+xml;q=0.9, application/xml;q=0.1, text/xml;q=0.1");
-	my $response = $ua->get($url);
+		
+	my $response = $config->{lwp_ua}->get($url);
 
 	my $host = 'xml';
 	$host = 'html5' if $response->content_type eq 'text/html';
@@ -1715,9 +1723,9 @@ sub set_callbacks
 	{
 		$self->{'sub'} = $_[0];
 		$self->{'sub'}->{'pretriple_resource'} = \&_print0
-			if lc $self->{'sub'}->{'pretriple_resource'} eq 'print';
+			if lc ($self->{'sub'}->{'pretriple_resource'}||'') eq 'print';
 		$self->{'sub'}->{'pretriple_literal'} = \&_print1
-			if lc $self->{'sub'}->{'pretriple_literal'} eq 'print';
+			if lc ($self->{'sub'}->{'pretriple_literal'}||'') eq 'print';
 	}
 	else
 	{
