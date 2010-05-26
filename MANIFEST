@@ -14,6 +14,7 @@ lib/RDF/RDFa/Parser/Profile.pm
 lib/RDF/RDFa/Parser/Profile/Null.pm
 lib/RDF/RDFa/Parser/Profile/PrefixCC.pm
 lib/RDF/RDFa/Parser/Profile/RDF.pm
+lib/RDF/RDFa/Parser/Profile/SearchMonkey.pm
 
 inc/Module/AutoInstall.pm
 inc/Module/Install/AutoInstall.pm

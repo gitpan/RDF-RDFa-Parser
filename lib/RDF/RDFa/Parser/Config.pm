@@ -3,6 +3,7 @@ package RDF::RDFa::Parser::Config;
 use base qw(Exporter);
 use constant {
 	HOST_ATOM  => 'atom',
+	HOST_DATARSS => 'datarss',
 	HOST_HTML4 => 'html4',
 	HOST_HTML5 => 'html5',
 	HOST_SVG   => 'svg',
@@ -16,13 +17,19 @@ use constant {
 use strict;
 use 5.008;
 
-our @EXPORT_OK = qw(HOST_ATOM HOST_HTML4 HOST_HTML5 HOST_SVG HOST_XHTML HOST_XML RDFA_10 RDFA_11);
-our $VERSION = '1.09_08';
+our @EXPORT_OK = qw(HOST_ATOM HOST_DATARSS HOST_HTML4 HOST_HTML5 HOST_SVG HOST_XHTML HOST_XML RDFA_10 RDFA_11);
+our $VERSION = '1.09_09';
 our $CONFIGS = {
 	'host' => {
 		HOST_ATOM() => {
 			'atom_elements'         => 1,
 			'keyword_bundles'       => 'rdfa iana',
+		},
+		HOST_DATARSS() => {
+			'atom_elements'         => 1,
+			'keyword_bundles'       => 'rdfa iana',
+			'default_profiles'      => 'http://search.yahoo.com/searchmonkey-profile',
+			'profile_pi'            => 1,
 		},
 		HOST_HTML4() => {
 			'dom_parser'            => 'html',
@@ -62,6 +69,7 @@ our $CONFIGS = {
 			'atom_elements'         => 0,
 			'atom_parser'           => 0,
 			'auto_config'           => 0,
+			'default_profiles'      => undef,
 			'dom_parser'            => 'xml',
 			'embedded_rdfxml'       => 1,
 			'full_uris'             => 0,
@@ -71,6 +79,7 @@ our $CONFIGS = {
 			'graph_type'            => 'id',
 			'graph_default'         => '_:RDFaDefaultGraph',
 			'graph_default_trine'   => undef,  # not officially exposed
+			'lwp_ua'                => undef,
 			'prefix_attr'           => 0,
 			'prefix_bare'           => 0,
 			'prefix_default'        => 0,
@@ -78,10 +87,12 @@ our $CONFIGS = {
 			'prefix_nocase_attr'    => 0,
 			'prefix_nocase_xmlns'   => 0,
 			'profiles'              => 0,
+			'profile_pi'            => 0,
 			'role_attr'             => 0,
 			'safe_anywhere'         => 0,
 			'tdb_service'           => 0,
 			'use_rtnlx'             => 0,
+			'user_agent'            => undef,
 			'vocab_attr'            => 0,
 			'xhtml_base'            => 0,
 			'xhtml_elements'        => 0,
@@ -95,6 +106,7 @@ our $CONFIGS = {
 			'atom_elements'         => 0,
 			'atom_parser'           => 0,
 			'auto_config'           => 0,
+			'default_profiles'      => undef,
 			'dom_parser'            => 'xml',
 			'embedded_rdfxml'       => 1,
 			'full_uris'             => 1, #diff
@@ -104,6 +116,7 @@ our $CONFIGS = {
 			'graph_type'            => 'id',
 			'graph_default'         => '_:RDFaDefaultGraph',
 			'graph_default_trine'   => undef,
+			'lwp_ua'                => undef,
 			'prefix_attr'           => 1, #diff
 			'prefix_bare'           => 0,
 			'prefix_default'        => 0,
@@ -111,10 +124,12 @@ our $CONFIGS = {
 			'prefix_nocase_attr'    => 1, #diff
 			'prefix_nocase_xmlns'   => 1, #diff
 			'profiles'              => 1, #diff
+			'profile_pi'            => 0,
 			'role_attr'             => 0,
 			'safe_anywhere'         => 1, #diff
 			'tdb_service'           => 0,
 			'use_rtnlx'             => 0,
+			'user_agent'            => undef,
 			'vocab_attr'            => 1, #diff
 			'xhtml_base'            => 0,
 			'xhtml_elements'        => 0,
@@ -130,7 +145,7 @@ sub new
 {
 	my ($class, $host, $version, %options) = @_;
 	$host    ||= HOST_XHTML;
-	$version ||= RDFA_10;
+	$version ||= RDFA_11;
 	
 	my $self = bless {}, $class;
 	
@@ -240,7 +255,7 @@ sub _merge_options
 	
 	while (my ($key, $value) = each %$opts)
 	{
-		if ($key eq 'keyword_bundles'
+		if ($key =~ m'^(keyword_bundles|default_profiles)$'i
 		&&  defined $self->{$key}
 		&&  length $self->{$key})
 		{
@@ -447,6 +462,8 @@ following constants; the default is HOST_XHTML.
 
 =item * B<< RDF::RDFa::Parser::Config->HOST_ATOM >>
 
+=item * B<< RDF::RDFa::Parser::Config->HOST_DATARSS >>
+
 =item * B<< RDF::RDFa::Parser::Config->HOST_HTML4 >>
 
 =item * B<< RDF::RDFa::Parser::Config->HOST_HTML5 >>
@@ -460,7 +477,7 @@ following constants; the default is HOST_XHTML.
 =back
 
 $version is the RDFa version. Generally you would supply one of the
-following constants; the default is RDFA_10.
+following constants; the default is RDFA_11.
 
 =over 2
 
@@ -486,7 +503,9 @@ in brackets.
 
 =item * B<auto_config> - see section "Auto Config" [0]
 
-=item *B<dom_parser> - parser to use to turn a markup string into a DOM. 'html' or 'xml'. ['xml']
+=item * B<default_profiles> - whitespace-separated list of profiles to load by default. [undef]
+
+=item * B<dom_parser> - parser to use to turn a markup string into a DOM. 'html' or 'xml'. ['xml']
 
 =item * B<embedded_rdfxml> - find plain RDF/XML chunks within document. 0=no, 1=handle, 2=skip. [0]                      
 
@@ -502,7 +521,7 @@ in brackets.
 
 =item * B<keyword_bundles> - space-separated list of bundles of keywords ('rdfa', 'html32', 'html4', 'html5', 'xhtml-role', 'aria-role', 'iana', 'xhv') ['rdfa']
 
-=item *B<lwp_ua> - an LWP::UserAgent to use for HTTP requests. [undef]
+=item * B<lwp_ua> - an LWP::UserAgent to use for HTTP requests. [undef]
 
 =item * B<prefix_attr> - support @prefix rather than just @xmlns:*. [0, 1]
 
@@ -520,13 +539,15 @@ in brackets.
 
 =item * B<profiles> - support RDFa profiles. [0, 1]
 
+=item * B<profile_pi> - support DataRSS-style profile processing instruction. [0]
+
 =item * B<role_attr> - support for XHTML @role [0]
 
 =item * B<safe_anywhere> - allow Safe CURIEs in @rel/@rev/etc. [0, 1]
 
 =item * B<tdb_service> - use thing-described-by.org to name some bnodes. [0]
 
-=item *B<user_agent> - a User-Agent header to use for HTTP requests. Ignored if lwp_ua is provided. [undef]
+=item * B<user_agent> - a User-Agent header to use for HTTP requests. Ignored if lwp_ua is provided. [undef]
 
 =item * B<use_rtnlx> - use RDF::Trine::Node::Literal::XML. 0=no, 1=if available. [0]
 
@@ -559,7 +580,7 @@ the graph too.
     RDF::RDFa::Parser::Config->RDFA_11,
     atom_parser => 1,
     );
-  $parser = RDF::RDFa::Parser->new($xml, $baseuri, $config)->consume;
+  $parser = RDF::RDFa::Parser->new_from_url($url, $config);
   $data   = $parser->graph;
 
 The following configuration set parses XHTML+RDFa 1.1 while also parsing

@@ -393,6 +393,22 @@ my:v_1-09_08
 			[ rdfs:label "Remove 'my' from a couple of lines."@en ; a dcs:Bugfix ]
 		] .
 
+my:v_1-09_09
+
+	a               :Version ;
+	dc:issued       "2010-05-26"^^xsd:date ;
+	:revision       "1.09_09"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_09.tar.gz> ;
+	rdfs:label      "RDFa 1.1 Preview 9"@en ;
+	dcs:changeset [
+		dcs:versus my:v_1-09_09 ;
+		dcs:item
+			[ rdfs:label "Improved DataRSS support; differentiate between DataRSS and plain Atom."@en ] ,
+			[ rdfs:label "Handle <?profile ?> processing instructions."@en ; a dcs:Addition ] ,
+			[ rdfs:label "Hard-coded the Yahoo SearchMonkey profile."@en ; a dcs:Addition ] ,
+			[ rdfs:label "Allow Config.pm to provide a list of defaul profiles to the parser."@en ; a dcs:Addition ]
+		] .
+
 my:roadmap_1_10
 
 	a                dcs:ToDoList ;
@@ -429,7 +445,8 @@ my:project
                    my:v_1-00 ,    my:v_1-00-001 , my:v_1-00-002 ,
                    my:v_1-09_00 , my:v_1-09_01 ,  my:v_1-09_02 ,
                    my:v_1-09_03 , my:v_1-09_04 ,  my:v_1-09_05 ,
-                   my:v_1-09_06 , my:v_1-09_07 , my:v_1-09_08 .
+                   my:v_1-09_06 , my:v_1-09_07 ,  my:v_1-09_08 ,
+                   my:v_1-09_09 .
 
 #############################################################
 

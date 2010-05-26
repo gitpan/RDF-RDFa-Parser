@@ -3,6 +3,8 @@
 use Test::More tests => 12;
 BEGIN { use_ok('RDF::RDFa::Parser') };
 
+my $xhtml_rdfa_10 = RDF::RDFa::Parser::Config->new('xhtml','1.0');
+
 my ($parser, $model);
 my $xhtml = <<EOF;
 <html
@@ -23,7 +25,7 @@ my $xhtml = <<EOF;
 </html>
 EOF
 
-$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/');
+$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/', $xhtml_rdfa_10);
 $parser->consume;
 $model = $parser->graph;
 
@@ -101,7 +103,7 @@ $xhtml = <<EOF;
 </html>
 EOF
 
-$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/');
+$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/', $xhtml_rdfa_10);
 $parser->consume;
 $model = $parser->graph;
 

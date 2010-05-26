@@ -2,6 +2,7 @@ package RDF::RDFa::Parser::Profile;
 
 use RDF::RDFa::Parser::Profile::Null;
 use RDF::RDFa::Parser::Profile::PrefixCC;
+use RDF::RDFa::Parser::Profile::SearchMonkey;
 use RDF::RDFa::Parser::Profile::RDF;
 
 use strict;
@@ -9,7 +10,7 @@ use 5.008;
 
 our @Modules;
 our %Known;
-our $VERSION = '1.09_08';
+our $VERSION = '1.09_09';
 
 sub new
 {

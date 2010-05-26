@@ -15,7 +15,7 @@ SYNOPSIS
      $title = $p->opengraph('title');
 
 VERSION
-    1.09_08
+    1.09_09
 
 DESCRIPTION
   Constructors

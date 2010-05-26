@@ -58,11 +58,11 @@ use 5.008;
 
 =head1 VERSION
 
-1.09_08
+1.09_09
 
 =cut
 
-our $VERSION = '1.09_08';
+our $VERSION = '1.09_09';
 our $HAS_AWOL;
 
 BEGIN
@@ -402,7 +402,6 @@ sub opengraph
 	my $property = shift;
 	$property = $1
 		if defined $property && $property =~ m'^http://opengraphprotocol\.org/schema/(.*)$';
-	
 		
 	my $rtp;
 	if (defined $property && $property =~ /^[a-z][a-z0-9\-\.\+]*:/i)
@@ -803,65 +802,87 @@ sub _consume_element
 			);
 	}
 
-	
+	my @profiles;
+
 	# RDFa 1.1 - @profile
 	if ($self->{'options'}->{'profiles'}
 	and $current_element->hasAttribute('profile'))
 	{
-		my @profiles = reverse $self->_split_tokens( $current_element->getAttribute('profile') );
-		
-		foreach my $uri (@profiles)
-		{
-			my $profile = RDF::RDFa::Parser::Profile->new(
-				$self->uri($uri, {'element'=>$current_element,'xml_base'=>$xml_base}),
-				$self);
-			
-			if (UNIVERSAL::isa($profile, 'RDF::RDFa::Parser::Profile'))
-			{
-				foreach my $mapping ($profile->get_prefixes)
-				{
-					my ($prefix, $uri, $insensitive) = @$mapping;
-					$prefix = lc $prefix if $insensitive;
-					$insensitive = $insensitive ? 'insensitive' : 'sensitive';
-					$local_uri_mappings->{$insensitive}->{$prefix} = $uri;				
-				}
-				foreach my $mapping ($profile->get_terms)
-				{
-					my ($term, $uri, $insensitive, $attrs) = @$mapping;
-					$term = lc $term if $insensitive;
-					$insensitive = $insensitive ? 'insensitive' : 'sensitive';
-					$attrs = [ split /\s*/, ($attrs||'*') ];
-					
-					foreach my $attr (@$attrs)
-					{
-						$local_term_mappings->{$insensitive}->{$attr}->{$term} = $uri;
-					}
-				}
-			}
-			else
-			{
-				$self->_log_error(
-					ERR_ERROR,
-					ERR_CODE_PROFILE_UNUSABLE,
-					sprintf("Unusable profile '%s'.", $current_element->getAttribute('profile')),
-					uri     => $current_element->getAttribute('profile'),
-					element => $current_element,
-					);
-			}
-		}
+		push @profiles, $self->_split_tokens( $current_element->getAttribute('profile') );		
 	}
 	elsif ($current_element->hasAttribute('profile')
 	and    $current_element->getAttribute('profile') ne 'http://www.w3.org/1999/xhtml/vocab')
 	{
+		$self->_log_error(
+			ERR_WARNING,
+			ERR_CODE_PROFILE_DISABLED,
+			sprintf("Encountered profile '%s', but profiles are disabled.", $current_element->getAttribute('profile')),
+			uri     => $current_element->getAttribute('profile'),
+			element => $current_element,
+			);
+	}
+
+	# Various weird/default profile features.
+	if ($current_element->isSameNode($self->dom->documentElement))
+	{
+		if ($self->{'options'}->{'default_profiles'})
+		{
+			push @profiles, $self->_split_tokens( $self->{'options'}->{'default_profiles'} );
+		}
+		
+		if ($self->{'options'}->{'profile_pi'})
+		{
+			foreach my $node ($self->dom->childNodes)
+			{
+				next unless $node->nodeType == XML_PI_NODE;
+				next unless $node->nodeName == 'profile';
+				my $uri = $node->getData;
+				$uri =~ s/(^\s+|\s+$)//g;
+				push @profiles, $uri;
+			}
+		}
+	}
+
+	foreach my $uri (reverse @profiles)
+	{
+		my $profile = RDF::RDFa::Parser::Profile->new(
+			$self->uri($uri, {'element'=>$current_element,'xml_base'=>$xml_base}),
+			$self);
+			
+		if (UNIVERSAL::isa($profile, 'RDF::RDFa::Parser::Profile'))
+		{
+			foreach my $mapping ($profile->get_prefixes)
+			{
+				my ($prefix, $uri, $insensitive) = @$mapping;
+				$prefix = lc $prefix if $insensitive;
+				$insensitive = $insensitive ? 'insensitive' : 'sensitive';
+				$local_uri_mappings->{$insensitive}->{$prefix} = $uri;				
+			}
+			foreach my $mapping ($profile->get_terms)
+			{
+				my ($term, $uri, $insensitive, $attrs) = @$mapping;
+				$term = lc $term if $insensitive;
+				$insensitive = $insensitive ? 'insensitive' : 'sensitive';
+				$attrs = [ split /\s*/, ($attrs||'*') ];
+				
+				foreach my $attr (@$attrs)
+				{
+					$local_term_mappings->{$insensitive}->{$attr}->{$term} = $uri;
+				}
+			}
+		}
+		else
+		{
 			$self->_log_error(
-				ERR_WARNING,
-				ERR_CODE_PROFILE_DISABLED,
-				sprintf("Encountered profile '%s', but profiles are disabled.", $current_element->getAttribute('profile')),
+				ERR_ERROR,
+				ERR_CODE_PROFILE_UNUSABLE,
+				sprintf("Unusable profile '%s'.", $current_element->getAttribute('profile')),
 				uri     => $current_element->getAttribute('profile'),
 				element => $current_element,
 				);
+		}
 	}
-	
+
 	# Next the [current element] is parsed for [URI mapping]s and these are
 	# added to the [local list of URI mappings]. Note that a [URI mapping] 
 	# will simply overwrite any current mapping in the list that has the same

@@ -3,6 +3,8 @@
 use Test::More tests => 8;
 BEGIN { use_ok('RDF::RDFa::Parser') };
 
+my $xhtml_rdfa_10 = RDF::RDFa::Parser::Config->new('xhtml','1.0');
+
 my $xhtml = <<EOF;
 <html xmlns:ex="http://example.com/ns#"
 	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -17,7 +19,7 @@ my $xhtml = <<EOF;
 </html>
 EOF
 
-my $parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/');
+my $parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/', $xhtml_rdfa_10);
 $parser->consume;
 
 my $model;
