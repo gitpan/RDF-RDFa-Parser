@@ -409,6 +409,19 @@ my:v_1-09_09
 			[ rdfs:label "Allow Config.pm to provide a list of defaul profiles to the parser."@en ; a dcs:Addition ]
 		] .
 
+my:v_1-09_10
+
+	a               :Version ;
+	dc:issued       "2010-05-27"^^xsd:date ;
+	:revision       "1.09_10"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_10.tar.gz> ;
+	rdfs:label      "RDFa 1.1 Preview 10"@en ;
+	dcs:changeset [
+		dcs:versus my:v_1-09_09 ;
+		dcs:item
+			[ rdfs:label "UTF-8 fixes necessitating requiring a newer version of RDF::Trine."@en ]
+		] .
+
 my:roadmap_1_10
 
 	a                dcs:ToDoList ;
@@ -446,7 +459,7 @@ my:project
                    my:v_1-09_00 , my:v_1-09_01 ,  my:v_1-09_02 ,
                    my:v_1-09_03 , my:v_1-09_04 ,  my:v_1-09_05 ,
                    my:v_1-09_06 , my:v_1-09_07 ,  my:v_1-09_08 ,
-                   my:v_1-09_09 .
+                   my:v_1-09_09 , my:v_1-09_10 .
 
 #############################################################
 

@@ -1,5 +1,6 @@
 package TestSuite;
 
+use Encode qw'decode';
 use File::Slurp;
 use File::ShareDir qw(dist_file);
 use HTML::HTML5::Parser;
@@ -64,7 +65,7 @@ my $R = {};
 my $PASS = my $FAIL = my $SKIP = 0;
 
 # Parse the test case manifest.
-diag("Parsing $flavour manifest...\n");
+#diag("Parsing $flavour manifest...\n");
 my $manifest = RDF::Trine::Model->new( RDF::Trine::Store->temporary_store );
 my $m_rdfxml = read_file('t/' . $flavour . "-manifest.rdf");
 my $rdfxml_p = RDF::Trine::Parser::RDFXML->new;
@@ -74,7 +75,7 @@ $rdfxml_p->parse_into_model(
 	$manifest);
 
 # Query it to get a list of approved tests.
-diag("Querying manifest...\n");
+#diag("Querying manifest...\n");
 my $manifest_sparql = <<ENDSPARQL;
 
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -204,7 +205,7 @@ while (my $TC = $iterator->next)
 		$rdfa_parser->set_callbacks({onerror=>sub{}});
 		$model = $rdfa_parser->graph;
 		
-		my $query   = RDF::Query->new($sparql);
+		my $query   = RDF::Query->new(decode('utf-8', $sparql));
 		$ask_result = $query->execute($model);
 	};
 	

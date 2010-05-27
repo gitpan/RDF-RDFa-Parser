@@ -20,14 +20,13 @@ RDF::RDFa::Parser - flexible RDFa parser
 
 =cut
 
-use Encode qw(encode_utf8);
 use File::ShareDir qw(dist_file);
 use HTML::HTML5::Parser;
 use HTML::HTML5::Sanity qw(fix_document);
 use LWP::UserAgent;
 use RDF::RDFa::Parser::Config;
 use RDF::RDFa::Parser::Profile;
-use RDF::Trine 0.118;
+use RDF::Trine 0.123;
 use Storable qw/dclone/;
 use URI::Escape;
 use URI::URL;
@@ -62,7 +61,7 @@ use 5.008;
 
 =cut
 
-our $VERSION = '1.09_09';
+our $VERSION = '1.09_10';
 our $HAS_AWOL;
 
 BEGIN
@@ -1883,7 +1882,7 @@ sub _insert_triple_literal
 	my $to;
 	
 	# Work around bad Unicode handling in RDF::Trine.
-	$object = encode_utf8($object);
+	# $object = encode_utf8($object);
 
 	if (defined $datatype)
 	{

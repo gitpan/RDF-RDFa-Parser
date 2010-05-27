@@ -19,18 +19,17 @@ test_requires       'File::Slurp'    => 0;
 
 requires            'Carp'           => 0;
 requires            'Data::Dumper'   => 0;
-requires            'Encode'         => 0;
 requires            'File::ShareDir' => 0;
 requires            'File::Spec'     => 0;
 requires            'HTML::HTML5::Parser' => 0;
 requires            'HTML::HTML5::Sanity' => 0;
 requires            'HTTP::Cache::Transparent' => 0;
 requires            'LWP::UserAgent' => 0;
-requires            'RDF::Trine'     => 0.118;
+requires            'RDF::Trine'     => '0.123';
 requires            'Storable'       => 0;
 requires            'URI::Escape'    => 0;
 requires            'URI::URL'       => 0;
-requires            'XML::LibXML'    => 1.66;
+requires            'XML::LibXML'    => '1.66';
 requires            'XML::RegExp'    => 0;
 
 resources(
