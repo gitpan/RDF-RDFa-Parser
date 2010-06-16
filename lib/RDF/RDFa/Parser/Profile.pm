@@ -10,7 +10,7 @@ use 5.008;
 
 our @Modules;
 our %Known;
-our $VERSION = '1.09_10';
+our $VERSION = '1.09_11';
 
 sub new
 {

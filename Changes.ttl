@@ -422,11 +422,27 @@ my:v_1-09_10
 			[ rdfs:label "UTF-8 fixes necessitating requiring a newer version of RDF::Trine."@en ]
 		] .
 
-my:roadmap_1_10
+my:v_1-09_11
+
+	a               :Version ;
+	dc:issued       "2010-06-16"^^xsd:date ;
+	:revision       "1.09_11"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_11.tar.gz> ;
+	rdfs:label      "RDFa 1.1 Preview 11"@en ;
+	dcs:changeset [
+		dcs:versus my:v_1-09_10 ;
+		dcs:item
+			[ rdfs:label "Various media-type handling clean-ups."@en ] ,
+			[ rdfs:label "Auto-Config fixes and clean-ups."@en ] ,
+			[ rdfs:label "Rearrange some of the documentation in the FEATURES section."@en ] ,
+			[ rdfs:label "Support for OpenDocument's slightly unusual flavour of RDFa."@en ; a dcs:Addition ]
+		] .
+
+my:roadmap_1_100
 
 	a                dcs:ToDoList ;
-	rdfs:label       "Roadmap for RDF::RDFa::Parser 1.10"@en ;
-	dcs:milestone    my:v_1-10 ;
+	rdfs:label       "Roadmap for RDF::RDFa::Parser 1.100"@en ;
+	dcs:milestone    my:v_1-100 ;
 	dcs:item
 		[ rdfs:label "RDFa 1.1 Support."@en ; dcs:timescale "Mostly implemented, but dependent on progress in the W3C RDFa WG. Early to mid 2011?"@en ] ,
 		[ rdfs:label "Option to automatically follow { <> xhv:meta ?resource . } links."@en ] ,
@@ -459,7 +475,7 @@ my:project
                    my:v_1-09_00 , my:v_1-09_01 ,  my:v_1-09_02 ,
                    my:v_1-09_03 , my:v_1-09_04 ,  my:v_1-09_05 ,
                    my:v_1-09_06 , my:v_1-09_07 ,  my:v_1-09_08 ,
-                   my:v_1-09_09 , my:v_1-09_10 .
+                   my:v_1-09_09 , my:v_1-09_10 ,  my:v_1-09_11 .
 
 #############################################################
 
@@ -470,7 +486,7 @@ toby:i
 	foaf:homepage   <http://tobyinkster.co.uk/> ;
 	foaf:page       <http://search.cpan.org/~tobyink/> ;
 	foaf:mbox       <mailto:tobyink@cpan.org> ;
-	dcs:tasks       my:roadmap_1_10 ;
+	dcs:tasks       my:roadmap_1_100 ;
 	<http://www.w3.org/2002/07/owl#sameAs> <http://purl.org/NET/cpan-uri/person/tobyink> .
 
 #############################################################

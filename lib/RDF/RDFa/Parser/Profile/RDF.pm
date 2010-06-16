@@ -4,13 +4,14 @@ use File::Spec;
 use HTTP::Cache::Transparent;
 use LWP::UserAgent;
 use RDF::RDFa::Parser;
+use RDF::RDFa::Parser::Config;
 use RDF::Trine;
 
 use base qw(RDF::RDFa::Parser::Profile);
 use strict;
 use 5.008;
 
-our $VERSION = '1.09_10';
+our $VERSION = '1.09_11';
 
 BEGIN
 {
@@ -24,24 +25,17 @@ sub new
 {
 	my ($class, $uri, $parser) = @_;
 	
-	my $ua       = $parser->{'options'}->{'lwp_ua'};
-	my $response = $ua->get($uri);
+	my $ua       = $parser->{'options'}->lwp_ua;
+	my $accept   = 'application/rdf+xml, text/turtle, application/x-rdf+json, '.$ua->default_header('Accept');
+	my $response = $ua->get($uri, Accept=>$accept);
 	
 	my $model;
 	
 	if ($response->code == 200)
 	{
-		my ($rdfa_opts, $trine);
+		my $trine;
 		
-		if ($response->content_type eq 'text/html')
-			{ $rdfa_opts = &RDF::RDFa::Parser::OPTS_HTML5; }
-		elsif ($response->content_type eq 'application/xhtml+xml')
-			{ $rdfa_opts = &RDF::RDFa::Parser::OPTS_XHTML_11; }
-		elsif ($response->content_type eq 'image/svg+xml')
-			{ $rdfa_opts = &RDF::RDFa::Parser::OPTS_SVG; }
-		elsif ($response->content_type eq 'application/atom+xml')
-			{ $rdfa_opts = &RDF::RDFa::Parser::OPTS_ATOM; }
-		elsif ($response->content_type eq 'application/rdf+xml')
+		if ($response->content_type eq 'application/rdf+xml')
 			{ $trine = 'rdfxml'; }
 		elsif ($response->content_type eq 'application/json')
 			{ $trine = 'rdfjson'; }
@@ -57,19 +51,8 @@ sub new
 			{ $trine = 'turtle'; }
 		elsif ($response->content_type eq 'text/plain')
 			{ $trine = 'ntriples'; }
-		
-		if (defined $rdfa_opts)
-		{
-			eval 
-			{
-				my $parser = RDF::RDFa::Parser->new(
-					$response->decoded_content, $response->base, $rdfa_opts);
-				$parser->consume;
-				$model = $parser->graph;
-			};
-			return undef if $@;
-		}
-		elsif (defined $trine)
+
+		if (defined $trine)
 		{
 			eval
 			{
@@ -80,6 +63,33 @@ sub new
 			};
 			return undef if $@;
 		}
+		else
+		{
+			my $hostlang = RDF::RDFa::Parser::Config->host_from_media_type($response->content_type);
+		
+			if (defined $hostlang)
+			{
+				eval 
+				{
+					my $parser = RDF::RDFa::Parser->new(
+						$response->decoded_content,
+						$response->base,
+						RDF::RDFa::Parser::Config->new($hostlang),
+						);
+					$parser->consume;
+					$model = $parser->graph;
+				};
+				return undef if $@;
+			}
+			else
+			{
+				return undef;
+			}
+		}
+	}
+	else
+	{
+		return undef;
 	}
 
 	if (defined $model)

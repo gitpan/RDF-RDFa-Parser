@@ -6,19 +6,26 @@ use constant {
 	HOST_DATARSS => 'datarss',
 	HOST_HTML4 => 'html4',
 	HOST_HTML5 => 'html5',
+	HOST_OPENDOCUMENT_XML => 'opendocument-xml',
+	HOST_OPENDOCUMENT_ZIP => 'opendocument-zip',
 	HOST_SVG   => 'svg',
 	HOST_XHTML => 'xhtml',
 	HOST_XML   => 'xml',
 };
 use constant {
-	RDFA_10    => '1.0',
-	RDFA_11    => '1.1',
+	RDFA_10     => '1.0',
+	RDFA_11     => '1.1',
+	RDFA_LATEST => '1.1',
+	RDFA_GUESS  => '1.1',
 };
 use strict;
 use 5.008;
 
-our @EXPORT_OK = qw(HOST_ATOM HOST_DATARSS HOST_HTML4 HOST_HTML5 HOST_SVG HOST_XHTML HOST_XML RDFA_10 RDFA_11);
-our $VERSION = '1.09_10';
+use URI::Escape qw'uri_unescape';
+use RDF::RDFa::Parser::OpenDocumentObjectModel;
+
+our @EXPORT_OK = qw(HOST_ATOM HOST_DATARSS HOST_HTML4 HOST_HTML5 HOST_OPENDOCUMENT_XML HOST_OPENDOCUMENT_ZIP HOST_SVG HOST_XHTML HOST_XML RDFA_10 RDFA_11);
+our $VERSION = '1.09_11';
 our $CONFIGS = {
 	'host' => {
 		HOST_ATOM() => {
@@ -53,6 +60,22 @@ our $CONFIGS = {
 			'xml_base'              => 0,
 			'xml_lang'              => 1,
 		},
+		HOST_OPENDOCUMENT_XML() => {
+			'bookmark_end'          => '{urn:oasis:names:tc:opendocument:xmlns:text:1.0}bookmark-end',
+			'bookmark_name'         => '{urn:oasis:names:tc:opendocument:xmlns:text:1.0}name',
+			'bookmark_start'        => '{urn:oasis:names:tc:opendocument:xmlns:text:1.0}bookmark-start',
+			'ns'                    => 'http://www.w3.org/1999/xhtml',
+		},
+		HOST_OPENDOCUMENT_ZIP() => {
+			'bookmark_end'          => '{urn:oasis:names:tc:opendocument:xmlns:text:1.0}bookmark-end',
+			'bookmark_name'         => '{urn:oasis:names:tc:opendocument:xmlns:text:1.0}name',
+			'bookmark_start'        => '{urn:oasis:names:tc:opendocument:xmlns:text:1.0}bookmark-start',
+			'dom_parser'            => 'opendocument',
+			'graph'                 => 3,
+			'graph_attr'            => '{http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/opendocument-dom-wrapper}graph',
+			'graph_type'            => 'about',
+			'ns'                    => 'http://www.w3.org/1999/xhtml',
+		},
 		HOST_SVG() => {},
 		HOST_XHTML() => {
 			'embedded_rdfxml'       => 0,
@@ -69,6 +92,9 @@ our $CONFIGS = {
 			'atom_elements'         => 0,
 			'atom_parser'           => 0,
 			'auto_config'           => 0,
+			'bookmark_end'          => undef,
+			'bookmark_name'         => undef,
+			'bookmark_start'        => undef,
 			'default_profiles'      => undef,
 			'dom_parser'            => 'xml',
 			'embedded_rdfxml'       => 1,
@@ -80,6 +106,7 @@ our $CONFIGS = {
 			'graph_default'         => '_:RDFaDefaultGraph',
 			'graph_default_trine'   => undef,  # not officially exposed
 			'lwp_ua'                => undef,
+			'ns'                    => undef,
 			'prefix_attr'           => 0,
 			'prefix_bare'           => 0,
 			'prefix_default'        => 0,
@@ -106,6 +133,9 @@ our $CONFIGS = {
 			'atom_elements'         => 0,
 			'atom_parser'           => 0,
 			'auto_config'           => 0,
+			'bookmark_end'          => undef,
+			'bookmark_name'         => undef,
+			'bookmark_start'        => undef,
 			'default_profiles'      => undef,
 			'dom_parser'            => 'xml',
 			'embedded_rdfxml'       => 1,
@@ -117,6 +147,7 @@ our $CONFIGS = {
 			'graph_default'         => '_:RDFaDefaultGraph',
 			'graph_default_trine'   => undef,
 			'lwp_ua'                => undef,
+			'ns'                    => undef,
 			'prefix_attr'           => 1, #diff
 			'prefix_bare'           => 0,
 			'prefix_default'        => 0,
@@ -147,6 +178,8 @@ sub new
 	$host    ||= HOST_XHTML;
 	$version ||= RDFA_11;
 	
+	$host = $class->host_from_media_type($host) if $host =~ m'/';
+	
 	my $self = bless {}, $class;
 	
 	$self->_merge_options($CONFIGS->{'rdfa'}->{$version})
@@ -175,13 +208,76 @@ sub new
 	return $self;
 }
 
+sub host_from_media_type
+{
+	my ($class, $mediatype) = @_;
+	
+	my $host = {
+		'application/atom+xml'    => HOST_ATOM,
+		'application/vnd.wap.xhtml+xml' => HOST_XHTML,
+		'application/xhtml+xml'   => HOST_XHTML,
+		'application/xml'         => HOST_XML,
+		'application/zip'         => HOST_OPENDOCUMENT_ZIP,
+		'image/svg+xml'           => HOST_SVG,
+		'text/html'               => HOST_HTML5,
+		'text/xml'                => HOST_XML,
+		}->{$mediatype};
+	
+	return $host
+		if defined $host;
+	
+	return HOST_XML
+		if $mediatype =~ /\+xml/;
+	
+	return HOST_OPENDOCUMENT_ZIP
+		if grep { $mediatype eq $_ } @RDF::RDFa::Parser::OpenDocumentObjectModel::Types;
+	
+	return undef;
+}
+
 sub rehost
 {
 	my ($self, $host, $version) = @_;
 	$version ||= $self->{'_rdfa'};
 	my $opts   = $self->{'_opts'};
-	my $class  = __PACKAGE__;
+	my $class  = ref $self;
 	return $class->new($host, $version, %$opts);
+}
+
+sub lwp_ua
+{
+	my ($self) = @_;
+	
+	unless (ref $self->{lwp_ua})
+	{
+		my $uastr = sprintf('%s/%s ', 'RDF::RDFa::Parser', $VERSION);
+		if (defined $self->{'user_agent'})
+		{
+			if ($self->{'user_agent'} =~ /\s+$/)
+			{
+				$uastr = $self->{'user_agent'} . " $uastr";
+			}
+			else
+			{
+				$uastr = $self->{'user_agent'};
+			}
+		}
+		
+		my $accept = "application/xhtml+xml, text/html;q=0.9, image/svg+xml;q=0.9, application/atom+xml;q=0.9, application/xml;q=0.1, text/xml;q=0.1";
+		if (RDF::RDFa::Parser::OpenDocumentObjectModel->usable)
+		{
+			foreach my $t (@RDF::RDFa::Parser::OpenDocumentObjectModel::Types)
+			{
+				$accept .= ", $t;q=0.4";
+			}
+		}
+		
+		$self->{lwp_ua} = LWP::UserAgent->new;
+		$self->{lwp_ua}->agent($uastr);
+		$self->{lwp_ua}->default_header("Accept" => $accept);
+	}
+	
+	return $self->{lwp_ua};
 }
 
 sub merge_options
@@ -193,14 +289,14 @@ sub merge_options
 
 sub auto_config
 {
-	my ($self, $dom) = @_;
+	my ($self, $parser) = @_;
 	my $count;
 	
 	return undef unless $self->{'auto_config'};
 
 	my $xpc = XML::LibXML::XPathContext->new;
 	$xpc->registerNs('x', 'http://www.w3.org/1999/xhtml');
-	my $nodes  = $xpc->find('//x:meta[@name="http://search.cpan.org/dist/RDF-RDFa-Parser/#auto_config"]/@content', $dom->documentElement);
+	my $nodes  = $xpc->find('//x:meta[@name="http://search.cpan.org/dist/RDF-RDFa-Parser/#auto_config"]/@content', $parser->dom->documentElement);
 	my $optstr = '';
 	foreach my $node ($nodes->get_nodelist)
 	{
@@ -213,15 +309,17 @@ sub auto_config
 	
 	foreach my $o (keys %$options)
 	{
-		next unless $o=~ /^(alt_stylesheet | embedded_rdfxml | full_uris |
-			keywords | prefix_attr | prefix_bare | prefix_empty | prefix_nocase |
-			safe_anywhere | tdb_service | xhtml_base | xhtml_elements | xhtml_lang |
-			xml_base | xml_lang | graph | graph_attr | graph_type | graph_default |
-			prefix_default | vocab_attr | profiles | keyword_bundles )$/ix;
+		# ignore use_rtnlx, dom_parser and auto_config.
+		next if $o=~ /^(use_rtnlx|dom_parser|auto_config)$/i;
 		$count++;
+		
 		if (lc $o eq 'keywords')
 		{
 			$x->{keyword_bundles} .= ' ' . $options->{$o};
+		}
+		elsif (lc $o eq 'keyword_bundles' || lc $o eq 'default_profiles')
+		{
+			$x->{lc $o} .= ' ' . $options->{$o};
 		}
 		else
 		{
@@ -238,6 +336,7 @@ sub _parse_application_x_www_form_urlencoded
 {
 	my $axwfue = shift;
 	$axwfue =~ tr/;/&/;
+	$axwfue =~ s/\+/%20/g;
 	$axwfue =~ s/(^&+|&+$)//g;
 	my $rv = {};
 	for (split /&/, $axwfue)
@@ -456,7 +555,8 @@ All you need to know about is the constructor:
   $config = RDF::RDFa::Parser::Config->new($host, $version, %options);
 
 $host is the host language. Generally you would supply one of the
-following constants; the default is HOST_XHTML.
+following constants; the default is HOST_XHTML. Internet media types
+are accepted (e.g. 'text/html' or 'image/svg+xml').
 
 =over
 
@@ -468,6 +568,10 @@ following constants; the default is HOST_XHTML.
 
 =item * B<< RDF::RDFa::Parser::Config->HOST_HTML5 >>
 
+=item * B<< RDF::RDFa::Parser::Config->HOST_OPENDOCUMENT_XML >>
+
+=item * B<< RDF::RDFa::Parser::Config->HOST_OPENDOCUMENT_ZIP >>
+
 =item * B<< RDF::RDFa::Parser::Config->HOST_SVG >>
 
 =item * B<< RDF::RDFa::Parser::Config->HOST_XHTML >>
@@ -477,7 +581,7 @@ following constants; the default is HOST_XHTML.
 =back
 
 $version is the RDFa version. Generally you would supply one of the
-following constants; the default is RDFA_11.
+following constants; the default is RDFA_LATEST.
 
 =over 2
 
@@ -485,7 +589,14 @@ following constants; the default is RDFA_11.
 
 =item * B<< RDF::RDFa::Parser::Config->RDFA_11 >>
 
+=item * B<< RDF::RDFa::Parser::Config->RDFA_GUESS >>
+
+=item * B<< RDF::RDFa::Parser::Config->RDFA_LATEST >>
+
 =back
+
+(RDFA_GUESS is currently just an alias for RDFA_LATEST. Version guessing
+is a planned feature.)
 
 %options is a hash of additional options to use which override the
 defaults. While many of these are useful, they probably also reduce
@@ -503,9 +614,11 @@ in brackets.
 
 =item * B<auto_config> - see section "Auto Config" [0]
 
+=item * B<bookmark_start>, B<bookmark_end>, B<bookmark_name> - Elements to treat like OpenDocument's E<lt>text:bookmark-startE<gt> and E<lt>text:bookmark-endE<gt> element, and associated text:name attribute. Must set all three to use this feature. Use Clark Notation to specify namespaces. [all undef]
+
 =item * B<default_profiles> - whitespace-separated list of profiles to load by default. [undef]
 
-=item * B<dom_parser> - parser to use to turn a markup string into a DOM. 'html' or 'xml'. ['xml']
+=item * B<dom_parser> - parser to use to turn a markup string into a DOM. 'html', 'opendocument' (i.e. zipped XML) or 'xml'. ['xml']
 
 =item * B<embedded_rdfxml> - find plain RDF/XML chunks within document. 0=no, 1=handle, 2=skip. [0]                      
 
@@ -522,6 +635,8 @@ in brackets.
 =item * B<keyword_bundles> - space-separated list of bundles of keywords ('rdfa', 'html32', 'html4', 'html5', 'xhtml-role', 'aria-role', 'iana', 'xhv') ['rdfa']
 
 =item * B<lwp_ua> - an LWP::UserAgent to use for HTTP requests. [undef]
+
+=item * B<ns> - namespace for RDFa attributes. [undef]
 
 =item * B<prefix_attr> - support @prefix rather than just @xmlns:*. [0, 1]
 

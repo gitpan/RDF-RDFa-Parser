@@ -14,14 +14,14 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 0ffeb2931ea43008db1d64be27b723fdf9d5af09 Changes
-SHA1 969ac17d86012023faa819d45584ab202229f073 Changes.ttl
-SHA1 e1c47469ddee693e2705279d07ebac9fa0de3cba Changes.xml
-SHA1 035582931e4020dc0c0d373c43c6ba873321dbd8 MANIFEST
+SHA1 d580baf112ed3e9f09427114e39e12184142960d Changes
+SHA1 1dd222e98d0971fc9b383945eb229d744dc8b97c Changes.ttl
+SHA1 bac72acde948d0f0b5e53369a0b6c3b6923d7a80 Changes.xml
+SHA1 9e4b132f2343033ab3bcb4cc9ce5d72ccd21eb46 MANIFEST
 SHA1 3dad6b3d3e01b7bcd5db5f715e4443c47bd2a970 MANIFEST.SKIP
-SHA1 130f7130fc7a5fd6ed913ba426341626c2e0b2d0 META.yml
-SHA1 cced0f19d45db0e5b47f842a23643b9c94bda4e8 Makefile.PL
-SHA1 b54f92504034ca3c65b052c1d39ef3c4442f6da6 README
+SHA1 8185d0937494f179f1e6ef12ad624ebf40d6eeea META.yml
+SHA1 d66f1a906639169d0f98c4a3c081a3f347304de3 Makefile.PL
+SHA1 59b4b30b7f89597d3f46dd1ad55a0a97337b8e1f README
 SHA1 8842ca38ce27ccf75e1ce8f5dfb93fa62d933b2e inc/Module/AutoInstall.pm
 SHA1 1ebec4119486a032a5612a403e8d7b7be973e938 inc/Module/Install.pm
 SHA1 bec3c7f9af6e1a3cb4d143249956c98af30f0552 inc/Module/Install/AutoInstall.pm
@@ -37,13 +37,14 @@ SHA1 e638746517232df3485ff384d5751a34b4747a95 inc/Module/Install/Share.pm
 SHA1 5c25f1104c0038041e3b93e0660c39171e4caf2b inc/Module/Install/Win32.pm
 SHA1 94d47349c803c4bd2a9230d25e4db0b6aaf1acd8 inc/Module/Install/WriteAll.pm
 SHA1 1e6399a0585817abef500c34fce676fb9b0545f0 inc/Test/Signature.pm
-SHA1 ccdadd1d75f7fc06995e7c8998723ce6e2f1aec9 lib/RDF/RDFa/Parser.pm
-SHA1 541e25af4dc11c93481a58bfa9d0511fb4d5019e lib/RDF/RDFa/Parser/Config.pm
-SHA1 63841d9ac2138263945bbdca2d84ba7efb723521 lib/RDF/RDFa/Parser/Profile.pm
-SHA1 3a5a8972ad6792cf8d85eb47c4e45f5a14a4d724 lib/RDF/RDFa/Parser/Profile/Null.pm
-SHA1 5467d60fe43d06ce67ad367f1830a99332497aca lib/RDF/RDFa/Parser/Profile/PrefixCC.pm
-SHA1 b25d68a92067bd097188840a621375883481a6ce lib/RDF/RDFa/Parser/Profile/RDF.pm
-SHA1 19c78fafc536fd897f8e63eb63809b508044272d lib/RDF/RDFa/Parser/Profile/SearchMonkey.pm
+SHA1 e2e61968c411f166dcc23a5c719c6bf718231c41 lib/RDF/RDFa/Parser.pm
+SHA1 d4aecc13af22b959f171a40bd57d661347a6c3ce lib/RDF/RDFa/Parser/Config.pm
+SHA1 c997b7492bca918b335a3a72a08ad07c418a001b lib/RDF/RDFa/Parser/OpenDocumentObjectModel.pm
+SHA1 7a2ed4ef57e30468f412a2da5e36e6f218dcd013 lib/RDF/RDFa/Parser/Profile.pm
+SHA1 7fd455e39d97c9b577b8c889bc080ff49ff25cbd lib/RDF/RDFa/Parser/Profile/Null.pm
+SHA1 4a971d552d5e6a3734653afaeeb3fabc3842eebe lib/RDF/RDFa/Parser/Profile/PrefixCC.pm
+SHA1 3c864a744567ea0479352ae5bd25353a393c04e9 lib/RDF/RDFa/Parser/Profile/RDF.pm
+SHA1 d4a0f2976f5b5d2ec93abf4fa8ed511d38870ec9 lib/RDF/RDFa/Parser/Profile/SearchMonkey.pm
 SHA1 ef2d6d99d8dfea7159e583f9b5ad35d5814f2271 share/catalogue/index.xml
 SHA1 9a3157a5419d575ea91bd0b912d139573423c94c share/catalogue/www.w3.org/MarkUp/DTD/aria-attributes-1.mod
 SHA1 88053f10e8d2fd58ccbab81dc2bbdfdf90016c3c share/catalogue/www.w3.org/MarkUp/DTD/html4-rdfa-1.dtd
@@ -546,7 +547,7 @@ SHA1 09b128a21a90a14f0a42b94e82244e3e0f6c4f71 t/xhtml1-manifest.rdf
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAkv+5hIACgkQzr+BKGoqfTk2xgCeO4Q3OyeJrtKhvRuHvhEo0m6J
-VmUAnRSRfPwaneoApCzPDZwjSH+eZQrN
-=FcZm
+iEYEARECAAYFAkwY18AACgkQzr+BKGoqfTlctQCglyPp82+0B/rcMEJwqjOYBRSM
+CpMAoISrhcZJyYAs6e+1TLE6Wgxzse4m
+=4IGz
 -----END PGP SIGNATURE-----

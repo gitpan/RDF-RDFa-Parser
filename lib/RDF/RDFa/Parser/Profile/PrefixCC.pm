@@ -7,7 +7,7 @@ use base qw(RDF::RDFa::Parser::Profile);
 use strict;
 use 5.008;
 
-our $VERSION = '1.09_10';
+our $VERSION = '1.09_11';
 
 BEGIN
 {
@@ -51,7 +51,7 @@ sub new
 
 	if (@still_unknown)
 	{
-		my $ua       = $parser->{'options'}->{'lwp_ua'};
+		my $ua       = $parser->{'options'}->lwp_ua;
 		my $response = $ua->get(
 			sprintf(
 				'http://prefix.cc/%s.txt.plain',

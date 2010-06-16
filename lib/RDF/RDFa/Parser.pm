@@ -25,6 +25,7 @@ use HTML::HTML5::Parser;
 use HTML::HTML5::Sanity qw(fix_document);
 use LWP::UserAgent;
 use RDF::RDFa::Parser::Config;
+use RDF::RDFa::Parser::OpenDocumentObjectModel;
 use RDF::RDFa::Parser::Profile;
 use RDF::Trine 0.123;
 use Storable qw/dclone/;
@@ -53,15 +54,16 @@ use constant {
 	ERR_CODE_LANG_INVALID          =>  0x0801,
 	};
 use strict;
+no warnings;
 use 5.008;
 
 =head1 VERSION
 
-1.09_09
+1.09_11
 
 =cut
 
-our $VERSION = '1.09_10';
+our $VERSION = '1.09_11';
 our $HAS_AWOL;
 
 BEGIN
@@ -96,7 +98,7 @@ want to fetch and parse a page in one step.
 
 $config optionally holds an RDF::RDFa::Parser::Config object which
 determines the set of rules used to parse the RDFa. It defaults to
-XHTML+RDFa 1.0.
+XHTML+RDFa 1.1.
 
 B<Advanced usage note:> $storage optionally holds an RDF::Trine::Store
 object. If undef, then a new temporary store is created.
@@ -130,27 +132,7 @@ sub new
 	# ================================
 	unless (defined $markup)
 	{
-		unless (ref $config->{lwp_ua})
-		{
-			my $uastr = sprintf('%s/%s ', __PACKAGE__, $VERSION);
-			if (defined $config->{'user_agent'})
-			{
-				if ($config->{'user_agent'} =~ /\s+$/)
-				{
-					$uastr = $config->{'user_agent'} . " $uastr";
-				}
-				else
-				{
-					$uastr = $config->{'user_agent'};
-				}
-			}
-			
-			$config->{lwp_ua} = LWP::UserAgent->new;
-			$config->{lwp_ua}->agent($uastr);
-			$config->{lwp_ua}->default_header("Accept" => "application/xhtml+xml, text/html;q=0.9, image/svg+xml;q=0.9, application/atom+xml;q=0.9, application/xml;q=0.1, text/xml;q=0.1");
-		}
-		
-		my $response = $config->{lwp_ua}->get($base_uri);
+		my $response = $config->lwp_ua->get($base_uri);
 		die "HTTP response not successful\n"
 			unless $response->is_success;
 		die "Unknown HTTP response media type\n"
@@ -167,7 +149,12 @@ sub new
 		$dom    = $markup;
 		$markup = $dom->toString;
 	}
-	elsif ($config->{'dom_parser'} =~ /html/i)
+	elsif ($config->{'dom_parser'} =~ /^(opendocument|opendoc|odf|od)$/i)
+	{
+		my $parser = RDF::RDFa::Parser::OpenDocumentObjectModel->new;
+		$dom = $parser->parse_string($markup, $base_uri);
+	}
+	elsif ($config->{'dom_parser'} =~ /^(html|tagsoup|soup)$/i)
 	{
 		my $parser = HTML::HTML5::Parser->new;
 		$dom = fix_document( $parser->parse_string($markup) );
@@ -203,7 +190,7 @@ sub new
 		'consumed' => 0,
 		}, $class;
 	
-	$config->auto_config($dom);
+	$config->auto_config($self);
 
 	# HTML <base> element.
 	if ($self->{'options'}->{'xhtml_base'})
@@ -249,33 +236,8 @@ sub new_from_url
 {
 	my ($class, $url, $config, $store)= @_;
 	
-	unless (ref $config->{lwp_ua})
-	{
-		my $uastr = sprintf('%s/%s ', __PACKAGE__, $VERSION);
-		if (defined $config->{'user_agent'})
-		{
-			if ($config->{'user_agent'} =~ /\s+$/)
-			{
-				$uastr = $config->{'user_agent'} . " $uastr";
-			}
-			else
-			{
-				$uastr = $config->{'user_agent'};
-			}
-		}
-		
-		$config->{lwp_ua} = LWP::UserAgent->new;
-		$config->{lwp_ua}->agent($uastr);
-		$config->{lwp_ua}->default_header("Accept" => "application/xhtml+xml, text/html;q=0.9, image/svg+xml;q=0.9, application/atom+xml;q=0.9, application/xml;q=0.1, text/xml;q=0.1");
-	}
-		
-	my $response = $config->{lwp_ua}->get($url);
-
-	my $host = 'xml';
-	$host = 'html5' if $response->content_type eq 'text/html';
-	$host = 'xhtml' if $response->content_type eq 'application/xhtml+xml';
-	$host = 'atom'  if $response->content_type eq 'application/atom+xml';
-	$host = 'svg'   if $response->content_type eq 'image/svg+xml';
+	my $response = $config->lwp_ua->get($url);	
+	my $host     = $response->content_type;
 	
 	if (UNIVERSAL::isa($config, 'RDF::RDFa::Parser::Config'))
 		{ $config = $config->rehost($host); }
@@ -596,9 +558,8 @@ sub consume
 sub _consume_element
 # http://www.w3.org/TR/rdfa-syntax/#sec_5.5.
 {
-	no warnings;
 	my $self = shift;
-
+	
 	# Processing begins by applying the processing rules below to the document
 	# object, in the context of this initial [evaluation context]. All elements
 	# in the tree are also processed according to the rules described below,
@@ -649,7 +610,10 @@ sub _consume_element
 		$graph              = $args{'graph'};
 		$xml_base           = $args{'xml_base'};		
 	}	
-	
+
+	# Used by OpenDocument, otherwise usually undef.
+	my $rdfans = $self->{'options'}->{'ns'} || undef;
+
 	# First, the local values are initialized
 	my $recurse                  = 1;
 	my $skip_element             = 0;
@@ -688,29 +652,29 @@ sub _consume_element
 		}
 	}
 	if ($self->{'options'}->{'xml_lang'}
-	&& $current_element->hasAttributeNS(XML_XML_NS, 'lang'))
+	&& $current_element->hasAttributeNsSafe(XML_XML_NS, 'lang'))
 	{
-		if ($self->_valid_lang( $current_element->getAttributeNS(XML_XML_NS, 'lang') ))
+		if ($self->_valid_lang( $current_element->getAttributeNsSafe(XML_XML_NS, 'lang') ))
 		{
-			$current_language = $current_element->getAttributeNS(XML_XML_NS, 'lang');
+			$current_language = $current_element->getAttributeNsSafe(XML_XML_NS, 'lang');
 		}
 		else
 		{
 			$self->_log_error(
 				ERR_WARNING,
 				ERR_CODE_LANG_INVALID,
-				sprintf('Language code "%s" is not valid.', $current_element->getAttributeNS(XML_XML_NS, 'lang')),
+				sprintf('Language code "%s" is not valid.', $current_element->getAttributeNsSafe(XML_XML_NS, 'lang')),
 				element => $current_element,
-				lang    => $current_element->getAttributeNS(XML_XML_NS, 'lang'),
+				lang    => $current_element->getAttributeNsSafe(XML_XML_NS, 'lang'),
 				) if $@;
 		}
 	}
 
 	# EXTENSION
 	# xml:base - important for RDF/XML extension
-	if ($current_element->hasAttributeNS(XML_XML_NS, 'base'))
+	if ($current_element->hasAttributeNsSafe(XML_XML_NS, 'base'))
 	{
-		$xml_base = $current_element->getAttributeNS(XML_XML_NS, 'base');
+		$xml_base = $current_element->getAttributeNsSafe(XML_XML_NS, 'base');
 		$xml_base =~ s/#.*$//g;
 		$xml_base = $self->uri($xml_base);
 	}
@@ -728,10 +692,14 @@ sub _consume_element
 	{
 		return 1 if $self->{'options'}->{'embedded_rdfxml'}==2;
 
-		my $g = $self->bnode;
+		my $g = $graph;
+		unless ($self->{'options'}->{'embedded_rdfxml'} == 3)
+		{
+			$g = $self->bnode;
+		}
 		
 		my $fake_lang = 0;
-		unless ($current_element->hasAttributeNS(XML_XML_NS, 'lang'))
+		unless ($current_element->hasAttributeNsSafe(XML_XML_NS, 'lang'))
 		{
 			$current_element->setAttributeNS(XML_XML_NS, 'lang', $current_language);
 			$fake_lang = 1;
@@ -805,18 +773,18 @@ sub _consume_element
 
 	# RDFa 1.1 - @profile
 	if ($self->{'options'}->{'profiles'}
-	and $current_element->hasAttribute('profile'))
+	and $current_element->hasAttributeNsSafe($rdfans, 'profile'))
 	{
-		push @profiles, $self->_split_tokens( $current_element->getAttribute('profile') );		
+		push @profiles, $self->_split_tokens( $current_element->getAttributeNsSafe($rdfans, 'profile') );		
 	}
-	elsif ($current_element->hasAttribute('profile')
-	and    $current_element->getAttribute('profile') ne 'http://www.w3.org/1999/xhtml/vocab')
+	elsif ($current_element->hasAttributeNsSafe($rdfans, 'profile')
+	and    $current_element->getAttributeNsSafe($rdfans, 'profile') ne 'http://www.w3.org/1999/xhtml/vocab')
 	{
 		$self->_log_error(
 			ERR_WARNING,
 			ERR_CODE_PROFILE_DISABLED,
-			sprintf("Encountered profile '%s', but profiles are disabled.", $current_element->getAttribute('profile')),
-			uri     => $current_element->getAttribute('profile'),
+			sprintf("Encountered profile '%s', but profiles are disabled.", $current_element->getAttributeNsSafe($rdfans, 'profile')),
+			uri     => $current_element->getAttributeNsSafe($rdfans, 'profile'),
 			element => $current_element,
 			);
 	}
@@ -875,10 +843,11 @@ sub _consume_element
 			$self->_log_error(
 				ERR_ERROR,
 				ERR_CODE_PROFILE_UNUSABLE,
-				sprintf("Unusable profile '%s'.", $current_element->getAttribute('profile')),
+				sprintf("Unusable profile '%s'.", $current_element->getAttributeNsSafe($rdfans, 'profile')),
 				uri     => $current_element->getAttribute('profile'),
 				element => $current_element,
 				);
+			return 0; # TODO: check this does what I want it to!
 		}
 	}
 
@@ -952,9 +921,9 @@ sub _consume_element
 	# RDFa 1.1 - @prefix support.
 	# Note that this overwrites @xmlns:foo.
 	if ($self->{'options'}->{'prefix_attr'}
-	&& $current_element->hasAttribute('prefix'))
+	&& $current_element->hasAttributeNsSafe($rdfans, 'prefix'))
 	{
-		my $pfx_attr = $current_element->getAttribute('prefix');
+		my $pfx_attr = $current_element->getAttributeNsSafe($rdfans, 'prefix');
 		while ($pfx_attr =~ /^\s*(\S+):[\s\r\n]*(\S*)[\s\r\n]+/gs)
 		{
 			my $pfx = $self->{'options'}->{'prefix_nocase_attr'} ? (lc $1) : $1;
@@ -979,7 +948,7 @@ sub _consume_element
 			$local_uri_mappings->{$cls}->{$pfx} = $uri;
 		}
 	}
-	elsif ($current_element->hasAttribute('prefix'))
+	elsif ($current_element->hasAttributeNsSafe($rdfans, 'prefix'))
 	{
 		$self->_log_error(
 			ERR_WARNING,
@@ -991,13 +960,13 @@ sub _consume_element
 	
 	# RDFa 1.1 - @vocab support
 	if ($self->{'options'}->{'vocab_attr'}
-	&& $current_element->hasAttribute('vocab'))
+	&& $current_element->hasAttributeNsSafe($rdfans, 'vocab'))
 	{
 		$local_uri_mappings->{'*'} = $self->uri(
-			$current_element->getAttribute('vocab'),
+			$current_element->getAttributeNsSafe($rdfans, 'vocab'),
 			{'element'=>$current_element,'xml_base'=>$xml_base});
 	}
-	elsif ($current_element->hasAttribute('vocab'))
+	elsif ($current_element->hasAttributeNsSafe($rdfans, 'vocab'))
 	{
 		$self->_log_error(
 			ERR_WARNING,
@@ -1005,7 +974,7 @@ sub _consume_element
 			"\@vocab found, but support disabled.",
 			element => $current_element,
 			uri     => $self->uri(
-				$current_element->getAttribute('vocab'),
+				$current_element->getAttributeNsSafe($rdfans, 'vocab'),
 				{'element'=>$current_element,'xml_base'=>$xml_base}),
 			);
 	}
@@ -1022,15 +991,15 @@ sub _consume_element
 		}
 		
 		if ($self->{'options'}->{'graph_type'} eq 'id'
-		&&  $current_element->hasAttributeNS($xmlns, $attr))
+		&&  $current_element->hasAttributeNsSafe($xmlns, $attr))
 		{
-			$graph = $self->uri('#' . $current_element->getAttributeNS($xmlns, $attr));
+			$graph = $self->uri('#' . $current_element->getAttributeNsSafe($xmlns, $attr));
 		}
 		elsif ($self->{'options'}->{'graph_type'} eq 'about'
-		&&  $current_element->hasAttributeNS($xmlns, $attr))
+		&&  $current_element->hasAttributeNsSafe($xmlns, $attr))
 		{
 			$graph = $self->_expand_curie(
-				$current_element->getAttributeNS($xmlns, $attr),
+				$current_element->getAttributeNsSafe($xmlns, $attr),
 				element   => $current_element,
 				attribute => 'graph',
 				prefixes  => $local_uri_mappings,
@@ -1044,9 +1013,9 @@ sub _consume_element
 
 	# EXTENSION: @role
 	if ($self->{'options'}->{'role_attr'}
-	&&  $current_element->hasAttribute('role'))
+	&&  $current_element->hasAttributeNsSafe($rdfans, 'role'))
 	{
-		my @role = $self->_split_tokens( $current_element->getAttribute('role') );
+		my @role = $self->_split_tokens( $current_element->getAttributeNsSafe($rdfans, 'role') );
 		my @ROLE = map {
 			my $x = $self->_expand_curie(
 				$_,
@@ -1079,8 +1048,8 @@ sub _consume_element
 		}
 	}
 	
-	my @rel = $self->_split_tokens( $current_element->getAttribute('rel') );
-	my @rev = $self->_split_tokens( $current_element->getAttribute('rev') );
+	my @rel = $self->_split_tokens( $current_element->getAttributeNsSafe($rdfans, 'rel') );
+	my @rev = $self->_split_tokens( $current_element->getAttributeNsSafe($rdfans, 'rev') );
 	
 	# EXTENSION: rel="alternate stylesheet"
 	if ($self->{'options'}->{'alt_stylesheet'}
@@ -1118,18 +1087,18 @@ sub _consume_element
 	# according to the section on CURIE and URI Processing, then the next step 
 	# is to establish a value for [new subject]. Any of the attributes that 
 	# can carry a resource can set [new subject]
-	unless ($current_element->hasAttribute('rel')
-	||      $current_element->hasAttribute('rev'))
+	unless ($current_element->hasAttributeNsSafe($rdfans, 'rel')
+	||      $current_element->hasAttributeNsSafe($rdfans, 'rev'))
 	{
 		# [new subject] is set to the URI obtained from the first match
 		# from the following rules:
 		
 		# by using the URI from @about, if present, obtained according to
 		# the section on CURIE and URI Processing ; 
-		if ($current_element->hasAttribute('about'))
+		if ($current_element->hasAttributeNsSafe($rdfans, 'about'))
 		{
 			$new_subject = $self->_expand_curie(
-				$current_element->getAttribute('about'),
+				$current_element->getAttributeNsSafe($rdfans, 'about'),
 				element   => $current_element,
 				attribute => 'about',
 				prefixes  => $local_uri_mappings,
@@ -1140,20 +1109,20 @@ sub _consume_element
 			
 		# otherwise, by using the URI from @src, if present, obtained
 		# according to the section on CURIE and URI Processing.
-		if ($current_element->hasAttribute('src') && !defined $new_subject)
+		if ($current_element->hasAttributeNsSafe($rdfans, 'src') && !defined $new_subject)
 		{
 			$new_subject = $self->uri(
-				$current_element->getAttribute('src'),
+				$current_element->getAttributeNsSafe($rdfans, 'src'),
 				{'element'=>$current_element,'xml_base'=>$hrefsrc_base}
 				);
 		}
 			
 		# otherwise , by using the URI from @resource, if present, obtained
 		# according to the section on CURIE and URI Processing ; 
-		if ($current_element->hasAttribute('resource') && !defined $new_subject)
+		if ($current_element->hasAttributeNsSafe($rdfans, 'resource') && !defined $new_subject)
 		{
 			$new_subject = $self->_expand_curie(
-				$current_element->getAttribute('resource'), 
+				$current_element->getAttributeNsSafe($rdfans, 'resource'), 
 				element   => $current_element,
 				attribute => 'resource',
 				prefixes  => $local_uri_mappings,
@@ -1164,10 +1133,10 @@ sub _consume_element
 			
 		# otherwise , by using the URI from @href, if present, obtained
 		# according to the section on CURIE and URI Processing.
-		if ($current_element->hasAttribute('href') && !defined $new_subject)
+		if ($current_element->hasAttributeNsSafe($rdfans, 'href') && !defined $new_subject)
 		{
 			$new_subject = $self->uri(
-				$current_element->getAttribute('href'),
+				$current_element->getAttributeNsSafe($rdfans, 'href'),
 				{'element'=>$current_element,'xml_base'=>$hrefsrc_base}
 				);
 		}
@@ -1197,13 +1166,13 @@ sub _consume_element
 			# if @instanceof is present, obtained according to the section
 			# on CURIE and URI Processing , then [new subject] is set to be
 			# a newly created [bnode]; 
-			elsif ($current_element->hasAttribute('typeof')
-				||  $current_element->hasAttribute('instanceof'))
+			elsif ($current_element->hasAttributeNsSafe($rdfans, 'typeof')
+				||  $current_element->hasAttributeNsSafe($rdfans, 'instanceof'))
 			{
 				$new_subject = $self->bnode($current_element);
 				
-				if ($current_element->hasAttribute('instanceof')
-				&& !$current_element->hasAttribute('typeof'))
+				if ($current_element->hasAttributeNsSafe($rdfans, 'instanceof')
+				&& !$current_element->hasAttributeNsSafe($rdfans, 'typeof'))
 				{
 					$self->_log_error(
 						ERR_WARNING,
@@ -1221,7 +1190,7 @@ sub _consume_element
 			{
 				$new_subject = $parent_object;
 				$skip_element = 1
-					unless $current_element->hasAttribute('property');
+					unless $current_element->hasAttributeNsSafe($rdfans, 'property');
 			}
 		}
 	}
@@ -1237,10 +1206,10 @@ sub _consume_element
 		
 		# by using the URI from @about, if present, obtained according
 		# to the section on CURIE and URI Processing; 
-		if ($current_element->hasAttribute('about'))
+		if ($current_element->hasAttributeNsSafe($rdfans, 'about'))
 		{
 			$new_subject = $self->_expand_curie(
-				$current_element->getAttribute('about'),
+				$current_element->getAttributeNsSafe($rdfans, 'about'),
 				element   => $current_element,
 				attribute => 'about',
 				prefixes  => $local_uri_mappings,
@@ -1251,10 +1220,10 @@ sub _consume_element
 			
 		# otherwise, by using the URI from @src, if present, obtained
 		# according to the section on CURIE and URI Processing.
-		if ($current_element->hasAttribute('src') && !defined $new_subject)
+		if ($current_element->hasAttributeNsSafe($rdfans, 'src') && !defined $new_subject)
 		{
 			$new_subject = $self->uri(
-				$current_element->getAttribute('src'),
+				$current_element->getAttributeNsSafe($rdfans, 'src'),
 				{'element'=>$current_element,'xml_base'=>$hrefsrc_base}
 				);
 		}
@@ -1284,13 +1253,13 @@ sub _consume_element
 			# if @instanceof is present, obtained according to the section
 			# on CURIE and URI Processing, then [new subject] is set to be a
 			# newly created [bnode]; 
-			elsif ($current_element->hasAttribute('typeof')
-				||  $current_element->hasAttribute('instanceof'))
+			elsif ($current_element->hasAttributeNsSafe($rdfans, 'typeof')
+				||  $current_element->hasAttributeNsSafe($rdfans, 'instanceof'))
 			{
 				$new_subject = $self->bnode($current_element);
 				
-				if ($current_element->hasAttribute('instanceof')
-				&& !$current_element->hasAttribute('typeof'))
+				if ($current_element->hasAttributeNsSafe($rdfans, 'instanceof')
+				&& !$current_element->hasAttributeNsSafe($rdfans, 'typeof'))
 				{
 					$self->_log_error(
 						ERR_WARNING,
@@ -1314,10 +1283,10 @@ sub _consume_element
 		
 		# by using the URI from @resource, if present, obtained according to
 		# the section on CURIE and URI Processing; 
-		if ($current_element->hasAttribute('resource'))
+		if ($current_element->hasAttributeNsSafe($rdfans, 'resource'))
 		{
 			$current_object_resource = $self->_expand_curie(
-				$current_element->getAttribute('resource'), 
+				$current_element->getAttributeNsSafe($rdfans, 'resource'), 
 				element   => $current_element,
 				attribute => 'resource',
 				prefixes  => $local_uri_mappings,
@@ -1328,10 +1297,10 @@ sub _consume_element
 			
 		# otherwise, by using the URI from @href, if present, obtained according
 		# to the section on CURIE and URI Processing.
-		if ($current_element->hasAttribute('href') && !defined $current_object_resource)
+		if ($current_element->hasAttributeNsSafe($rdfans, 'href') && !defined $current_object_resource)
 		{
 			$current_object_resource = $self->uri(
-				$current_element->getAttribute('href'),
+				$current_element->getAttributeNsSafe($rdfans, 'href'),
 				{'element'=>$current_element,'xml_base'=>$hrefsrc_base}
 				);
 		}
@@ -1343,12 +1312,12 @@ sub _consume_element
 	# If in any of the previous steps a [new subject] was set to a non-null
 	# value, it is now used to provide a subject for type values
 	if ($new_subject
-	&& (  $current_element->hasAttribute('instanceof')
-		|| $current_element->hasAttribute('typeof')))
+	&& (  $current_element->hasAttributeNsSafe($rdfans, 'instanceof')
+		|| $current_element->hasAttributeNsSafe($rdfans, 'typeof')))
 	{
 
-		if ($current_element->hasAttribute('instanceof')
-		&&  $current_element->hasAttribute('typeof'))
+		if ($current_element->hasAttributeNsSafe($rdfans, 'instanceof')
+		&&  $current_element->hasAttributeNsSafe($rdfans, 'typeof'))
 		{
 			$self->_log_error(
 				ERR_WARNING,
@@ -1357,7 +1326,7 @@ sub _consume_element
 				element => $current_element,
 				);
 		}
-		elsif ($current_element->hasAttribute('instanceof'))
+		elsif ($current_element->hasAttributeNsSafe($rdfans, 'instanceof'))
 		{
 			$self->_log_error(
 				ERR_WARNING,
@@ -1371,8 +1340,8 @@ sub _consume_element
 		# @instanceof. If present, the attribute must contain one or more
 		# URIs, obtained according to the section on URI and CURIE Processing...
 	
-		my @instanceof = $self->_split_tokens(  $current_element->getAttribute('typeof')
-			|| $current_element->getAttribute('instanceof') );
+		my @instanceof = $self->_split_tokens(  $current_element->getAttributeNsSafe($rdfans, 'typeof')
+			|| $current_element->getAttributeNsSafe($rdfans, 'instanceof') );
 		
 		foreach my $curie (@instanceof)
 		{
@@ -1499,13 +1468,13 @@ sub _consume_element
 	# literal
 	my @current_object_literal;
 	
-	my @prop = $self->_split_tokens( $current_element->getAttribute('property') );
+	my @prop = $self->_split_tokens( $current_element->getAttributeNsSafe($rdfans, 'property') );
 
 	my $datatype = -1;
-	if ($current_element->hasAttribute('datatype'))
+	if ($current_element->hasAttributeNsSafe($rdfans, 'datatype'))
 	{
 		$datatype = $self->_expand_curie(
-			$current_element->getAttribute('datatype'),
+			$current_element->getAttributeNsSafe($rdfans, 'datatype'),
 			element   => $current_element,
 			attribute => 'datatype',
 			prefixes  => $local_uri_mappings,
@@ -1524,9 +1493,22 @@ sub _consume_element
 		# as a [ plain literal ] if: 
 		#
 		# @content is present; 
-		if ($current_element->hasAttribute('content'))
+		if ($current_element->hasAttributeNsSafe($rdfans, 'content'))
 		{
-			@current_object_literal = ($current_element->getAttribute('content'),
+			@current_object_literal = ($current_element->getAttributeNsSafe($rdfans, 'content'),
+				($datatype == -1 ? undef : $datatype),
+				$current_language);
+		}
+		
+		# OpenDocument 1.2 extension
+		elsif (defined $self->{'options'}->{'bookmark_end'}
+		&& defined $self->{'options'}->{'bookmark_name'}
+		&& (
+			'{}'.$self->{'options'}->{'bookmark_start'} eq sprintf('{%s}%s',$current_element->namespaceURI,$current_element->localname)
+			|| $self->{'options'}->{'bookmark_start'} eq sprintf('{%s}%s',$current_element->namespaceURI,$current_element->localname)
+		))
+		{
+			@current_object_literal = ($self->_element_to_bookmarked_string($current_element),
 				($datatype == -1 ? undef : $datatype),
 				$current_language);
 		}
@@ -1581,9 +1563,9 @@ sub _consume_element
 		# Processing.
 		elsif ($datatype != -1)
 		{
-			if ($current_element->hasAttribute('content'))
+			if ($current_element->hasAttributeNsSafe($rdfans, 'content'))
 			{
-				@current_object_literal = ($current_element->getAttribute('content'),
+				@current_object_literal = ($current_element->getAttributeNsSafe($rdfans, 'content'),
 					($datatype == -1 ? undef : $datatype),
 					$current_language);
 			}
@@ -1818,7 +1800,6 @@ sub _print1
 		printf("# Triple.\n");
 	}
 
-	no warnings;
 	printf("%s %s %s%s%s .\n",
 		($subject =~ /^_:/ ? $subject : "<$subject>"),
 		"<$pred>",
@@ -1826,7 +1807,6 @@ sub _print1
 		(length $dt ? "^^<$dt>" : ''),
 		((length $lang && !length $dt) ? "\@$lang" : '')
 		);
-	use warnings;
 	
 	return undef;
 }
@@ -1989,6 +1969,74 @@ sub _split_tokens
 	$string =~ s/(^\s+|\s+$)//g;
 	my @return = split /\s+/, $string;
 	return @return;
+}
+
+sub _element_to_bookmarked_string
+{
+	my ($self, $bookmark) = @_;
+
+	my @name_attribute;
+	if ($self->{'options'}->{'bookmark_name'} =~ /^\{(.*)\}(.+)$/)
+	{
+		@name_attribute = $1 ? ($1, $2) : (undef, $2);
+	}
+	else
+	{
+		@name_attribute = (undef, $self->{'options'}->{'bookmark_name'});
+	}
+	
+	my ($endtag_namespace, $endtag_localname);
+	if ($self->{'options'}->{'bookmark_end'} =~ /^\{(.*)\}(.+)$/)
+	{
+		($endtag_namespace, $endtag_localname) = $1 ? ($1, $2) : (undef, $2);
+	}
+	else
+	{
+		($endtag_namespace, $endtag_localname) = (undef, $self->{'options'}->{'bookmark_end'});
+	}
+
+	my $string = '';
+	my $current = $bookmark;
+	while ($current)
+	{
+		$current = $self->_find_next_node($current);
+		
+		if (defined $current
+		&& $current->nodeType == XML_TEXT_NODE)
+		{
+			$string .= $current->getData;
+		}
+		if (defined $current
+		&& $current->nodeType == XML_ELEMENT_NODE
+		&& $current->localname eq $endtag_localname
+		&& $current->namespaceURI eq $endtag_namespace
+		&& $current->getAttributeNsSafe(@name_attribute) eq $bookmark->getAttributeNsSafe(@name_attribute))
+		{
+			$current = undef;
+		}
+	}
+	
+	return $string;
+}
+
+sub _find_next_node
+{
+	my ($self, $node) = @_;
+	
+	if ($node->nodeType == XML_ELEMENT_NODE)
+	{
+		my @kids = $node->childNodes;
+		return $kids[0] if @kids;
+	}
+	
+	my $ancestor = $node;
+	while ($ancestor)
+	{
+		return $ancestor->nextSibling if $ancestor->nextSibling;
+		$ancestor = $ancestor->parentNode;
+	}
+	
+	return undef;
 }
 
 sub _element_to_string
@@ -2379,6 +2427,20 @@ sub OPTS_XML
 
 1;
 
+# naughty hack
+package XML::LibXML::Element;
+sub getAttributeNsSafe
+{
+	my ($element, $nsuri, $attribute) = @_;
+	return defined $nsuri ? $element->getAttributeNS($nsuri, $attribute) : $element->getAttribute($attribute);
+}
+sub hasAttributeNsSafe
+{
+	my ($element, $nsuri, $attribute) = @_;
+	return defined $nsuri ? $element->hasAttributeNS($nsuri, $attribute) : $element->hasAttribute($attribute);
+}
+1;
+
 =back
 
 =head1 CALLBACKS
@@ -2532,48 +2594,83 @@ using the C<errors> method.
 
 =head1 FEATURES
 
-=head2 HTML Support
+Most features are configurable using L<RDF::RDFa::Parser::Config>.
 
-This module is able to handle well-formed XML/XHTML and tag-soup HTML. How the
-input markup is parsed depends on the configuration settings passed to the
-constructor. If you use an XML or XHTML configuration but pass non-well-formed
-markup, the the parser will die.
+=head2 RDFa Versions
 
-=head2 Atom / DataRSS
+RDF::RDFa::Parser supports RDFa versions 1.0 and 1.1.
 
-When processing Atom, if the 'atom_elements' option is switched on, RDF::RDFa::Parser
-will treat <feed> and <entry> elements specially. This is similar to the special support
-for <head> and <body> mandated by the XHTML+RDFa Recommendation. Essentially <feed> and
-<entry> elements are assumed to have an imaginary "about" attribute which has its value
-set to a brand new blank node.
+1.1 is currently a moving target; support is experimental.
 
-If the 'atom_parser' option is switched on, RDF::RDFa::Parser fully parses Atom feeds
-and entries, using the XML::Atom::OWL package. The two modules attempt to work together
-in assigning blank node identifiers consistently, etc. Callbacks I<should> work properly,
-but this has not been extensively tested. If XML::Atom::OWL is not installed, then this
-option will be silently ignored.
+1.1 is the default, but this can be configured using RDF::RDFa::Parser::Config.
 
-C<RDF::RDFa::Parser::Config> is capable of enabling 
-settings for parsing Atom. It switches on the 'atom_elements' option
-(but not 'atom_parser'), adds support for IANA-registered rel/rev
-keywords, switches off support for some XHTML-specific features,
-enables processing of the xml:base attribute, and adds support for
-embedded chunks of RDF/XML.
+=head2 Host Languages
 
-Generally speaking, adding RDFa attributes to elements in the Atom namespace themselves
-can result in some slightly muddy semantics. It's best to use an extension namespace and
-add the RDFa attributes to elements in that namespace. DataRSS provides a good
-example of this. See L<http://developer.yahoo.com/searchmonkey/smguide/datarss.html>.
+RDF::RDFa::Parser supports various different RDFa host languages:
 
-=head2 SVG
+=over 4
 
-The SVG Tiny 1.2 specification makes the use of RDFa attributes within
-SVG images valid.
+=item * B<XHTML>
 
-C<RDF::RDFa::Parser::Config> is capable of enabling 
-settings for parsing SVG. It switches off support for some
-XHTML-specific features, enables processing of the xml:base attribute,
-and adds support for embedded chunks of RDF/XML.
+As per the XHTML+RDFa 1.0 and XHTML+RDFa 1.1 specifications.
+
+=item * B<HTML 4>
+
+Uses an HTML5 (sic) parser; uses @lang instead of @xml:lang; keeps prefixes
+and terms case-insensitive; recognises the @rel relations defined in the HTML
+4 specification. Otherwise the same as XHTML.
+
+=item * B<HTML5>
+
+Uses an HTML5 parser; uses @lang as well as @xml:lang; keeps prefixes
+and terms case-insensitive; recognises the @rel relations defined in the HTML5
+draft specification. Otherwise the same as XHTML.
+
+=item * B<XML>
+
+This is implemented as per the RDFa Core 1.1 specification. There is also
+support for "RDFa Core 1.0", for which no specification exists, but has been
+reverse-engineered by applying the differences between XHTML+RDFa 1.1 and
+RDFa Core 1.1 to the XHTML+RDFa 1.0 specification.
+
+Embedded chunks of RDF/XML within XML are supported.
+
+=item * B<SVG>
+
+For now, a synonym for XML.
+
+=item * B<Atom>
+
+The E<lt>feedE<gt> and E<lt>entryE<gt> elements are treated specially, setting
+a new subject; IANA-registered rel keywords are recognised.
+
+By passing C<< atom_parser=>1 >> as a Config option, you can also handle
+Atom's native semantics. (Uses XML::Atom::OWL. If this module is not installed,
+this option is silently ignored.)
+
+Otherwise, the same as XML.
+
+=item * B<DataRSS>
+
+Support for the E<lt>?profile?E<gt> processing instruction; defines some default
+prefixes. Otherwise, the same as Atom.
+
+=item * B<OpenDocument XML>
+
+That is, XML content formatted along the lines of 'content.xml' in OpenDocument
+files.
+
+Supports OpenDocument bookmarked ranges used as typed or plain object literals
+(though not XML literals); expects RDFa attributes in the XHTML namespace
+instead of in no namespace. Otherwise, the same as XML.
+
+=item * B<OpenDocument>
+
+That is, a ZIP file containing OpenDocument XML files. RDF::RDFa::Parser
+will do all the unzipping and combining for you, so you don't have to.
+The unregistered "jar:" URI scheme is used to refer to files within the ZIP.
+
+=back
 
 =head2 Embedded RDF/XML
 
@@ -2596,77 +2693,84 @@ option. It should mostly not do any harm: triples encoded in RDF/XML
 will be generally ignored (though the chunk itself could theoretically
 end up as part of an XML literal). It will waste a bit of time though.
 
-=item 1. Skip the chunk.
-
-This will skip over the RDF element entirely, and thus save you a
-bit of time.
-
-=item 2. Parse the RDF/XML.
+=item 1. Parse the RDF/XML.
 
 The parser will parse the RDF/XML properly. If named graphs are
 enabled, any triples will be added to a separate graph. This is
 the behaviour that SVG Tiny 1.2 seems to suggest is the correct
 thing to do.
 
+=item 2. Skip the chunk.
+
+This will skip over the RDF element entirely, and thus save you a
+bit of time.
+
 =back
 
 You can decide which path to take by setting the 'embedded_rdfxml'
-option in the constructor. For HTML and XHTML, you probably want
-to set embedded_rdfxml to '0' (the default) or '1'. For other XML
-markup languages (e.g. SVG or Atom), then you probably want to
-set it to '2'.
+Config option. For HTML and XHTML, you probably want
+to set embedded_rdfxml to '0' (the default) or '2' (a little faster).
+For other XML markup languages (e.g. SVG or Atom), then you probably want to
+set it to '1'.
+
+(There's also an option '3' which controls how embedded RDF/XML interacts
+with named graphs, but this is only really intended for internal use, parsing
+OpenDocument.)
 
 =head2 Named Graphs
 
 The parser has support for named graphs within a single RDFa
-document. To switch this on, use the 'graph' option in the
-constructor.
+document. To switch this on, use the 'graph' Config option.
+
+See also L<http://buzzword.org.uk/2009/rdfa4/spec>.
 
 The name of the attribute which indicates graph URIs is by
 default 'graph', but can be changed using the 'graph_attr'
-option. This option accepts clark notation to specify a
+Config option. This option accepts Clark Notation to specify a
 namespaced attribute. By default, the attribute value is
 interpreted as a fragment identifier (like the 'id' attribute),
-but if you set 'graph_type' to 'about', it will be treated
-as a URI or safe CURIE (like the 'about' attribute).
+but if you set the 'graph_type' Config option to 'about',
+it will be treated as a URI or safe CURIE (like the 'about'
+attribute).
 
-The 'graph_default' option allows you to set the default
+The 'graph_default' Config option allows you to set the default
 graph URI/bnode identifier.
 
 Once you're using named graphs, the C<graphs> method becomes
 useful: it returns a hashref of { graph_uri => trine_model } pairs.
 The optional parameter to the C<graph> method also becomes useful.
 
-See also L<http://buzzword.org.uk/2009/rdfa4/spec>.
+OpenDocument (ZIP) host language support makes internal use
+of named graphs, so if you're parsing OpenDocument, tinker with
+the Config options at your own risk!
 
 =head2 Auto Config
 
-RDF::RDFa::Parser has a lot of different options that can be switched
-on and off. Sometimes it might be useful to allow the page being
-parsed to control some of the options. If you switch on the 'auto_config'
-option, pages can do this.
+RDF::RDFa::Parser has a lot of different Config options to play with. Sometimes it
+might be useful to allow the page being parsed to control some of these options.
+If you switch on the 'auto_config' Config option, pages can do this.
 
 A page can set options using a specially crafted E<lt>metaE<gt> tag:
 
   <meta name="http://search.cpan.org/dist/RDF-RDFa-Parser/#auto_config"
-     content="xhtml_lang=1&amp;keywords=rdfa+html5+html4+html32" />
+     content="xhtml_lang=1&amp;keyword_bundles=rdfa+html5+html4+html32" />
 
 Note that the C<content> attribute is an application/x-www-form-urlencoded
 string (which must then be HTML-escaped of course). Semicolons may be used
 instead of ampersands, as these tend to look nicer:
 
   <meta name="http://search.cpan.org/dist/RDF-RDFa-Parser/#auto_config"
-     content="xhtml_lang=1;keywords=rdfa+html5+html4+html32" />
-
-Any option allowed in the constructor may be given using auto config,
-except 'use_rtnlx', and of course 'auto_config' itself. 
+     content="xhtml_lang=1;keyword_bundles=rdfa+html5+html4+html32" />
 
 It's possible to use auto config outside XHTML (e.g. in Atom or
 SVG) using namespaces:
 
   <xhtml:meta xmlns:xhtml="http://www.w3.org/1999/xhtml"
      name="http://search.cpan.org/dist/RDF-RDFa-Parser/#auto_config"
-     keywords="iana+rdfa;xml_base=2;atom_elements=1" />
+     content="keyword_bundles=iana+rdfa;xml_base=2;atom_elements=1" />
+
+Any Config option may be given using auto config, except 'use_rtnlx', 'dom_parser',
+and of course 'auto_config' itself. 
 
 =head1 BUGS
 

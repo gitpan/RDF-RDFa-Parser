@@ -745,7 +745,38 @@
     <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_10</revision>
     <rdfs:label xml:lang="en">RDFa 1.1 Preview 10</rdfs:label>
   </Version>
-  <dcs:ToDoList rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/roadmap_1_10">
+  <Version rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_11">
+    <dcs:changeset>
+      <rdf:Description>
+        <dcs:item>
+          <rdf:Description>
+            <rdfs:label xml:lang="en">Various media-type handling clean-ups.</rdfs:label>
+          </rdf:Description>
+        </dcs:item>
+        <dcs:item>
+          <rdf:Description>
+            <rdfs:label xml:lang="en">Auto-Config fixes and clean-ups.</rdfs:label>
+          </rdf:Description>
+        </dcs:item>
+        <dcs:item>
+          <rdf:Description>
+            <rdfs:label xml:lang="en">Rearrange some of the documentation in the FEATURES section.</rdfs:label>
+          </rdf:Description>
+        </dcs:item>
+        <dcs:item>
+          <dcs:Addition>
+            <rdfs:label xml:lang="en">Support for OpenDocument's slightly unusual flavour of RDFa.</rdfs:label>
+          </dcs:Addition>
+        </dcs:item>
+        <dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_10"/>
+      </rdf:Description>
+    </dcs:changeset>
+    <dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-06-16</dc:issued>
+    <file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_11.tar.gz"/>
+    <revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_11</revision>
+    <rdfs:label xml:lang="en">RDFa 1.1 Preview 11</rdfs:label>
+  </Version>
+  <dcs:ToDoList rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/roadmap_1_100">
     <dcs:item>
       <rdf:Description>
         <dcs:timescale xml:lang="en">Mostly implemented, but dependent on progress in the W3C RDFa WG. Early to mid 2011?</dcs:timescale>
@@ -762,8 +793,8 @@
         <rdfs:label xml:lang="en">Add support for native SVG semantics of &lt;svg:title&gt; and &lt;svg:desc&gt;, perhaps via a separate module a la XML::Atom::OWL.</rdfs:label>
       </rdf:Description>
     </dcs:item>
-    <dcs:milestone rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-10"/>
-    <rdfs:label xml:lang="en">Roadmap for RDF::RDFa::Parser 1.10</rdfs:label>
+    <dcs:milestone rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-100"/>
+    <rdfs:label xml:lang="en">Roadmap for RDF::RDFa::Parser 1.100</rdfs:label>
   </dcs:ToDoList>
   <Project rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/project">
     <bug-database rdf:resource="http://rt.cpan.org/Dist/Display.html?Queue=RDF-RDFa-Parser"/>
@@ -803,6 +834,7 @@
     <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_08"/>
     <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_09"/>
     <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_10"/>
+    <release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_11"/>
     <repository>
       <SVNRepository>
         <browse rdf:resource="http://goddamn.co.uk/viewvc/perlmods/RDF-RDFa-Parser/"/>
@@ -812,7 +844,7 @@
     <tester rdf:resource="http://tobyinkster.co.uk/#i"/>
   </Project>
   <foaf:Person rdf:about="http://tobyinkster.co.uk/#i">
-    <dcs:tasks rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/roadmap_1_10"/>
+    <dcs:tasks rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/roadmap_1_100"/>
     <ns1:sameAs xmlns:ns1="http://www.w3.org/2002/07/owl#" rdf:resource="http://purl.org/NET/cpan-uri/person/tobyink"/>
     <foaf:homepage rdf:resource="http://tobyinkster.co.uk/"/>
     <foaf:mbox rdf:resource="mailto:tobyink@cpan.org"/>

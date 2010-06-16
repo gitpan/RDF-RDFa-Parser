@@ -15,7 +15,7 @@ SYNOPSIS
      $title = $p->opengraph('title');
 
 VERSION
-    1.09_09
+    1.09_11
 
 DESCRIPTION
   Constructors
@@ -38,7 +38,7 @@ DESCRIPTION
 
         $config optionally holds an RDF::RDFa::Parser::Config object which
         determines the set of rules used to parse the RDFa. It defaults to
-        XHTML+RDFa 1.0.
+        XHTML+RDFa 1.1.
 
         Advanced usage note: $storage optionally holds an RDF::Trine::Store
         object. If undef, then a new temporary store is created.
@@ -270,47 +270,82 @@ CALLBACKS
     after parsing using the "errors" method.
 
 FEATURES
-  HTML Support
-    This module is able to handle well-formed XML/XHTML and tag-soup HTML.
-    How the input markup is parsed depends on the configuration settings
-    passed to the constructor. If you use an XML or XHTML configuration but
-    pass non-well-formed markup, the the parser will die.
+    Most features are configurable using RDF::RDFa::Parser::Config.
 
-  Atom / DataRSS
-    When processing Atom, if the 'atom_elements' option is switched on,
-    RDF::RDFa::Parser will treat <feed> and <entry> elements specially. This
-    is similar to the special support for <head> and <body> mandated by the
-    XHTML+RDFa Recommendation. Essentially <feed> and <entry> elements are
-    assumed to have an imaginary "about" attribute which has its value set
-    to a brand new blank node.
+  RDFa Versions
+    RDF::RDFa::Parser supports RDFa versions 1.0 and 1.1.
 
-    If the 'atom_parser' option is switched on, RDF::RDFa::Parser fully
-    parses Atom feeds and entries, using the XML::Atom::OWL package. The two
-    modules attempt to work together in assigning blank node identifiers
-    consistently, etc. Callbacks *should* work properly, but this has not
-    been extensively tested. If XML::Atom::OWL is not installed, then this
-    option will be silently ignored.
+    1.1 is currently a moving target; support is experimental.
 
-    "RDF::RDFa::Parser::Config" is capable of enabling settings for parsing
-    Atom. It switches on the 'atom_elements' option (but not 'atom_parser'),
-    adds support for IANA-registered rel/rev keywords, switches off support
-    for some XHTML-specific features, enables processing of the xml:base
-    attribute, and adds support for embedded chunks of RDF/XML.
+    1.1 is the default, but this can be configured using
+    RDF::RDFa::Parser::Config.
 
-    Generally speaking, adding RDFa attributes to elements in the Atom
-    namespace themselves can result in some slightly muddy semantics. It's
-    best to use an extension namespace and add the RDFa attributes to
-    elements in that namespace. DataRSS provides a good example of this. See
-    <http://developer.yahoo.com/searchmonkey/smguide/datarss.html>.
+  Host Languages
+    RDF::RDFa::Parser supports various different RDFa host languages:
 
-  SVG
-    The SVG Tiny 1.2 specification makes the use of RDFa attributes within
-    SVG images valid.
+    *   XHTML
 
-    "RDF::RDFa::Parser::Config" is capable of enabling settings for parsing
-    SVG. It switches off support for some XHTML-specific features, enables
-    processing of the xml:base attribute, and adds support for embedded
-    chunks of RDF/XML.
+        As per the XHTML+RDFa 1.0 and XHTML+RDFa 1.1 specifications.
+
+    *   HTML 4
+
+        Uses an HTML5 (sic) parser; uses @lang instead of @xml:lang; keeps
+        prefixes and terms case-insensitive; recognises the @rel relations
+        defined in the HTML 4 specification. Otherwise the same as XHTML.
+
+    *   HTML5
+
+        Uses an HTML5 parser; uses @lang as well as @xml:lang; keeps
+        prefixes and terms case-insensitive; recognises the @rel relations
+        defined in the HTML5 draft specification. Otherwise the same as
+        XHTML.
+
+    *   XML
+
+        This is implemented as per the RDFa Core 1.1 specification. There is
+        also support for "RDFa Core 1.0", for which no specification exists,
+        but has been reverse-engineered by applying the differences between
+        XHTML+RDFa 1.1 and RDFa Core 1.1 to the XHTML+RDFa 1.0
+        specification.
+
+        Embedded chunks of RDF/XML within XML are supported.
+
+    *   SVG
+
+        For now, a synonym for XML.
+
+    *   Atom
+
+        The <feed> and <entry> elements are treated specially, setting a new
+        subject; IANA-registered rel keywords are recognised.
+
+        By passing "atom_parser=>1" as a Config option, you can also handle
+        Atom's native semantics. (Uses XML::Atom::OWL. If this module is not
+        installed, this option is silently ignored.)
+
+        Otherwise, the same as XML.
+
+    *   DataRSS
+
+        Support for the <?profile?> processing instruction; defines some
+        default prefixes. Otherwise, the same as Atom.
+
+    *   OpenDocument XML
+
+        That is, XML content formatted along the lines of 'content.xml' in
+        OpenDocument files.
+
+        Supports OpenDocument bookmarked ranges used as typed or plain
+        object literals (though not XML literals); expects RDFa attributes
+        in the XHTML namespace instead of in no namespace. Otherwise, the
+        same as XML.
+
+    *   OpenDocument
+
+        That is, a ZIP file containing OpenDocument XML files.
+        RDF::RDFa::Parser will do all the unzipping and combining for you,
+        so you don't have to. The unregistered "jar:" URI scheme is used to
+        refer to files within the ZIP.
 
   Embedded RDF/XML
     Though a rarely used feature, XHTML allows other XML markup languages to
@@ -330,51 +365,61 @@ FEATURES
         theoretically end up as part of an XML literal). It will waste a bit
         of time though.
 
-    1. Skip the chunk.
-        This will skip over the RDF element entirely, and thus save you a
-        bit of time.
-
-    2. Parse the RDF/XML.
+    1. Parse the RDF/XML.
         The parser will parse the RDF/XML properly. If named graphs are
         enabled, any triples will be added to a separate graph. This is the
         behaviour that SVG Tiny 1.2 seems to suggest is the correct thing to
         do.
 
+    2. Skip the chunk.
+        This will skip over the RDF element entirely, and thus save you a
+        bit of time.
+
     You can decide which path to take by setting the 'embedded_rdfxml'
-    option in the constructor. For HTML and XHTML, you probably want to set
-    embedded_rdfxml to '0' (the default) or '1'. For other XML markup
-    languages (e.g. SVG or Atom), then you probably want to set it to '2'.
+    Config option. For HTML and XHTML, you probably want to set
+    embedded_rdfxml to '0' (the default) or '2' (a little faster). For other
+    XML markup languages (e.g. SVG or Atom), then you probably want to set
+    it to '1'.
+
+    (There's also an option '3' which controls how embedded RDF/XML
+    interacts with named graphs, but this is only really intended for
+    internal use, parsing OpenDocument.)
 
   Named Graphs
     The parser has support for named graphs within a single RDFa document.
-    To switch this on, use the 'graph' option in the constructor.
+    To switch this on, use the 'graph' Config option.
+
+    See also <http://buzzword.org.uk/2009/rdfa4/spec>.
 
     The name of the attribute which indicates graph URIs is by default
-    'graph', but can be changed using the 'graph_attr' option. This option
-    accepts clark notation to specify a namespaced attribute. By default,
-    the attribute value is interpreted as a fragment identifier (like the
-    'id' attribute), but if you set 'graph_type' to 'about', it will be
-    treated as a URI or safe CURIE (like the 'about' attribute).
+    'graph', but can be changed using the 'graph_attr' Config option. This
+    option accepts Clark Notation to specify a namespaced attribute. By
+    default, the attribute value is interpreted as a fragment identifier
+    (like the 'id' attribute), but if you set the 'graph_type' Config option
+    to 'about', it will be treated as a URI or safe CURIE (like the 'about'
+    attribute).
 
-    The 'graph_default' option allows you to set the default graph URI/bnode
-    identifier.
+    The 'graph_default' Config option allows you to set the default graph
+    URI/bnode identifier.
 
     Once you're using named graphs, the "graphs" method becomes useful: it
     returns a hashref of { graph_uri => trine_model } pairs. The optional
     parameter to the "graph" method also becomes useful.
 
-    See also <http://buzzword.org.uk/2009/rdfa4/spec>.
+    OpenDocument (ZIP) host language support makes internal use of named
+    graphs, so if you're parsing OpenDocument, tinker with the Config
+    options at your own risk!
 
   Auto Config
-    RDF::RDFa::Parser has a lot of different options that can be switched on
-    and off. Sometimes it might be useful to allow the page being parsed to
-    control some of the options. If you switch on the 'auto_config' option,
+    RDF::RDFa::Parser has a lot of different Config options to play with.
+    Sometimes it might be useful to allow the page being parsed to control
+    some of these options. If you switch on the 'auto_config' Config option,
     pages can do this.
 
     A page can set options using a specially crafted <meta> tag:
 
       <meta name="http://search.cpan.org/dist/RDF-RDFa-Parser/#auto_config"
-         content="xhtml_lang=1&amp;keywords=rdfa+html5+html4+html32" />
+         content="xhtml_lang=1&amp;keyword_bundles=rdfa+html5+html4+html32" />
 
     Note that the "content" attribute is an
     application/x-www-form-urlencoded string (which must then be
@@ -382,17 +427,17 @@ FEATURES
     as these tend to look nicer:
 
       <meta name="http://search.cpan.org/dist/RDF-RDFa-Parser/#auto_config"
-         content="xhtml_lang=1;keywords=rdfa+html5+html4+html32" />
-
-    Any option allowed in the constructor may be given using auto config,
-    except 'use_rtnlx', and of course 'auto_config' itself.
+         content="xhtml_lang=1;keyword_bundles=rdfa+html5+html4+html32" />
 
     It's possible to use auto config outside XHTML (e.g. in Atom or SVG)
     using namespaces:
 
       <xhtml:meta xmlns:xhtml="http://www.w3.org/1999/xhtml"
          name="http://search.cpan.org/dist/RDF-RDFa-Parser/#auto_config"
-         keywords="iana+rdfa;xml_base=2;atom_elements=1" />
+         content="keyword_bundles=iana+rdfa;xml_base=2;atom_elements=1" />
+
+    Any Config option may be given using auto config, except 'use_rtnlx',
+    'dom_parser', and of course 'auto_config' itself.
 
 BUGS
     RDF::RDFa::Parser 0.21 passed all approved tests in the XHTML+RDFa test
