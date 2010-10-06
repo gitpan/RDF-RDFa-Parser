@@ -162,6 +162,7 @@ t/05namedgraphs.t
 t/06xmlbase.t
 t/07rdfxml.t
 t/08atom.t
+t/09profiles.t
 t/11testsuite_xhtml1.t
 t/12testsuite_html4.t
 t/13testsuite_html5.t

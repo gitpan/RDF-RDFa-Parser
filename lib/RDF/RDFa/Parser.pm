@@ -20,6 +20,7 @@ RDF::RDFa::Parser - flexible RDFa parser
 
 =cut
 
+use Data::UUID;
 use File::ShareDir qw(dist_file);
 use HTML::HTML5::Parser;
 use HTML::HTML5::Sanity qw(fix_document);
@@ -28,11 +29,13 @@ use RDF::RDFa::Parser::Config;
 use RDF::RDFa::Parser::OpenDocumentObjectModel;
 use RDF::RDFa::Parser::Profile;
 use RDF::Trine 0.123;
-use Storable qw/dclone/;
+use Scalar::Util qw(blessed);
+use Storable qw(dclone);
 use URI::Escape;
 use URI::URL;
 use XML::LibXML qw(:all);
 use XML::RegExp;
+
 use constant {
 	ERR_WARNING  => 'w',
 	ERR_ERROR    => 'e',
@@ -53,21 +56,26 @@ use constant {
 	ERR_CODE_VOCAB_DISABLED        =>  0x0701,
 	ERR_CODE_LANG_INVALID          =>  0x0801,
 	};
+use constant {
+	RDF_XMLLIT   => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral',
+	RDF_TYPE     => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type',
+	};
 use strict;
 no warnings;
 use 5.008;
 
 =head1 VERSION
 
-1.09_11
+1.091
 
 =cut
 
-our $VERSION = '1.09_11';
+our $VERSION = '1.091';
 our $HAS_AWOL;
 
 BEGIN
 {
+	local $@;
 	eval "use XML::Atom::OWL;";
 	$HAS_AWOL = $@ ? 0 : 1;
 }
@@ -90,20 +98,12 @@ function to die.
 
 $base is a URL used to resolve relative links found in the document.
 
-If $markup is undef, then RDF::RDFa::Parser will fetch $base to
-obtain the document to be parsed. This is probably not a feature you
-should exploit, as it may behave unexpectedly in certain circumstances
-(e.g. if it follows a redirect trail). Use C<new_from_uri> if you
-want to fetch and parse a page in one step.
-
 $config optionally holds an RDF::RDFa::Parser::Config object which
 determines the set of rules used to parse the RDFa. It defaults to
 XHTML+RDFa 1.1.
 
 B<Advanced usage note:> $storage optionally holds an RDF::Trine::Store
 object. If undef, then a new temporary store is created.
-
-=back
 
 =cut
 
@@ -116,11 +116,14 @@ sub new
 	# If $config is undefined, then use the default configuration
 	if (!defined $config)
 		{ $config = RDF::RDFa::Parser::Config->new; }
+	# If $config is something sensible, then use it.
+	elsif (blessed($config) && $config->isa('RDF::RDFa::Parser::Config'))
+		{ 1; }
 	# If it's a hashref (for backcompat), then use default plus those options
 	elsif ('HASH' eq ref $config)
 		{ $config = RDF::RDFa::Parser::Config->new(undef, undef, %$config); }
 	# If it's something odd, then bail.
-	elsif (!UNIVERSAL::isa($config, 'RDF::RDFa::Parser::Config'))
+	else
 		{ die "Unrecognised configuration\n"; }
 
 	# Rationalise $base_uri
@@ -130,21 +133,12 @@ sub new
 
 	# Rationalise $markup and set $dom
 	# ================================
-	unless (defined $markup)
-	{
-		my $response = $config->lwp_ua->get($base_uri);
-		die "HTTP response not successful\n"
-			unless $response->is_success;
-		die "Unknown HTTP response media type\n"
-			unless $response->content_type =~ m`^(text/(x|ht)ml)|(application/(atom\+xml|xhtml\+xml|xml)|image/svg\+xml)$`;
-		$markup = $response->decoded_content;
-		
-		$config->{'dom_parser'} = 'html'
-			if $response->content_type eq 'text/html';
-	}
-	
 	my $dom;
-	if (UNIVERSAL::isa($markup, 'XML::LibXML::Document'))
+	if (!defined $markup)
+	{
+		die "Need to provide markup to parse.";
+	}
+	elsif (blessed($markup) && $markup->isa('XML::LibXML::Document'))
 	{
 		$dom    = $markup;
 		$markup = $dom->toString;
@@ -212,8 +206,6 @@ sub new
 	return $self;
 }
 
-=over 4
-
 =item C<< $p = RDF::RDFa::Parser->new_from_url($url, [$config], [$storage]) >>
 
 $url is a URL to fetch and parse.
@@ -228,18 +220,22 @@ a new temporary store is created.
 
 This function can also be called as C<new_from_uri>. Same thing.
 
-=back
-
 =cut
 
 sub new_from_url
 {
 	my ($class, $url, $config, $store)= @_;
 	
-	my $response = $config->lwp_ua->get($url);	
-	my $host     = $response->content_type;
+	my $response = do
+		{
+			if (blessed($url) && $url->isa('HTTP::Message'))
+				{ $url; }
+			else
+				{ $config->lwp_ua->get($url);	}
+		};
+	my $host = $response->content_type;
 	
-	if (UNIVERSAL::isa($config, 'RDF::RDFa::Parser::Config'))
+	if (blessed($config) && $config->isa('RDF::RDFa::Parser::Config'))
 		{ $config = $config->rehost($host); }
 	elsif (ref $config eq 'HASH')
 		{ $config = RDF::RDFa::Parser::Config->new($host, undef, %$config); }
@@ -255,6 +251,18 @@ sub new_from_url
 }
 
 *new_from_uri = \&new_from_url;
+
+=item C<< $p = RDF::RDFa::Parser->new_from_response($response, [$config], [$storage]) >>
+
+$response is an C<HTTP::Response> object.
+
+Otherwise the same as C<new_from_url>. 
+
+=cut
+
+*new_from_response = \&new_from_url;
+
+=back
 
 =head2 Public Methods
 
@@ -335,8 +343,8 @@ called in list context) for that Open Graph Protocol property. (In pure
 RDF terms, it returns the non-bnode objects of triples where the
 subject is the document base URI; and the predicate is $property,
 with non-URI $property strings taken as having the implicit prefix
-'http://opengraphprotocol.org/schema/'. There is no distinction between
-literal and non-literal values.)
+'http://ogp.me/ns#'. There is no distinction between literal and
+non-literal values.)
 
 If $property is omitted, returns a list of possible properties.
 
@@ -363,12 +371,14 @@ sub opengraph
 	my $property = shift;
 	$property = $1
 		if defined $property && $property =~ m'^http://opengraphprotocol\.org/schema/(.*)$';
+	$property = $1
+		if defined $property && $property =~ m'^http://ogp\.me/ns#(.*)$';
 		
 	my $rtp;
 	if (defined $property && $property =~ /^[a-z][a-z0-9\-\.\+]*:/i)
 		{ $rtp = RDF::Trine::Node::Resource->new($property); }
 	elsif (defined $property)
-		{ $rtp = RDF::Trine::Node::Resource->new('http://opengraphprotocol.org/schema/'.$property); }
+		{ $rtp = RDF::Trine::Node::Resource->new('http://ogp.me/ns#'.$property); }
 		
 	my $iter = $self->graph->get_statements(
 		RDF::Trine::Node::Resource->new($self->uri), $rtp, undef);
@@ -377,7 +387,8 @@ sub opengraph
 	{
 		my $propkey = $st->predicate->uri;
 		$propkey = $1
-			if $propkey =~ m'^http://opengraphprotocol\.org/schema/(.*)$';
+			if $propkey =~ m'^http://ogp\.me/ns#(.*)$'
+			|| $propkey =~ m'^http://opengraphprotocol\.org/schema/(.*)$';
 		
 		if ($st->object->is_resource)
 			{ push @{ $data->{$propkey} }, $st->object->uri; }	
@@ -491,14 +502,14 @@ sub _log_error
 	}
 	elsif ($level eq ERR_ERROR)
 	{
-		warn "${code}: ${message}\n";
+		warn sprintf("%04X: %s\n", $code, $message);
 		warn sprintf("... with URI <%s>\n",
 			$args{'uri'})
 			if defined $args{'uri'};
 		warn sprintf("... on element '%s' with path '%s'\n",
 			$args{'element'}->localname,
 			$args{'element'}->nodePath)
-			if UNIVERSAL::isa($args{'element'}, 'XML::LibXML::Node');
+			if blessed($args{'element'}) && $args{'element'}->isa('XML::LibXML::Node');
 	}
 	
 	push @{$self->{errors}}, [$level, $code, $message, \%args];
@@ -508,7 +519,7 @@ sub _log_error
 
 B<Advanced usage only.>
 
-The document is parsed for RDFa. As of RDF::RDFa::Parser 1.09_04,
+The document is parsed for RDFa. As of RDF::RDFa::Parser 1.09x,
 this is called automatically when needed; you probably don't need
 to touch it unless you're doing interesting things with callbacks.
 
@@ -816,7 +827,7 @@ sub _consume_element
 			$self->uri($uri, {'element'=>$current_element,'xml_base'=>$xml_base}),
 			$self);
 			
-		if (UNIVERSAL::isa($profile, 'RDF::RDFa::Parser::Profile'))
+		if (blessed($profile) && $profile->isa('RDF::RDFa::Parser::Profile'))
 		{
 			foreach my $mapping ($profile->get_prefixes)
 			{
@@ -837,6 +848,9 @@ sub _consume_element
 					$local_term_mappings->{$insensitive}->{$attr}->{$term} = $uri;
 				}
 			}
+			my $profile_default_vocab = $profile->get_vocab;
+			$local_uri_mappings->{'*'} = $profile_default_vocab
+				if defined $profile_default_vocab;
 		}
 		else
 		{
@@ -1364,7 +1378,7 @@ sub _consume_element
 			# object
 			#     full URI of 'type' 
 
-			$self->_insert_triple_resource($current_element, $new_subject, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', $rdftype, $graph);
+			$self->_insert_triple_resource($current_element, $new_subject, RDF_TYPE, $rdftype, $graph);
 			$activity++;
 		}
 
@@ -1470,9 +1484,11 @@ sub _consume_element
 	
 	my @prop = $self->_split_tokens( $current_element->getAttributeNsSafe($rdfans, 'property') );
 
-	my $datatype = -1;
+	my $has_datatype = 0;
+	my $datatype = undef;
 	if ($current_element->hasAttributeNsSafe($rdfans, 'datatype'))
 	{
+		$has_datatype = 1;
 		$datatype = $self->_expand_curie(
 			$current_element->getAttributeNsSafe($rdfans, 'datatype'),
 			element   => $current_element,
@@ -1496,7 +1512,7 @@ sub _consume_element
 		if ($current_element->hasAttributeNsSafe($rdfans, 'content'))
 		{
 			@current_object_literal = ($current_element->getAttributeNsSafe($rdfans, 'content'),
-				($datatype == -1 ? undef : $datatype),
+				($has_datatype ? $datatype : undef),
 				$current_language);
 		}
 		
@@ -1509,22 +1525,10 @@ sub _consume_element
 		))
 		{
 			@current_object_literal = ($self->_element_to_bookmarked_string($current_element),
-				($datatype == -1 ? undef : $datatype),
+				($has_datatype ? $datatype: undef),
 				$current_language);
 		}
 		
-		# or all children of the [current element] are text nodes;
-		# or there are no child nodes;
-		# or the body of the [ current element ] does have non-text
-		#    child nodes but @datatype is present, with an empty value. 
-		elsif ((!$current_element->getElementsByTagName('*')) 
-		||     ($datatype eq ''))
-		{
-			@current_object_literal = ($self->_element_to_string($current_element),
-				($datatype == -1 ? undef : $datatype),
-				$current_language);
-		}
-
 		# Additionally, if there is a value for [current language] then
 		# the value of the [plain literal] should include this language
 		# information, as described in [RDF-CONCEPTS]. The actual literal
@@ -1532,21 +1536,23 @@ sub _consume_element
 		# by concatenating the text content of each of the descendant
 		# elements of the [current element] in document order. 
 		
-		# as an [XML literal] if:
-		# 
-      #    * the [current element] has any child nodes that are not simply
-		#      text nodes, and @datatype is not present, or is present, but
-		#      is set to rdf:XMLLiteral.
-		#
-	   # The value of the [XML literal] is a string created by serializing
-		# to text, all nodes that are descendants of the [current element],
-		# i.e., not including the element itself, and giving it a datatype of
-		# rdf:XMLLiteral.
-		elsif ($datatype eq 'http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral'
-		|| ($datatype==-1 && $current_element->getElementsByTagName('*')))
+		# or all children of the [current element] are text nodes;
+		# or there are no child nodes;
+		# or the body of the [ current element ] does have non-text
+		#    child nodes but @datatype is present, with an empty value. 
+		elsif ((!$current_element->getElementsByTagName('*')) 
+		||     ($has_datatype and $datatype eq ''))
+		{
+			@current_object_literal = ($self->_element_to_string($current_element),
+				($has_datatype ? $datatype: undef),
+				$current_language);
+		}
+
+		# as an [XML literal] if: explicitly rdf:XMLLiteral.
+		elsif ($datatype eq RDF_XMLLIT)
 		{
 			@current_object_literal = ($self->_element_to_xml($current_element, $current_language),
-				'http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral',
+				RDF_XMLLIT,
 				$current_language);
 			$recurse = 0;
 		}
@@ -1561,22 +1567,41 @@ sub _consume_element
 		# includes the datatype URI, as described in [RDF-CONCEPTS], which
 		# will have been obtained according to the section on CURIE and URI
 		# Processing.
-		elsif ($datatype != -1)
+		elsif ($has_datatype)
 		{
 			if ($current_element->hasAttributeNsSafe($rdfans, 'content'))
 			{
 				@current_object_literal = ($current_element->getAttributeNsSafe($rdfans, 'content'),
-					($datatype == -1 ? undef : $datatype),
+					$datatype,
 					$current_language);
 			}
 			else
 			{
 				@current_object_literal = ($self->_element_to_string($current_element),
-					($datatype == -1 ? undef : $datatype),
+					$datatype,
 					$current_language);
 			}
 		}
-		
+
+		# In RDFa 1.0 by default generate an XML Literal;
+		# in RDFa 1.1 by default generate a plain literal.
+		elsif (!$has_datatype and $current_element->getElementsByTagName('*'))
+		{
+			if ($self->{'options'}->{'xmllit_default'})
+			{
+				@current_object_literal = ($self->_element_to_xml($current_element, $current_language),
+					RDF_XMLLIT,
+					$current_language);
+			}
+			else
+			{
+				@current_object_literal = ($self->_element_to_string($current_element),
+					undef,
+					$current_language);
+			}
+			$recurse = 0;
+		}
+
 		else
 		{
 			die("How did we get here??\n");
@@ -2094,25 +2119,43 @@ sub bnode
 	my $self    = shift;
 	my $element = shift;
 	my $save_me = shift || 0;
+	my $ident   = shift || undef;
 	
 	if (defined $element
 	and $self->{'saved_bnodes'}->{ $element->nodePath })
 	{
 		return $self->{'saved_bnodes'}->{ $element->nodePath };
 	}
-	
+
+	elsif (defined $ident
+	and $self->{'saved_bnodes'}->{ $ident })
+	{
+		return $self->{'saved_bnodes'}->{ $ident };
+	}
+
 	return sprintf('http://thing-described-by.org/?%s#%s',
 		$self->uri,
 		$self->{element}->getAttribute('id'))
 		if ($self->{options}->{tdb_service} && $element && length $element->getAttribute('id'));
 
-	my $rv = sprintf('_:RDFaAutoNode%03d', $self->{bnodes}++);
+	unless (defined $self->{bnode_prefix})
+	{
+		$self->{bnode_prefix} = Data::UUID->new->create_str;
+		$self->{bnode_prefix} =~ s/-//g;
+	}
+
+	my $rv = sprintf('_:rdfa%snode%04d', $self->{bnode_prefix}, $self->{bnodes}++);
 	
 	if ($save_me and defined $element)
 	{
 		$self->{'saved_bnodes'}->{ $element->nodePath } = $rv;
 	}
-	
+
+	if (defined $ident)
+	{
+		$self->{'saved_bnodes'}->{ $ident } = $rv;
+	}
+
 	return $rv;
 }
 
@@ -2236,11 +2279,9 @@ sub __expand_curie
 	{
 		my $bnode;
 		if ($token eq '_:' || $token eq '[_:]')
-			{ $bnode = '_:RDFaX'; }
-		elsif ($token =~ /^_:RDFa(.*)$/i || $token =~ /^\[_:RDFa(.*)\]$/i)
-			{ $bnode = '_:RDFax'.$1; }
+			{ $bnode = $self->bnode(undef, undef, '_:'); }
 		elsif ($token =~ /^_:(.+)$/i || $token =~ /^\[_:(.+)\]$/i)
-			{ $bnode = '_:'.$1; }
+			{ $bnode = $self->bnode(undef, undef, '_:'.$1); }
 		
 		if (defined $bnode)
 		{

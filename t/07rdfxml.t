@@ -1,6 +1,6 @@
 # Tests that lang tags work properly
 
-use Test::More tests => 8;
+use Test::More tests => 10;
 BEGIN { use_ok('RDF::RDFa::Parser') };
 
 my $xhtml = <<EOF;
@@ -73,10 +73,20 @@ $parser->consume;
 
 $model = $parser->graph;
 
-ok($model->count_statements(
+my $iter = $model->get_statements(
 		RDF::Trine::Node::Resource->new('http://example.com/ns#r3'),
 		RDF::Trine::Node::Resource->new('http://example.com/ns#literal'),
 		RDF::Trine::Node::Literal->new('Foo', 'en-gb'),
-		RDF::Trine::Node::Blank->new('RDFaAutoNode000'),
-		),
-	"Named graphs work with RDF/XML.");
+		undef,
+		);
+my @r;
+while (my $st = $iter->next)
+{
+	push @r, $st;
+}
+ok(@r,
+	"Named graphs work with RDF/XML - I.");
+ok(!$r[1],
+	"Named graphs work with RDF/XML - II.");
+ok($r[0]->context->is_blank,
+	"Named graphs work with RDF/XML - III.");

@@ -112,6 +112,7 @@ ok(
 eval "use RDF::Query;";
 SKIP: {
 	skip "RDF::Query and XML::Atom::OWL not installed", 1 if $@ or !$RDF::RDFa::Parser::HAS_AWOL;
+	skip "Need newer version of Trine", 1 unless $RDF::Trine::VERSION gt '0.128';
 	
 	$result = RDF::Query->new("PREFIX awol: <http://bblfish.net/work/atom-owl/2006-06-06/#>
 	ASK WHERE {
@@ -122,3 +123,6 @@ SKIP: {
 	
 	ok($result->get_boolean, "Atom native semantics and RDFa mix properly.");
 };
+
+use RDF::TrineShortcuts;
+print rdf_string($graph, 'turtle');

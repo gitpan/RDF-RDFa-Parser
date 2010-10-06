@@ -15,7 +15,7 @@ SYNOPSIS
      $title = $p->opengraph('title');
 
 VERSION
-    1.09_11
+    1.091
 
 DESCRIPTION
   Constructors
@@ -29,12 +29,6 @@ DESCRIPTION
         function to die.
 
         $base is a URL used to resolve relative links found in the document.
-
-        If $markup is undef, then RDF::RDFa::Parser will fetch $base to
-        obtain the document to be parsed. This is probably not a feature you
-        should exploit, as it may behave unexpectedly in certain
-        circumstances (e.g. if it follows a redirect trail). Use
-        "new_from_uri" if you want to fetch and parse a page in one step.
 
         $config optionally holds an RDF::RDFa::Parser::Config object which
         determines the set of rules used to parse the RDFa. It defaults to
@@ -55,6 +49,12 @@ DESCRIPTION
         then a new temporary store is created.
 
         This function can also be called as "new_from_uri". Same thing.
+
+    "$p = RDF::RDFa::Parser->new_from_response($response, [$config],
+    [$storage])"
+        $response is an "HTTP::Response" object.
+
+        Otherwise the same as "new_from_url".
 
   Public Methods
     "$p->graph"
@@ -80,8 +80,8 @@ DESCRIPTION
         (In pure RDF terms, it returns the non-bnode objects of triples
         where the subject is the document base URI; and the predicate is
         $property, with non-URI $property strings taken as having the
-        implicit prefix 'http://opengraphprotocol.org/schema/'. There is no
-        distinction between literal and non-literal values.)
+        implicit prefix 'http://ogp.me/ns#'. There is no distinction between
+        literal and non-literal values.)
 
         If $property is omitted, returns a list of possible properties.
 
@@ -121,8 +121,8 @@ DESCRIPTION
     "$p->consume"
         Advanced usage only.
 
-        The document is parsed for RDFa. As of RDF::RDFa::Parser 1.09_04,
-        this is called automatically when needed; you probably don't need to
+        The document is parsed for RDFa. As of RDF::RDFa::Parser 1.09x, this
+        is called automatically when needed; you probably don't need to
         touch it unless you're doing interesting things with callbacks.
 
     "$p->set_callbacks(\%callbacks)"

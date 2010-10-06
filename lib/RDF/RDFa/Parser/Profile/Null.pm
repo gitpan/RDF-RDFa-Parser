@@ -4,7 +4,7 @@ use base qw(RDF::RDFa::Parser::Profile);
 use strict;
 use 5.008;
 
-our $VERSION = '1.09_11';
+our $VERSION = '1.091';
 
 BEGIN
 {
@@ -40,7 +40,7 @@ RDF::RDFa::Parser::Profile::Null - hard-coded null profiles
 
 =head1 DESCRIPTION
 
-Certain commonly-used profile URIs are known not to contain RDFa
+Certain commonly-used profile URIs are known to not contain RDFa
 profiles. This module hard-codes them as null profiles to avoid
 performing useless HTTP requests.
 

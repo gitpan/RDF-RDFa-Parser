@@ -1,16 +1,17 @@
 package RDF::RDFa::Parser::Profile;
 
+use strict;
+use 5.008;
+
 use RDF::RDFa::Parser::Profile::Null;
 use RDF::RDFa::Parser::Profile::PrefixCC;
 use RDF::RDFa::Parser::Profile::SearchMonkey;
 use RDF::RDFa::Parser::Profile::RDF;
-
-use strict;
-use 5.008;
+use Scalar::Util qw'blessed';
 
 our @Modules;
 our %Known;
-our $VERSION = '1.09_11';
+our $VERSION = '1.091';
 
 sub new
 {
@@ -18,7 +19,7 @@ sub new
 
 	# Return cached result.
 	return $Known{$uri}
-		if UNIVERSAL::isa($Known{$uri}, __PACKAGE__);
+		if blessed($Known{$uri}) && $Known{$uri}->isa(__PACKAGE__);
 	return undef
 		if $Known{$uri} eq '-';
 
@@ -57,6 +58,11 @@ sub get_prefixes
 	return qw();
 }
 
+sub get_vocabulary
+{
+	return undef;
+}
+
 1;
 
 __END__
@@ -72,7 +78,7 @@ about this module unless you're doing some seriously weird stuff.
 
 The constructor (C<new>) takes a URI for an RDF profile and returns either
 undef (meaning "I don't want anything to do with that profile") or an object
-with C<get_terms> and C<get_prefixes> methods.
+with C<get_terms>, C<get_prefixes> and C<get_vocabulary> methods.
 
 C<get_terms> returns a list of arrayrefs such that each arrayref has the
 following entries:
@@ -98,7 +104,12 @@ entries:
 
 =item 1. The full URI is should expand to.
 
+=item 2. True iff the term is case-insensitive.
+
 =back
+
+C<get_vocabulary> returns the URI stem for the default vocabulary set by the
+profile, or undef if no such vocabulary is set by the profile.
 
 =head1 SEE ALSO
 

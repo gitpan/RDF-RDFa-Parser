@@ -1,6 +1,6 @@
 package RDF::RDFa::Parser::OpenDocumentObjectModel;
 
-our $VERSION = '1.09_11';
+our $VERSION = '1.091';
 our @Types = qw(
 	application/vnd.oasis.opendocument.chart
 	application/vnd.oasis.opendocument.database
@@ -19,6 +19,7 @@ our @Types = qw(
 	);
 
 use File::Temp qw':seekable';
+use Scalar::Util qw'blessed';
 use URI;
 use URI::file;
 use XML::LibXML qw':all';
@@ -41,7 +42,7 @@ sub new
 
 sub usable
 {
-	return UNIVERSAL::can('Archive::Zip', 'new');
+	return Archive::Zip->can('new');
 }
 
 sub parse_archive
@@ -124,7 +125,7 @@ sub parse_file
 {
 	my ($self, $file, $baseurl) = @_;
 
-	unless (UNIVERSAL::isa($file, 'URI'))
+	unless (blessed($file) && $file->isa('URI'))
 	{
 		if ($file =~ /^[a-z0-9_\.-]+:\S+$/i)
 		{

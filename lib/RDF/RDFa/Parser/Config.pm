@@ -25,7 +25,7 @@ use URI::Escape qw'uri_unescape';
 use RDF::RDFa::Parser::OpenDocumentObjectModel;
 
 our @EXPORT_OK = qw(HOST_ATOM HOST_DATARSS HOST_HTML4 HOST_HTML5 HOST_OPENDOCUMENT_XML HOST_OPENDOCUMENT_ZIP HOST_SVG HOST_XHTML HOST_XML RDFA_10 RDFA_11);
-our $VERSION = '1.09_11';
+our $VERSION = '1.091';
 our $CONFIGS = {
 	'host' => {
 		HOST_ATOM() => {
@@ -126,6 +126,7 @@ our $CONFIGS = {
 			'xhtml_lang'            => 0,
 			'xml_base'              => 2,
 			'xml_lang'              => 1,
+			'xmllit_default'        => 1,
 			'xmlns_attr'            => 1,
 		},
 		RDFA_11() => {
@@ -167,6 +168,7 @@ our $CONFIGS = {
 			'xhtml_lang'            => 0,
 			'xml_base'              => 2,
 			'xml_lang'              => 1,
+			'xmllit_default'        => 0,
 			'xmlns_attr'            => 1,
 		},
 	},
@@ -677,6 +679,8 @@ in brackets.
 =item * B<xml_base> - support for 'xml:base' attribute. 0=only RDF/XML; 1=except @href/@src; 2=always. [0]
 
 =item * B<xml_lang> - Support for 'xml:lang' attribute. [1]
+
+=item * B<xmllit_default> - Generate XMLLiterals enthusiastically. [1, 0]
 
 =item * B<xmlns_attr> - Support for 'xmlns:foo' to define CURIE prefixes. [1]
 

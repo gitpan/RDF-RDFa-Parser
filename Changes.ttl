@@ -438,6 +438,22 @@ my:v_1-09_11
 			[ rdfs:label "Support for OpenDocument's slightly unusual flavour of RDFa."@en ; a dcs:Addition ]
 		] .
 
+my:v_1-091
+
+	a               :Version ;
+	dc:issued       "2010-10-06"^^xsd:date ;
+	:revision       "1.091"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.091.tar.gz> ;
+	rdfs:label      "RDFa 1.1 Release Candidate 1"@en ;
+	dcs:changeset [
+		dcs:versus my:v_1-09_11 ;
+		dcs:item
+			[ rdfs:label "Various clean-ups."@en ] ,
+			[ rdfs:label "Generate less-predictable blank node identifiers."@en ] ,
+			[ rdfs:label "Add test cases covering @profile."@en ] ,
+			[ rdfs:label "Support rdfa:vocabulary in Profiles."@en ; a dcs:Addition ]
+		] .
+
 my:roadmap_1_100
 
 	a                dcs:ToDoList ;
@@ -475,7 +491,8 @@ my:project
                    my:v_1-09_00 , my:v_1-09_01 ,  my:v_1-09_02 ,
                    my:v_1-09_03 , my:v_1-09_04 ,  my:v_1-09_05 ,
                    my:v_1-09_06 , my:v_1-09_07 ,  my:v_1-09_08 ,
-                   my:v_1-09_09 , my:v_1-09_10 ,  my:v_1-09_11 .
+                   my:v_1-09_09 , my:v_1-09_10 ,  my:v_1-09_11 ,
+                   my:v_1-091 .
 
 #############################################################
 

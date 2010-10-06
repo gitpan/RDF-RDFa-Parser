@@ -18,6 +18,7 @@ requires            'common::sense'  => 0;
 recommends          'Archive::Zip'   => 0;
 requires            'Carp'           => 0;
 requires            'Data::Dumper'   => 0;
+requires            'Data::UUID'     => 0;
 requires            'File::ShareDir' => 0;
 test_requires       'File::Slurp'    => 0;
 requires            'File::Spec'     => 0;
@@ -25,8 +26,10 @@ requires            'File::Temp'     => 0;
 requires            'HTML::HTML5::Parser' => 0;
 requires            'HTML::HTML5::Sanity' => 0;
 requires            'HTTP::Cache::Transparent' => 0;
+test_requires       'HTTP::Response' => 0;
 requires            'LWP::UserAgent' => 0;
 requires            'RDF::Trine'     => '0.123';
+requires            'Scalar::Util'   => 0;
 requires            'Storable'       => 0;
 test_requires       'Test::More'     => '0.61';
 requires            'URI::file'      => 0;
@@ -43,6 +46,8 @@ unless (UNIVERSAL::can('Archive::Zip', 'new'))
 	print "** Archive::Zip is needed for parsing RDFa in OpenDocument files.\n";
 	print "****************\n";
 }
+
+keywords 'RDF', 'RDFa', 'Semantic Web', 'HTML', 'XHTML', 'Atom', 'SVG', 'XML', 'OpenDocument', 'ODF', 'Metadata';
 
 resources(
 	'homepage'   => "http://search.cpan.org/dist/$dist/",

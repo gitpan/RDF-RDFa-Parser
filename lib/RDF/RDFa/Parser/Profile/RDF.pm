@@ -11,7 +11,7 @@ use base qw(RDF::RDFa::Parser::Profile);
 use strict;
 use 5.008;
 
-our $VERSION = '1.09_11';
+our $VERSION = '1.091';
 
 BEGIN
 {
@@ -28,6 +28,13 @@ sub new
 	my $ua       = $parser->{'options'}->lwp_ua;
 	my $accept   = 'application/rdf+xml, text/turtle, application/x-rdf+json, '.$ua->default_header('Accept');
 	my $response = $ua->get($uri, Accept=>$accept);
+	
+	return $class->new_from_response($response, $parser);
+}
+
+sub new_from_response
+{
+	my ($class, $response, $parser) = @_;
 	
 	my $model;
 	
@@ -94,46 +101,73 @@ sub new
 
 	if (defined $model)
 	{
-		my $self = bless { definitions=>0, prefixes=>[], terms=>[] }, $class;
-			
-		my $term_results   = $model->get_pattern( $self->_term_pattern );
-		while (my $row = $term_results->next)
-		{
-			next unless UNIVERSAL::isa($row->{'term'}, 'RDF::Trine::Node::Literal');
-			next unless UNIVERSAL::isa($row->{'uri'}, 'RDF::Trine::Node::Literal');
-			
-			$self->{definitions}++;
-			push @{ $self->{'terms'} },
-				[
-					$row->{'term'}->literal_value,
-					$row->{'uri'}->literal_value,
-					0,
-					'*',
-				];
-		}
+		return $class->new_from_model($model, $parser);
+	}
+	
+	return undef;
+}
+
+sub new_from_model
+{
+	my ($class, $model, $parser) = @_;
+
+	my $self = bless { definitions=>0, prefixes=>[], terms=>[] }, $class;
 		
-		my $prefix_results = $model->get_pattern( $self->_prefix_pattern );
-		while (my $row = $prefix_results->next)
-		{
-			next unless UNIVERSAL::isa($row->{'prefix'}, 'RDF::Trine::Node::Literal');
-			next unless UNIVERSAL::isa($row->{'uri'}, 'RDF::Trine::Node::Literal');
-			
-			$self->{definitions}++;
-			push @{ $self->{'prefixes'} },
-				[
-					lc $row->{'prefix'}->literal_value,
-					$row->{'uri'}->literal_value,
-					1,
-				];
-		}
+	my $term_results   = $model->get_pattern( $self->_term_pattern );
+	while (my $row = $term_results->next)
+	{
+		next unless $row->{'term'}   && $row->{'term'}->is_literal;
+		next unless $row->{'uri'}    && $row->{'uri'}->is_literal;
 		
-		if ($self->{definitions})
-		{
-			return $self;
-		}
+		$self->{definitions}++;
+		push @{ $self->{'terms'} },
+			[
+				$row->{'term'}->literal_value,
+				$row->{'uri'}->literal_value,
+				0,
+				'*',
+			];
+	}
+	
+	my $prefix_results = $model->get_pattern( $self->_prefix_pattern );
+	while (my $row = $prefix_results->next)
+	{
+		next unless $row->{'prefix'} && $row->{'prefix'}->is_literal;
+		next unless $row->{'uri'}    && $row->{'uri'}->is_literal;
+		
+		$self->{definitions}++;
+		push @{ $self->{'prefixes'} },
+			[
+				lc $row->{'prefix'}->literal_value,
+				$row->{'uri'}->literal_value,
+				1,
+			];
 	}
 
-	return undef;
+	# TODO - any terms or prefixes defined multiple times should
+	# be ignored completely.
+	
+	my $vocab_results = $model->get_statements(
+		undef,
+		RDF::Trine::Node::Resource->new('http://www.w3.org/ns/rdfa#vocabulary'),
+		undef);
+	while (my $st = $vocab_results->next)
+	{
+		next unless $st->object->is_literal;
+		if (defined $self->{'vocab'})
+		{
+			$self->{definitions}--;
+			$self->{'vocab'} = '';
+			last;
+		}
+		else
+		{
+			$self->{definitions}++;
+			$self->{'vocab'} = $st->object->literal_value;
+		}
+	}
+	
+	return $self;
 }
 
 sub _term_pattern
@@ -188,6 +222,12 @@ sub get_prefixes
 	return @{ $self->{'prefixes'} };
 }
 
+sub get_vocab
+{
+	my ($self) = @_;
+	return ($self->{'vocab'} eq '') ? undef : $self->{'vocab'};
+}
+
 
 1;
 
@@ -200,6 +240,9 @@ RDF::RDFa::Parser::Profile::RDF - profiles written in RDF
 =head1 DESCRIPTION
 
 This is the recommended format for profiles in RDFa 1.1.
+
+This module provides C<new_from_response> and C<new_from_model>
+constructors which may prove useful for subclassing.
 
 =head1 SEE ALSO
 
