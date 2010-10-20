@@ -4,16 +4,10 @@ use File::Spec;
 use HTTP::Cache::Transparent;
 
 use base qw(RDF::RDFa::Parser::Profile);
-use strict;
+use common::sense;
 use 5.008;
 
-our $VERSION = '1.091';
-
-BEGIN
-{
-	# This lets RDF::RDFa::Parser find this module.
-	push @RDF::RDFa::Parser::Profile::Modules, __PACKAGE__;
-}
+our $VERSION = '1.092';
 
 sub new
 {
@@ -24,7 +18,8 @@ sub new
 	
 	my $self = bless [], $class;
 	
-	while (<DATA>)
+	my @DATA = &DATA;
+	while ($_ = shift @DATA)
 	{
 		chomp;
 		my ($p, undef, $u)  = split /\t/;
@@ -40,37 +35,10 @@ sub get_prefixes
 	return @$self;
 }
 
-1;
-
-=head1 NAME
-
-RDF::RDFa::Parser::Profile::SearchMonkey - Yahoo SearchMonkey profile
-
-=head1 DESCRIPTION
-
-Hard-coded profile for 	http://search.yahoo.com/searchmonkey-profile
-
-=head1 SEE ALSO
-
-L<RDF::RDFa::Parser>,
-L<RDF::RDFa::Parser::Profile>.
-
-=head1 AUTHOR
-
-Toby Inkster E<lt>tobyink@cpan.orgE<gt>.
-
-=head1 COPYRIGHT
-
-Copyright 2008-2010 Toby Inkster
-
-This library is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
-
-=cut
-
-# copied and pasted from Yahoo documentation, 2010-05-26.
-
-__DATA__
+sub DATA
+{
+	# copied and pasted from Yahoo documentation, 2010-05-26.
+	return split /\r?\n/, <<'DATA';
 abmeta	AB Meta	http://www.abmeta.org/ns#
 action	SearchMonkey Actions	http://search.yahoo.com/searchmonkey/action/
 assert	SearchMonkey Assertions (deprecated)	http://search.yahoo.com/searchmonkey/assert/
@@ -110,3 +78,33 @@ vcard	VCard	http://www.w3.org/2006/vcard/ns#
 xfn	XFN	http://gmpg.org/xfn/11#
 xhtml	XHTML	http://www.w3.org/1999/xhtml/vocab#
 xsd	XML Schema Datatypes	http://www.w3.org/2001/XMLSchema#
+DATA
+}
+
+1;
+
+=head1 NAME
+
+RDF::RDFa::Parser::Profile::SearchMonkey - Yahoo SearchMonkey profile
+
+=head1 DESCRIPTION
+
+Hard-coded profile for 	http://search.yahoo.com/searchmonkey-profile
+
+=head1 SEE ALSO
+
+L<RDF::RDFa::Parser>,
+L<RDF::RDFa::Parser::Profile>.
+
+=head1 AUTHOR
+
+Toby Inkster E<lt>tobyink@cpan.orgE<gt>.
+
+=head1 COPYRIGHT
+
+Copyright 2008-2010 Toby Inkster
+
+This library is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut

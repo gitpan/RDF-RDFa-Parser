@@ -60,17 +60,16 @@ use constant {
 	RDF_XMLLIT   => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral',
 	RDF_TYPE     => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type',
 	};
-use strict;
-no warnings;
+use common::sense;
 use 5.008;
 
 =head1 VERSION
 
-1.091
+1.092
 
 =cut
 
-our $VERSION = '1.091';
+our $VERSION = '1.092';
 our $HAS_AWOL;
 
 BEGIN
@@ -185,6 +184,9 @@ sub new
 		}, $class;
 	
 	$config->auto_config($self);
+	
+	$self->{options} = $config = $config->guess_rdfa_version($self)
+		if $config->{guess_rdfa_version};
 
 	# HTML <base> element.
 	if ($self->{'options'}->{'xhtml_base'})
@@ -593,7 +595,7 @@ sub _consume_element
 		$parent_subject     = $base;
 		$parent_object      = undef;
 		$uri_mappings       = {};
-		$term_mappings      = $self->{'options'}->{'keywords'};
+		$term_mappings      = {};
 		$incomplete_triples = ();
 		$language           = undef;
 		$graph              = $self->{'options'}->{'graph'} ? $self->{'options'}->{'graph_default'} : undef;
@@ -803,11 +805,6 @@ sub _consume_element
 	# Various weird/default profile features.
 	if ($current_element->isSameNode($self->dom->documentElement))
 	{
-		if ($self->{'options'}->{'default_profiles'})
-		{
-			push @profiles, $self->_split_tokens( $self->{'options'}->{'default_profiles'} );
-		}
-		
 		if ($self->{'options'}->{'profile_pi'})
 		{
 			foreach my $node ($self->dom->childNodes)
@@ -819,10 +816,17 @@ sub _consume_element
 				push @profiles, $uri;
 			}
 		}
+		
+		if ($self->{'options'}->{'default_profiles'})
+		{
+			push @profiles, $self->_split_tokens( $self->{'options'}->{'default_profiles'} );
+		}		
 	}
 
 	foreach my $uri (reverse @profiles)
 	{
+		next unless $uri =~ /\S/; # skip duds
+		
 		my $profile = RDF::RDFa::Parser::Profile->new(
 			$self->uri($uri, {'element'=>$current_element,'xml_base'=>$xml_base}),
 			$self);
@@ -841,14 +845,14 @@ sub _consume_element
 				my ($term, $uri, $insensitive, $attrs) = @$mapping;
 				$term = lc $term if $insensitive;
 				$insensitive = $insensitive ? 'insensitive' : 'sensitive';
-				$attrs = [ split /\s*/, ($attrs||'*') ];
+				$attrs = [ split /\s+/, ($attrs||'*') ];
 				
 				foreach my $attr (@$attrs)
 				{
 					$local_term_mappings->{$insensitive}->{$attr}->{$term} = $uri;
 				}
 			}
-			my $profile_default_vocab = $profile->get_vocab;
+			my $profile_default_vocab = $profile->get_vocabulary;
 			$local_uri_mappings->{'*'} = $profile_default_vocab
 				if defined $profile_default_vocab;
 		}
@@ -937,7 +941,7 @@ sub _consume_element
 	if ($self->{'options'}->{'prefix_attr'}
 	&& $current_element->hasAttributeNsSafe($rdfans, 'prefix'))
 	{
-		my $pfx_attr = $current_element->getAttributeNsSafe($rdfans, 'prefix');
+		my $pfx_attr = $current_element->getAttributeNsSafe($rdfans, 'prefix') . ' ';
 		while ($pfx_attr =~ /^\s*(\S+):[\s\r\n]*(\S*)[\s\r\n]+/gs)
 		{
 			my $pfx = $self->{'options'}->{'prefix_nocase_attr'} ? (lc $1) : $1;
@@ -1000,7 +1004,7 @@ sub _consume_element
 		my ($xmlns, $attr) = ($self->{'options'}->{'graph_attr'} =~ /^(?:\{(.+)\})?(.+)$/);
 		unless ($attr)
 		{
-			$xmlns = undef;
+			$xmlns = $rdfans;
 			$attr  = 'graph';
 		}
 		
@@ -1064,7 +1068,7 @@ sub _consume_element
 	
 	my @rel = $self->_split_tokens( $current_element->getAttributeNsSafe($rdfans, 'rel') );
 	my @rev = $self->_split_tokens( $current_element->getAttributeNsSafe($rdfans, 'rev') );
-	
+
 	# EXTENSION: rel="alternate stylesheet"
 	if ($self->{'options'}->{'alt_stylesheet'}
 	&&  (grep /^alternate$/i, @rel)
@@ -1096,7 +1100,7 @@ sub _consume_element
 			);
 		defined $x ? ($x) : ();
 		} @rev;
-	
+
 	# If the [current element] contains no valid @rel or @rev URI, obtained
 	# according to the section on CURIE and URI Processing, then the next step 
 	# is to establish a value for [new subject]. Any of the attributes that 
@@ -2263,9 +2267,9 @@ sub _expand_curie
 	my ($self, $token, %args) = @_;	
 	my $r = $self->__expand_curie($token, %args);
 	
-	if (defined $self->{'sub'}->{'oncurie'})
+	if (defined $self->{'sub'}->{'ontoken'})
 	{
-		return $self->{'sub'}->{'oncurie'}($self, $args{element}, $token, $r);
+		return $self->{'sub'}->{'ontoken'}($self, $args{element}, $token, $r);
 	}
 
 	return $r;
@@ -2345,6 +2349,7 @@ sub __expand_curie
 
 		if ($is_safe)
 		{
+			$prefix = ($prefix eq '-') ? '' : $prefix;
 			$self->_log_error(
 				ERR_ERROR,
 				ERR_CODE_CURIE_UNDEFINED,
@@ -2590,7 +2595,7 @@ The return value of this callback is currently ignored, but you should return
 
 =head2 ontoken
 
-This is called when a CURIE has been expanded. The parameters are:
+This is called when a CURIE or term has been expanded. The parameters are:
 
 =over 4
 
@@ -2794,21 +2799,21 @@ If you switch on the 'auto_config' Config option, pages can do this.
 A page can set options using a specially crafted E<lt>metaE<gt> tag:
 
   <meta name="http://search.cpan.org/dist/RDF-RDFa-Parser/#auto_config"
-     content="xhtml_lang=1&amp;keyword_bundles=rdfa+html5+html4+html32" />
+     content="xhtml_lang=1&amp;xml_lang=0" />
 
 Note that the C<content> attribute is an application/x-www-form-urlencoded
 string (which must then be HTML-escaped of course). Semicolons may be used
 instead of ampersands, as these tend to look nicer:
 
   <meta name="http://search.cpan.org/dist/RDF-RDFa-Parser/#auto_config"
-     content="xhtml_lang=1;keyword_bundles=rdfa+html5+html4+html32" />
+     content="xhtml_lang=1;xml_lang=0" />
 
 It's possible to use auto config outside XHTML (e.g. in Atom or
 SVG) using namespaces:
 
   <xhtml:meta xmlns:xhtml="http://www.w3.org/1999/xhtml"
      name="http://search.cpan.org/dist/RDF-RDFa-Parser/#auto_config"
-     content="keyword_bundles=iana+rdfa;xml_base=2;atom_elements=1" />
+     content="xhtml_lang=0;xml_base=2;atom_elements=1" />
 
 Any Config option may be given using auto config, except 'use_rtnlx', 'dom_parser',
 and of course 'auto_config' itself. 

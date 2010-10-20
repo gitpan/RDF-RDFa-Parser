@@ -1,17 +1,18 @@
 package RDF::RDFa::Parser::Profile;
 
-use strict;
+use common::sense;
 use 5.008;
 
-use RDF::RDFa::Parser::Profile::Null;
-use RDF::RDFa::Parser::Profile::PrefixCC;
-use RDF::RDFa::Parser::Profile::SearchMonkey;
+use Module::Pluggable
+	search_path => ['RDF::RDFa::Parser::Profile'],
+	require     => 1,
+	except      => ['RDF::RDFa::Parser::Profile::RDF'];
 use RDF::RDFa::Parser::Profile::RDF;
 use Scalar::Util qw'blessed';
 
-our @Modules;
 our %Known;
-our $VERSION = '1.091';
+our @ExtraPlugins;
+our $VERSION = '1.092';
 
 sub new
 {
@@ -21,12 +22,12 @@ sub new
 	return $Known{$uri}
 		if blessed($Known{$uri}) && $Known{$uri}->isa(__PACKAGE__);
 	return undef
-		if $Known{$uri} eq '-';
+		if defined $Known{$uri} && $Known{$uri} eq '-';
 
-	# Try non-default profile modules first.
-	foreach my $m (@Modules)
+	# Try exotic profile modules first.
+	foreach my $m ((@ExtraPlugins, $class->plugins))
 	{
-		next if $m eq 'use RDF::RDFa::Parser::Profile::RDF';
+		next if $m =~ /::Abstract/;
 		my $p = $m->new($uri, $parser);
 		if ($p)
 		{
@@ -76,6 +77,10 @@ RDF::RDFa::Parser::Profile - base class for RDFa profiles
 This is a base class for RDFa profiles. You don't need to know anything
 about this module unless you're doing some seriously weird stuff.
 
+This module uses L<Module::Pluggable> to load all modules in the
+C<RDF::RDFa::Parser::Profile::*> namespace and delegate to them
+as appropriate.
+
 The constructor (C<new>) takes a URI for an RDF profile and returns either
 undef (meaning "I don't want anything to do with that profile") or an object
 with C<get_terms>, C<get_prefixes> and C<get_vocabulary> methods.
@@ -115,8 +120,10 @@ profile, or undef if no such vocabulary is set by the profile.
 
 L<RDF::RDFa::Parser>,
 L<RDF::RDFa::Parser::Profile::Null>,
-L<RDF::RDFa::Parser::Profile::PrefixCC>,
-L<RDF::RDFa::Parser::Profile::RDF>.
+L<RDF::RDFa::Parser::Profile::XHTML>,
+L<RDF::RDFa::Parser::Profile::IETFLinkTypes>,
+L<RDF::RDFa::Parser::Profile::RDF>,
+etc.
 
 =head1 AUTHOR
 

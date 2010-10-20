@@ -8,17 +8,14 @@ use RDF::RDFa::Parser::Config;
 use RDF::Trine;
 
 use base qw(RDF::RDFa::Parser::Profile);
-use strict;
+use common::sense;
 use 5.008;
 
-our $VERSION = '1.091';
+our $VERSION = '1.092';
 
 BEGIN
 {
 	HTTP::Cache::Transparent::init({BasePath => File::Spec->tmpdir.'/cache/'});
-	
-	# This lets RDF::RDFa::Parser find this module.
-	push @RDF::RDFa::Parser::Profile::Modules, __PACKAGE__;
 }
 
 sub new
@@ -126,6 +123,11 @@ sub new_from_model
 				$row->{'uri'}->literal_value,
 				0,
 				'*',
+			], [
+				$row->{'term'}->literal_value,
+				$row->{'uri'}->literal_value,
+				1,
+				'*',
 			];
 	}
 	
@@ -222,7 +224,7 @@ sub get_prefixes
 	return @{ $self->{'prefixes'} };
 }
 
-sub get_vocab
+sub get_vocabulary
 {
 	my ($self) = @_;
 	return ($self->{'vocab'} eq '') ? undef : $self->{'vocab'};

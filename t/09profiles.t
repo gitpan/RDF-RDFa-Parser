@@ -1,3 +1,51 @@
+package RDF::RDFa::Parser::Profile::JustTesting;
+
+use base 'RDF::RDFa::Parser::Profile::RDF';
+use HTTP::Response;
+
+BEGIN
+{
+	push @RDF::RDFa::Parser::Profile::ExtraPlugins, __PACKAGE__;
+}
+
+sub new
+{
+	my ($class, $uri, $parser) = @_;
+	
+	return undef
+		unless $uri eq 'http://example.com/profile';
+	
+	my $response = HTTP::Response->new('200', 'OK', [
+		'content-base' => $uri,
+		'content-type' => 'text/turtle',
+	], <<'PROFILE');
+@prefix rdfa: <http://www.w3.org/ns/rdfa#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+<>
+	a rdfa:ProfileDocument ;
+	rdfa:defines [
+		a rdfa:PrefixMapping ;
+		rdfa:prefix "ex"^^xsd:string ;
+		rdfa:uri "http://example.com/ns#"^^xsd:string 
+	] ;
+	rdfa:defines [
+		a rdfa:TermMapping ;
+		rdfa:term "FOOBAR"^^xsd:string ;
+		rdfa:uri "http://example.com/ns#Foobar"^^xsd:anyURI
+	] ;
+	rdfa:vocabulary "http://example.com/vocab#"^^xsd:string .
+
+PROFILE
+		
+	return $class->new_from_response($response, $parser);
+}
+
+1;
+
+
+package main;
+
 use Test::More tests => 5;
 BEGIN { use_ok('RDF::RDFa::Parser') };
 
@@ -14,8 +62,6 @@ my $testdoc = <<'TESTDOC';
 	</body>
 </html>
 TESTDOC
-
-push @RDF::RDFa::Parser::Profile::Modules, 'RDF::RDFa::Parser::Profile::JustTesting';
 
 my $opts = RDF::RDFa::Parser::Config->new('xhtml','1.1');
 my $p    = RDF::RDFa::Parser->new($testdoc, "http://example.net/document.xhtml", $opts);
@@ -61,42 +107,6 @@ ok(
 		),
 	"Vocab definition works"
 	);
-
-package RDF::RDFa::Parser::Profile::JustTesting;
-
-use base 'RDF::RDFa::Parser::Profile::RDF';
-use HTTP::Response;
-
-sub new
-{
-	my ($class, $uri, $parser) = @_;
 	
-	return undef
-		unless $uri eq 'http://example.com/profile';
-	
-	my $response = HTTP::Response->new('200', 'OK', [
-		'content-base' => $uri,
-		'content-type' => 'text/turtle',
-	], <<'PROFILE');
-@prefix rdfa: <http://www.w3.org/ns/rdfa#> .
-@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
-
-<>
-	a rdfa:ProfileDocument ;
-	rdfa:defines [
-		a rdfa:PrefixMapping ;
-		rdfa:prefix "ex"^^xsd:string ;
-		rdfa:uri "http://example.com/ns#"^^xsd:string 
-	] ;
-	rdfa:defines [
-		a rdfa:TermMapping ;
-		rdfa:term "FOOBAR"^^xsd:string ;
-		rdfa:uri "http://example.com/ns#Foobar"^^xsd:anyURI
-	] ;
-	rdfa:vocabulary "http://example.com/vocab#"^^xsd:string .
-PROFILE
-		
-	return $class->new_from_response($response, $parser);
-}
-
 1;
+

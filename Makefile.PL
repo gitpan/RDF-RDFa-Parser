@@ -28,6 +28,7 @@ requires            'HTML::HTML5::Sanity' => 0;
 requires            'HTTP::Cache::Transparent' => 0;
 test_requires       'HTTP::Response' => 0;
 requires            'LWP::UserAgent' => 0;
+requires            'Module::Pluggable' => 0;
 requires            'RDF::Trine'     => '0.123';
 requires            'Scalar::Util'   => 0;
 requires            'Storable'       => 0;

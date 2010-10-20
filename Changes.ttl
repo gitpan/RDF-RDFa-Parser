@@ -454,6 +454,25 @@ my:v_1-091
 			[ rdfs:label "Support rdfa:vocabulary in Profiles."@en ; a dcs:Addition ]
 		] .
 
+my:v_1-092
+
+	a               :Version ;
+	dc:issued       "2010-10-20"^^xsd:date ;
+	:revision       "1.092"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.092.tar.gz> ;
+	rdfs:label      "RDFa 1.1 Release Candidate 2"@en ;
+	dcs:changeset [
+		dcs:versus my:v_1-091 ;
+		dcs:item
+			[ rdfs:label "If @graph support is enabled, and RDFa attributes are being used in a non-standard namespace, assume @graph is in that namespace too."@en ] ,
+			[ rdfs:label "RDFa Profiles establish both a case-sensitive and case-insensitive term mapping."@en ] ,
+			[ rdfs:label "Strongly deprecate keyword_bundles config option - use default_profiles instead."@en ] ,
+			[ rdfs:label "Reimplement RDFa 1.0 keyword concept using profiles."@en ] ,
+			[ rdfs:label "There was an inconsistency between the code and documentation for the name of the oncurie/ontoken callback. It's now called ontoken."@en ; a dcs:Bugfix ] ,
+			[ rdfs:label "Load Profile modules via Module::Pluggable."@en ] ,
+			[ rdfs:label "The final prefix defined in @prefix was being ignored due to a regexp bug. Fixed."@en ; a dcs:Bugfix ]
+		] .
+
 my:roadmap_1_100
 
 	a                dcs:ToDoList ;
@@ -492,7 +511,7 @@ my:project
                    my:v_1-09_03 , my:v_1-09_04 ,  my:v_1-09_05 ,
                    my:v_1-09_06 , my:v_1-09_07 ,  my:v_1-09_08 ,
                    my:v_1-09_09 , my:v_1-09_10 ,  my:v_1-09_11 ,
-                   my:v_1-091 .
+                   my:v_1-091   , my:v_1-092 .
 
 #############################################################
 

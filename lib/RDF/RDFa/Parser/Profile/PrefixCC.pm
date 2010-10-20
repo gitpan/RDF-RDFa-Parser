@@ -4,17 +4,14 @@ use File::Spec;
 use HTTP::Cache::Transparent;
 
 use base qw(RDF::RDFa::Parser::Profile);
-use strict;
+use common::sense;
 use 5.008;
 
-our $VERSION = '1.091';
+our $VERSION = '1.092';
 
 BEGIN
 {
 	HTTP::Cache::Transparent::init({BasePath => File::Spec->tmpdir.'/cache/'});
-	
-	# This lets RDF::RDFa::Parser find this module.
-	push @RDF::RDFa::Parser::Profile::Modules, __PACKAGE__;
 }
 
 sub new
@@ -28,7 +25,8 @@ sub new
 	my $self = bless [], $class;
 	
 	my $known = {};
-	while (<DATA>)
+	my @DATA = &DATA;
+	while ($_ = shift @DATA)
 	{
 		chomp;
 		my ($p, $u)  = split /\t/;
@@ -80,6 +78,33 @@ sub get_prefixes
 	return @$self;
 }
 
+sub DATA
+{
+	# cached data
+	return split /\r?\n/, <<'DATA';
+cc	http://creativecommons.org/ns#
+ctag	http://commontag.org/ns#
+dc	http://purl.org/dc/terms/
+doap	http://usefulinc.com/ns/doap#
+foaf	http://xmlns.com/foaf/0.1/
+geo	http://www.w3.org/2003/01/geo/wgs84_pos#
+gr	http://purl.org/goodrelations/v1#
+owl	http://www.w3.org/2002/07/owl#
+rdf	http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rdfa	http://www.w3.org/ns/rdfa#
+rdfs	http://www.w3.org/2000/01/rdf-schema#
+rel	http://purl.org/vocab/relationship/
+rev	http://purl.org/stuff/rev#
+rss	http://purl.org/rss/1.0/
+sioc	http://rdfs.org/sioc/ns#
+skos	http://www.w3.org/2004/02/skos/core#
+tag	http://www.holygoat.co.uk/owl/redwood/0.1/tags/
+xfn	http://vocab.sindice.com/xfn#
+xhv	http://www.w3.org/1999/xhtml/vocab#
+xsd	http://www.w3.org/2001/XMLSchema#
+DATA
+}
+
 1;
 
 =head1 NAME
@@ -112,25 +137,3 @@ This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
 =cut
-
-__DATA__
-cc	http://creativecommons.org/ns#
-ctag	http://commontag.org/ns#
-dc	http://purl.org/dc/terms/
-doap	http://usefulinc.com/ns/doap#
-foaf	http://xmlns.com/foaf/0.1/
-geo	http://www.w3.org/2003/01/geo/wgs84_pos#
-gr	http://purl.org/goodrelations/v1#
-owl	http://www.w3.org/2002/07/owl#
-rdf	http://www.w3.org/1999/02/22-rdf-syntax-ns#
-rdfa	http://www.w3.org/ns/rdfa#
-rdfs	http://www.w3.org/2000/01/rdf-schema#
-rel	http://purl.org/vocab/relationship/
-rev	http://purl.org/stuff/rev#
-rss	http://purl.org/rss/1.0/
-sioc	http://rdfs.org/sioc/ns#
-skos	http://www.w3.org/2004/02/skos/core#
-tag	http://www.holygoat.co.uk/owl/redwood/0.1/tags/
-xfn	http://vocab.sindice.com/xfn#
-xhv	http://www.w3.org/1999/xhtml/vocab#
-xsd	http://www.w3.org/2001/XMLSchema#

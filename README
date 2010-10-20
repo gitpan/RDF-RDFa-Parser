@@ -15,7 +15,7 @@ SYNOPSIS
      $title = $p->opengraph('title');
 
 VERSION
-    1.091
+    1.092
 
 DESCRIPTION
   Constructors
@@ -234,7 +234,8 @@ CALLBACKS
     the return value.
 
   ontoken
-    This is called when a CURIE has been expanded. The parameters are:
+    This is called when a CURIE or term has been expanded. The parameters
+    are:
 
     *   A reference to the "RDF::RDFa::Parser" object
 
@@ -419,7 +420,7 @@ FEATURES
     A page can set options using a specially crafted <meta> tag:
 
       <meta name="http://search.cpan.org/dist/RDF-RDFa-Parser/#auto_config"
-         content="xhtml_lang=1&amp;keyword_bundles=rdfa+html5+html4+html32" />
+         content="xhtml_lang=1&amp;xml_lang=0" />
 
     Note that the "content" attribute is an
     application/x-www-form-urlencoded string (which must then be
@@ -427,14 +428,14 @@ FEATURES
     as these tend to look nicer:
 
       <meta name="http://search.cpan.org/dist/RDF-RDFa-Parser/#auto_config"
-         content="xhtml_lang=1;keyword_bundles=rdfa+html5+html4+html32" />
+         content="xhtml_lang=1;xml_lang=0" />
 
     It's possible to use auto config outside XHTML (e.g. in Atom or SVG)
     using namespaces:
 
       <xhtml:meta xmlns:xhtml="http://www.w3.org/1999/xhtml"
          name="http://search.cpan.org/dist/RDF-RDFa-Parser/#auto_config"
-         content="keyword_bundles=iana+rdfa;xml_base=2;atom_elements=1" />
+         content="xhtml_lang=0;xml_base=2;atom_elements=1" />
 
     Any Config option may be given using auto config, except 'use_rtnlx',
     'dom_parser', and of course 'auto_config' itself.

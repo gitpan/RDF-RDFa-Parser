@@ -12,10 +12,21 @@ lib/RDF/RDFa/Parser.pm
 lib/RDF/RDFa/Parser/Config.pm
 lib/RDF/RDFa/Parser/OpenDocumentObjectModel.pm
 lib/RDF/RDFa/Parser/Profile.pm
+lib/RDF/RDFa/Parser/Profile/AbstractLinkTypes.pm
+lib/RDF/RDFa/Parser/Profile/AbstractRoles.pm
+lib/RDF/RDFa/Parser/Profile/ARIARoles.pm
+lib/RDF/RDFa/Parser/Profile/GRDDLLinkTypes.pm
+lib/RDF/RDFa/Parser/Profile/HTML32LinkTypes.pm
+lib/RDF/RDFa/Parser/Profile/HTML4LinkTypes.pm
+lib/RDF/RDFa/Parser/Profile/HTML5LinkTypes.pm
+lib/RDF/RDFa/Parser/Profile/IETFLinkTypes.pm
 lib/RDF/RDFa/Parser/Profile/Null.pm
 lib/RDF/RDFa/Parser/Profile/PrefixCC.pm
+lib/RDF/RDFa/Parser/Profile/RDFa10LinkTypes.pm
 lib/RDF/RDFa/Parser/Profile/RDF.pm
 lib/RDF/RDFa/Parser/Profile/SearchMonkey.pm
+lib/RDF/RDFa/Parser/Profile/XHTML.pm
+lib/RDF/RDFa/Parser/Profile/XHTMLRoles.pm
 
 inc/Module/AutoInstall.pm
 inc/Module/Install/AutoInstall.pm

@@ -2,47 +2,60 @@ package RDF::RDFa::Parser::Config;
 
 use base qw(Exporter);
 use constant {
-	HOST_ATOM  => 'atom',
-	HOST_DATARSS => 'datarss',
-	HOST_HTML4 => 'html4',
-	HOST_HTML5 => 'html5',
+	HOST_ATOM     => 'atom',
+	HOST_DATARSS  => 'datarss',
+	HOST_HTML32   => 'html32',
+	HOST_HTML4    => 'html4',
+	HOST_HTML5    => 'html5',
 	HOST_OPENDOCUMENT_XML => 'opendocument-xml',
 	HOST_OPENDOCUMENT_ZIP => 'opendocument-zip',
-	HOST_SVG   => 'svg',
-	HOST_XHTML => 'xhtml',
-	HOST_XML   => 'xml',
+	HOST_SVG      => 'svg',
+	HOST_XHTML    => 'xhtml',
+	HOST_XML      => 'xml',
 };
 use constant {
 	RDFA_10     => '1.0',
 	RDFA_11     => '1.1',
 	RDFA_LATEST => '1.1',
-	RDFA_GUESS  => '1.1',
+	RDFA_GUESS  => 'guess',
 };
-use strict;
+use common::sense;
 use 5.008;
 
 use URI::Escape qw'uri_unescape';
 use RDF::RDFa::Parser::OpenDocumentObjectModel;
 
 our @EXPORT_OK = qw(HOST_ATOM HOST_DATARSS HOST_HTML4 HOST_HTML5 HOST_OPENDOCUMENT_XML HOST_OPENDOCUMENT_ZIP HOST_SVG HOST_XHTML HOST_XML RDFA_10 RDFA_11);
-our $VERSION = '1.091';
+our $VERSION = '1.092';
 our $CONFIGS = {
 	'host' => {
 		HOST_ATOM() => {
 			'atom_elements'         => 1,
-			'keyword_bundles'       => 'rdfa iana',
+			'default_profiles'      => 'tag:buzzword.org.uk,2010:rdfa:profile:ietf',
 		},
 		HOST_DATARSS() => {
 			'atom_elements'         => 1,
-			'keyword_bundles'       => 'rdfa iana',
-			'default_profiles'      => 'http://search.yahoo.com/searchmonkey-profile',
+			'default_profiles'      => 'http://search.yahoo.com/searchmonkey-profile tag:buzzword.org.uk,2010:rdfa:profile:ietf',
 			'profile_pi'            => 1,
 		},
-		HOST_HTML4() => {
+		HOST_HTML32() => {
+			'default_profiles'      => 'tag:buzzword.org.uk,2010:rdfa:profile:html32',
 			'dom_parser'            => 'html',
 			'embedded_rdfxml'       => 0,
+			'prefix_empty'          => 'http://www.w3.org/1999/xhtml/vocab#',
 			'prefix_nocase_xmlns'   => 1,
-			'keyword_bundles'       => 'rdfa html4',
+			'xhtml_base'            => 1,
+			'xhtml_elements'        => 1,
+			'xhtml_lang'            => 1,
+			'xml_base'              => 0,
+			'xml_lang'              => 0,
+		},
+		HOST_HTML4() => {
+			'default_profiles'      => 'tag:buzzword.org.uk,2010:rdfa:profile:html4',
+			'dom_parser'            => 'html',
+			'embedded_rdfxml'       => 0,
+			'prefix_empty'          => 'http://www.w3.org/1999/xhtml/vocab#',
+			'prefix_nocase_xmlns'   => 1,
 			'xhtml_base'            => 1,
 			'xhtml_elements'        => 1,
 			'xhtml_lang'            => 1,
@@ -50,10 +63,11 @@ our $CONFIGS = {
 			'xml_lang'              => 0,
 		},
 		HOST_HTML5() => {
+			'default_profiles'      => 'tag:buzzword.org.uk,2010:rdfa:profile:html5',
 			'dom_parser'            => 'html',
 			'embedded_rdfxml'       => 0,
+			'prefix_empty'          => 'http://www.w3.org/1999/xhtml/vocab#',
 			'prefix_nocase_xmlns'   => 1,
-			'keyword_bundles'       => 'rdfa html5',
 			'xhtml_base'            => 1,
 			'xhtml_elements'        => 1,
 			'xhtml_lang'            => 1,
@@ -78,8 +92,9 @@ our $CONFIGS = {
 		},
 		HOST_SVG() => {},
 		HOST_XHTML() => {
+			# 'default_profiles'      => 'http://www.w3.org/1999/xhtml/vocab', ## this differs between XHTML+RDFa 1.0 and 1.1.
 			'embedded_rdfxml'       => 0,
-			'keyword_bundles'       => 'rdfa',
+			'prefix_empty'          => 'http://www.w3.org/1999/xhtml/vocab#',
 			'xhtml_base'            => 1,
 			'xhtml_elements'        => 1,
 			'xml_base'              => 0,
@@ -95,11 +110,10 @@ our $CONFIGS = {
 			'bookmark_end'          => undef,
 			'bookmark_name'         => undef,
 			'bookmark_start'        => undef,
-			'default_profiles'      => undef,
+			'default_profiles'      => 'tag:buzzword.org.uk,2010:rdfa:profile:rdfa10',
 			'dom_parser'            => 'xml',
 			'embedded_rdfxml'       => 1,
 			'full_uris'             => 0,
-			'keyword_bundles'       => 'rdfa',
 			'graph'                 => 0,
 			'graph_attr'            => 'graph',
 			'graph_type'            => 'id',
@@ -141,7 +155,6 @@ our $CONFIGS = {
 			'dom_parser'            => 'xml',
 			'embedded_rdfxml'       => 1,
 			'full_uris'             => 1, #diff
-			'keyword_bundles'       => '', #diff
 			'graph'                 => 0,
 			'graph_attr'            => 'graph',
 			'graph_type'            => 'id',
@@ -152,7 +165,7 @@ our $CONFIGS = {
 			'prefix_attr'           => 1, #diff
 			'prefix_bare'           => 0,
 			'prefix_default'        => 0,
-			'prefix_empty'          => 'http://www.w3.org/1999/xhtml/vocab#',
+			'prefix_empty'          => undef,
 			'prefix_nocase_attr'    => 1, #diff
 			'prefix_nocase_xmlns'   => 1, #diff
 			'profiles'              => 1, #diff
@@ -172,6 +185,28 @@ our $CONFIGS = {
 			'xmlns_attr'            => 1,
 		},
 	},
+	'combination' => {
+		'xhtml+1.1' => {
+			# XHTML+RDFa 1.1 uses the XHV vocab, which differs slightly
+			# from RDFa 1.0's default vocab.
+			'default_profiles'      => 'http://www.w3.org/1999/xhtml/vocab',
+			
+			# XHTML+RDFa 1.1 wants to use @lang, though
+			# neither XHTML's host language rules, nor
+			# RDFa 1.1's rules individually use it.
+			'xhtml_lang'            => 1,
+		},
+		'html4+1.1' => {
+			# HTML+RDFa 1.1 uses the XHV vocab, which differs slightly
+			# from RDFa 1.0's default vocab.
+			'default_profiles'      => 'http://www.w3.org/1999/xhtml/vocab',
+		},
+		'html5+1.1' => {
+			# HTML+RDFa 1.1 uses the XHV vocab, which differs slightly
+			# from RDFa 1.0's default vocab.
+			'default_profiles'      => 'http://www.w3.org/1999/xhtml/vocab',
+		},
+	},
 };
 
 sub new
@@ -180,27 +215,34 @@ sub new
 	$host    ||= HOST_XHTML;
 	$version ||= RDFA_11;
 	
+	if ($version eq RDFA_GUESS)
+	{
+		$version = RDFA_11;
+		$options{'guess_rdfa_version'} = 1;
+	}
+	
 	$host = $class->host_from_media_type($host) if $host =~ m'/';
 	
 	my $self = bless {}, $class;
 	
-	$self->_merge_options($CONFIGS->{'rdfa'}->{$version})
-		if defined $CONFIGS->{'rdfa'}->{$version};
-	
-	$self->_merge_options($CONFIGS->{'host'}->{$host})
-		if defined $CONFIGS->{'host'}->{$host};
-
-	# XHTML+RDFa 1.1 wants to use @lang, though
-	# neither XHTML's host language rules, nor
-	# RDFa 1.1's rules individually use it.
-	if ($host eq HOST_XHTML && $version eq RDFA_11)
+	if (defined $CONFIGS->{'rdfa'}->{$version})
 	{
-		$self->{xhtml_lang} = 1;
+		$self->merge_options($CONFIGS->{'rdfa'}->{$version});
+	}
+	else
+	{
+		die "Unsupported RDFa version: $version";
 	}
 	
-	$self->_merge_options(\%options)
+	$self->merge_options($CONFIGS->{'host'}->{$host})
+		if defined $CONFIGS->{'host'}->{$host};
+
+	$self->merge_options($CONFIGS->{'combination'}->{$host . '+' . $version})
+		if defined $CONFIGS->{'combination'}->{$host . '+' . $version};
+
+	$self->merge_options(\%options)
 		if %options;
-	
+		
 	$self->_expand_keywords;
 	
 	$self->{'_host'} = $host;
@@ -246,6 +288,24 @@ sub rehost
 	return $class->new($host, $version, %$opts);
 }
 
+sub guess_rdfa_version
+{
+	my ($config, $parser) = @_;
+	
+	my $rdfans = $config->{'ns'} || undef;
+	my $version;
+	$version = $parser->dom->documentElement->hasAttributeNsSafe($rdfans, 'version')
+		? $parser->dom->documentElement->getAttributeNsSafe($rdfans, 'version')
+		: undef;
+	
+	if (defined $version and $version =~ /\bRDFa\s+(\d+\.\d+)\b/i)
+	{
+		return $config->rehost($config->{'_host'}, $1);
+	}
+	
+	return $config;
+}
+
 sub lwp_ua
 {
 	my ($self) = @_;
@@ -282,13 +342,6 @@ sub lwp_ua
 	return $self->{lwp_ua};
 }
 
-sub merge_options
-{
-	my ($self, %opts) = @_;
-	$self->_merge_options(\%opts);
-	$self->_expand_keywords;
-}
-
 sub auto_config
 {
 	my ($self, $parser) = @_;
@@ -315,11 +368,7 @@ sub auto_config
 		next if $o=~ /^(use_rtnlx|dom_parser|auto_config)$/i;
 		$count++;
 		
-		if (lc $o eq 'keywords')
-		{
-			$x->{keyword_bundles} .= ' ' . $options->{$o};
-		}
-		elsif (lc $o eq 'keyword_bundles' || lc $o eq 'default_profiles')
+		if (lc $o eq 'default_profiles')
 		{
 			$x->{lc $o} .= ' ' . $options->{$o};
 		}
@@ -330,6 +379,7 @@ sub auto_config
 	}
 	
 	$self->merge_options(%$x);
+	$self->_expand_keywords;
 	
 	return $count;
 }
@@ -350,13 +400,14 @@ sub _parse_application_x_www_form_urlencoded
 	return $rv;
 }
 
-sub _merge_options
+sub merge_options
 {
-	my ($self, $opts) = @_;
+	my $self = shift;
+	my %opts = (ref $_[0]) ? %{$_[0]} : @_;
 	
-	while (my ($key, $value) = each %$opts)
+	while (my ($key, $value) = each %opts)
 	{
-		if ($key =~ m'^(keyword_bundles|default_profiles)$'i
+		if ($key =~ m'^(default_profiles)$'i
 		&&  defined $self->{$key}
 		&&  length $self->{$key})
 		{
@@ -379,160 +430,27 @@ sub _expand_keywords
 	my $self  = shift;
 	my $terms = $self->{'keyword_bundles'} || '';
 	
-	my $KW = {
-		'about'     => {},
-		'resource'  => {},
-		'rel'       => {},
-		'rev'       => {},
-		'role'      => {},
-		'property'  => {},
-		'datatype'  => {},
-		'typeof'    => {},
-		'graph'     => {},
-		'*'         => {},
-		};
-	my $KW2 = {
-		'about'     => {},
-		'resource'  => {},
-		'rel'       => {},
-		'rev'       => {},
-		'role'      => {},
-		'property'  => {},
-		'datatype'  => {},
-		'typeof'    => {},
-		'graph'     => {},
-		'*'         => {},
-		};
-
-	if ($terms =~ /\b(rdfa|xhv)\b/i)
-	{
-		foreach my $attr (qw(rel rev))
-		{
-			foreach my $word (qw(alternate appendix bookmark cite
-				chapter contents copyright first glossary help icon
-				index last license meta next p3pv1 prev role section
-				stylesheet subsection start top up))
-			{
-				$KW->{ $attr }->{ lc $word } = 'http://www.w3.org/1999/xhtml/vocab#' . (lc $word)
-					unless defined $KW->{ $attr }->{ lc $word };
-			}
-		}
-	}
-
-	if ($terms =~ /\b(html5)\b/i)
-	{
-		foreach my $attr (qw(rel rev))
-		{
-			foreach my $word (qw(alternate archives author bookmark
-				external feed first help icon index last license next
-				nofollow noreferrer pingback prefetch prev search
-				stylesheet sidebar tag up ALTERNATE-STYLESHEET))
-			{
-				$KW->{ $attr }->{ lc $word } = 'http://www.w3.org/1999/xhtml/vocab#' . $word
-					unless defined $KW->{ $attr }->{ lc $word };
-			}
-		}
-	}
+	warn "keyword_bundles is very deprecated." if length $terms;
 	
-	if ($terms =~ /\b(html4)\b/i)
-	{
-		foreach my $attr (qw(rel rev))
-		{
-			foreach my $word (qw(Alternate Stylesheet Start Next
-				Prev Contents Index Glossary Copyright Chapter
-				Section Subsection Appendix Help Bookmark))
-			{
-				$KW->{ $attr }->{ lc $word } = 'http://www.w3.org/1999/xhtml/vocab#' . (lc $word)
-					unless defined $KW->{ $attr }->{ lc $word };
-			}
-		}
-	}
-	
-	if ($terms =~ /\b(html32)\b/i)
-	{
-		foreach my $attr (qw(rel rev))
-		{
-			foreach my $word (qw(top contents index glossary copyright
-				next previous help search chapter made))
-			{
-				$KW->{ $attr }->{ lc $word } = 'http://www.w3.org/1999/xhtml/vocab#' . $word
-					unless defined $KW->{ $attr }->{ lc $word };
-			}
-		}
-	}
-	
-	if ($terms =~ /\b(iana)\b/i)
-	{
-		foreach my $attr (qw(rel rev))
-		{
-			foreach my $word (qw(alternate appendix bookmark chapter
-				contents copyright current describedby edit edit-media
-				enclosure first glossary help hub index last latest-version
-				license next next-archive payment predecessor-version
-				prev previous prev-archive related replies section self
-				service start stylesheet subsection successor-version
-				up version-history via working-copy working-copy-of))
-			{
-				$KW->{ $attr }->{ lc $word } = 'http://www.iana.org/assignments/relation/' . $word
-					unless defined $KW->{ $attr }->{ lc $word };
-			}
-		}
-	}
+	$self->{default_profiles} .= ' http://www.w3.org/1999/xhtml/vocab'
+		if $terms =~ /\b(rdfa|xhv)\b/i;
 
-	if ($terms =~ /\b(grddl)\b/i)
-	{
-		foreach my $attr (qw(rel rev))
-		{
-			foreach my $word (qw(transformation profileTransformation namespaceTransformation))
-			{
-				$KW->{ $attr }->{ lc $word } = 'http://www.w3.org/2003/g/data-view#' . $word
-					unless defined $KW->{ $attr }->{ lc $word };
-			}
-		}
-	}
+	$self->{default_profiles} .= ' tag:buzzword.org.uk,2010:rdfa:profile:'.(lc $1)
+		if $terms =~ /\b(html\d+)\b/i;
 
-	if ($terms =~ /\b(xhtml-role|xhv)\b/i)
-	{
-		foreach my $word (qw(banner complementary contentinfo
-			definition main navigation note search))
-		{
-			$KW->{'role'}->{ lc $word } = 'http://www.w3.org/1999/xhtml/vocab#' . $word
-				unless defined $KW->{'role'}->{ lc $word };
-		}
-	}
+	$self->{default_profiles} .= ' tag:buzzword.org.uk,2010:rdfa:profile:ietf'
+		if $terms =~ /\b(iana|ietf)\b/i;
 
-	if ($terms =~ /\b(aria-role|xhv)\b/i)
-	{
-		foreach my $word (qw(alert alertdialog application article
-			button checkbox columnheader combobox dialog directory
-			document grid gridcell group heading img link list listbox
-			listitem log marquee math menu menubar menuitem
-			menuitemcheckbox menuitemradio option presentation
-			progressbar radio radiogroup region row rowheader separator
-			slider spinbutton status tab tablist tabpanel textbox timer
-			toolbar tooltip tree treegrid treeitem))
-		{
-			$KW->{'role'}->{ lc $word } = 'http://www.w3.org/1999/xhtml/vocab#' . $word
-				unless defined $KW->{'role'}->{ lc $word };
-		}
-	}
+	$self->{default_profiles} .= ' tag:buzzword.org.uk,2010:rdfa:profile:grddl'
+		if $terms =~ /\b(grddl)\b/i;
 
-#	if ($terms =~ /\b(xfn)\b/i)
-#	{
-#		foreach my $attr (qw(rel rev))
-#		{
-#			foreach my $word (qw(contact acquaintance friend
-#				met co-worker colleague co-resident neighbor
-#				child parent sibling spouse kin muse crush date
-#				sweetheart me))
-#			{
-#				$KW->{ $attr }->{ lc $word } = 'http://vocab.sindice.com/xfn#' . $word . "-hyperlink"
-#					unless defined $KW->{ $attr }->{ lc $word };
-#			}
-#		}
-#	}
-	
-	$self->{'keywords'} = { 'insensitive' => $KW , 'sensitive' => $KW2 };
+	$self->{default_profiles} .= ' tag:buzzword.org.uk,2010:rdfa:profile:aria-role'
+		if $terms =~ /\b(aria\-role|xhv)\b/i;
+
+	$self->{default_profiles} .= ' tag:buzzword.org.uk,2010:rdfa:profile:xhtml-role'
+		if $terms =~ /\b(xhtml\-role|xhv)\b/i;
+
+	return;
 }
 
 1;
@@ -566,6 +484,8 @@ are accepted (e.g. 'text/html' or 'image/svg+xml').
 
 =item * B<< RDF::RDFa::Parser::Config->HOST_DATARSS >>
 
+=item * B<< RDF::RDFa::Parser::Config->HOST_HTML32 >>
+
 =item * B<< RDF::RDFa::Parser::Config->HOST_HTML4 >>
 
 =item * B<< RDF::RDFa::Parser::Config->HOST_HTML5 >>
@@ -597,8 +517,10 @@ following constants; the default is RDFA_LATEST.
 
 =back
 
-(RDFA_GUESS is currently just an alias for RDFA_LATEST. Version guessing
-is a planned feature.)
+Version guessing: the root element is inspected for an attribute
+'version'. If this exists and matches /\bRDFa\s+(\d+\.\d+)\b/i
+then that is used as the version. Otherwise, the latest version
+is assumed.
 
 %options is a hash of additional options to use which override the
 defaults. While many of these are useful, they probably also reduce
@@ -634,7 +556,7 @@ in brackets.
 
 =item * B<graph_default> - default graph name. ['_:RDFaDefaultGraph']
 
-=item * B<keyword_bundles> - space-separated list of bundles of keywords ('rdfa', 'html32', 'html4', 'html5', 'xhtml-role', 'aria-role', 'iana', 'xhv') ['rdfa']
+=item * B<keyword_bundles> - NO LONGER SUPPORTED - use default_profiles instead.
 
 =item * B<lwp_ua> - an LWP::UserAgent to use for HTTP requests. [undef]
 

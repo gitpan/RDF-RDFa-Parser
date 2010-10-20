@@ -37,7 +37,7 @@ $parser->set_callbacks({pretriple_literal => sub{
 	}
 	return 0;
 },
-oncurie => sub{
+ontoken => sub{
 	if ($_[2] eq 'foam:topic')
 	{
 		return 'http://xmlns.com/foaf/0.1/topic';

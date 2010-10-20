@@ -1,6 +1,6 @@
 package RDF::RDFa::Parser::OpenDocumentObjectModel;
 
-our $VERSION = '1.091';
+our $VERSION = '1.092';
 our @Types = qw(
 	application/vnd.oasis.opendocument.chart
 	application/vnd.oasis.opendocument.database

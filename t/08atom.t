@@ -124,5 +124,3 @@ SKIP: {
 	ok($result->get_boolean, "Atom native semantics and RDFa mix properly.");
 };
 
-use RDF::TrineShortcuts;
-print rdf_string($graph, 'turtle');
