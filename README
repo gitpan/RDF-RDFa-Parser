@@ -15,7 +15,7 @@ SYNOPSIS
      $title = $p->opengraph('title');
 
 VERSION
-    1.092
+    1.093
 
 DESCRIPTION
   Constructors
@@ -38,7 +38,7 @@ DESCRIPTION
         object. If undef, then a new temporary store is created.
 
     "$p = RDF::RDFa::Parser->new_from_url($url, [$config], [$storage])"
-        $url is a URL to fetch and parse.
+        $url is a URL to fetch and parse, or an HTTP::Response object.
 
         $config optionally holds an RDF::RDFa::Parser::Config object which
         determines the set of rules used to parse the RDFa. The default is
@@ -147,60 +147,19 @@ DESCRIPTION
         used, "set_callbacks" must be called *before* "consume".
         "set_callbacks" returns a reference to the parser object itself.
 
+    "$p->element_subjects"
+        Advanced usage only.
+
+        Gets/sets a hashref of { xpath => RDF::Trine::Node } mappings.
+
+        This is not touched during normal RDFa parsing, only being used by
+        the @role and @cite features where RDF resources (i.e. URIs and
+        blank nodes) are needed to represent XML elements themselves.
+
 CALLBACKS
     Several callback functions are provided. These may be set using the
-    "set_callbacks" function, which taskes a hashref of keys pointing to
+    "set_callbacks" function, which takes a hashref of keys pointing to
     coderefs. The keys are named for the event to fire the callback on.
-
-  pretriple_resource
-    This is called when a triple has been found, but before preparing the
-    triple for adding to the model. It is only called for triples with a
-    non-literal object value.
-
-    The parameters passed to the callback function are:
-
-    *   A reference to the "RDF::RDFa::Parser" object
-
-    *   A reference to the "XML::LibXML::Element" being parsed
-
-    *   Subject URI or bnode (string)
-
-    *   Predicate URI (string)
-
-    *   Object URI or bnode (string)
-
-    *   Graph URI or bnode (string or undef)
-
-    The callback should return 1 to tell the parser to skip this triple (not
-    add it to the graph); return 0 otherwise.
-
-  pretriple_literal
-    This is the equivalent of pretriple_resource, but is only called for
-    triples with a literal object value.
-
-    The parameters passed to the callback function are:
-
-    *   A reference to the "RDF::RDFa::Parser" object
-
-    *   A reference to the "XML::LibXML::Element" being parsed
-
-    *   Subject URI or bnode (string)
-
-    *   Predicate URI (string)
-
-    *   Object literal (string)
-
-    *   Datatype URI (string or undef)
-
-    *   Language (string or undef)
-
-    *   Graph URI or bnode (string or undef)
-
-    Beware: sometimes both a datatype *and* a language will be passed. This
-    goes beyond the normal RDF data model.)
-
-    The callback should return 1 to tell the parser to skip this triple (not
-    add it to the graph); return 0 otherwise.
 
   ontriple
     This is called once a triple is ready to be added to the graph. (After
@@ -209,7 +168,8 @@ CALLBACKS
 
     *   A reference to the "RDF::RDFa::Parser" object
 
-    *   A reference to the "XML::LibXML::Element" being parsed
+    *   A hashref of relevant "XML::LibXML::Element" objects (subject,
+        predicate, object, graph, current)
 
     *   An RDF::Trine::Statement object.
 
@@ -269,6 +229,60 @@ CALLBACKS
     If you do not define an onerror callback, then errors will be output via
     STDERR and warnings will be silent. Either way, you can retrieve errors
     after parsing using the "errors" method.
+
+  pretriple_resource
+    This callback is deprecated - use ontriple instead.
+
+    This is called when a triple has been found, but before preparing the
+    triple for adding to the model. It is only called for triples with a
+    non-literal object value.
+
+    The parameters passed to the callback function are:
+
+    *   A reference to the "RDF::RDFa::Parser" object
+
+    *   A reference to the "XML::LibXML::Element" being parsed
+
+    *   Subject URI or bnode (string)
+
+    *   Predicate URI (string)
+
+    *   Object URI or bnode (string)
+
+    *   Graph URI or bnode (string or undef)
+
+    The callback should return 1 to tell the parser to skip this triple (not
+    add it to the graph); return 0 otherwise.
+
+  pretriple_literal
+    This callback is deprecated - use ontriple instead.
+
+    This is the equivalent of pretriple_resource, but is only called for
+    triples with a literal object value.
+
+    The parameters passed to the callback function are:
+
+    *   A reference to the "RDF::RDFa::Parser" object
+
+    *   A reference to the "XML::LibXML::Element" being parsed
+
+    *   Subject URI or bnode (string)
+
+    *   Predicate URI (string)
+
+    *   Object literal (string)
+
+    *   Datatype URI (string or undef)
+
+    *   Language (string or undef)
+
+    *   Graph URI or bnode (string or undef)
+
+    Beware: sometimes both a datatype *and* a language will be passed. This
+    goes beyond the normal RDF data model.)
+
+    The callback should return 1 to tell the parser to skip this triple (not
+    add it to the graph); return 0 otherwise.
 
 FEATURES
     Most features are configurable using RDF::RDFa::Parser::Config.
@@ -395,10 +409,10 @@ FEATURES
     The name of the attribute which indicates graph URIs is by default
     'graph', but can be changed using the 'graph_attr' Config option. This
     option accepts Clark Notation to specify a namespaced attribute. By
-    default, the attribute value is interpreted as a fragment identifier
-    (like the 'id' attribute), but if you set the 'graph_type' Config option
-    to 'about', it will be treated as a URI or safe CURIE (like the 'about'
-    attribute).
+    default, the attribute value is interpreted as like the 'about'
+    attribute (i.e. CURIEs, URIs, etc), but if you set the 'graph_type'
+    Config option to 'id', it will be treated as setting a fragment
+    identifier (like the 'id' attribute).
 
     The 'graph_default' Config option allows you to set the default graph
     URI/bnode identifier.
@@ -408,7 +422,7 @@ FEATURES
     parameter to the "graph" method also becomes useful.
 
     OpenDocument (ZIP) host language support makes internal use of named
-    graphs, so if you're parsing OpenDocument, tinker with the Config
+    graphs, so if you're parsing OpenDocument, tinker with the graph Config
     options at your own risk!
 
   Auto Config

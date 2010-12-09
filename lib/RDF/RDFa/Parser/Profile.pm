@@ -12,7 +12,7 @@ use Scalar::Util qw'blessed';
 
 our %Known;
 our @ExtraPlugins;
-our $VERSION = '1.092';
+our $VERSION = '1.093';
 
 sub new
 {
@@ -22,7 +22,9 @@ sub new
 	return $Known{$uri}
 		if blessed($Known{$uri}) && $Known{$uri}->isa(__PACKAGE__);
 	return undef
-		if defined $Known{$uri} && $Known{$uri} eq '-';
+		if defined $Known{$uri} && $Known{$uri} == 0;
+
+	$Known{$uri} = 0; # avoid loops!
 
 	# Try exotic profile modules first.
 	foreach my $m ((@ExtraPlugins, $class->plugins))
@@ -45,7 +47,7 @@ sub new
 	}
 	
 	# If that didn't work, return undef.
-	$Known{$uri} = '-';
+	$Known{$uri} = 0;
 	return undef;
 }
 

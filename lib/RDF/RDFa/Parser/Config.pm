@@ -26,7 +26,7 @@ use URI::Escape qw'uri_unescape';
 use RDF::RDFa::Parser::OpenDocumentObjectModel;
 
 our @EXPORT_OK = qw(HOST_ATOM HOST_DATARSS HOST_HTML4 HOST_HTML5 HOST_OPENDOCUMENT_XML HOST_OPENDOCUMENT_ZIP HOST_SVG HOST_XHTML HOST_XML RDFA_10 RDFA_11);
-our $VERSION = '1.092';
+our $VERSION = '1.093';
 our $CONFIGS = {
 	'host' => {
 		HOST_ATOM() => {
@@ -42,7 +42,6 @@ our $CONFIGS = {
 			'default_profiles'      => 'tag:buzzword.org.uk,2010:rdfa:profile:html32',
 			'dom_parser'            => 'html',
 			'embedded_rdfxml'       => 0,
-			'prefix_empty'          => 'http://www.w3.org/1999/xhtml/vocab#',
 			'prefix_nocase_xmlns'   => 1,
 			'xhtml_base'            => 1,
 			'xhtml_elements'        => 1,
@@ -54,7 +53,6 @@ our $CONFIGS = {
 			'default_profiles'      => 'tag:buzzword.org.uk,2010:rdfa:profile:html4',
 			'dom_parser'            => 'html',
 			'embedded_rdfxml'       => 0,
-			'prefix_empty'          => 'http://www.w3.org/1999/xhtml/vocab#',
 			'prefix_nocase_xmlns'   => 1,
 			'xhtml_base'            => 1,
 			'xhtml_elements'        => 1,
@@ -66,7 +64,6 @@ our $CONFIGS = {
 			'default_profiles'      => 'tag:buzzword.org.uk,2010:rdfa:profile:html5',
 			'dom_parser'            => 'html',
 			'embedded_rdfxml'       => 0,
-			'prefix_empty'          => 'http://www.w3.org/1999/xhtml/vocab#',
 			'prefix_nocase_xmlns'   => 1,
 			'xhtml_base'            => 1,
 			'xhtml_elements'        => 1,
@@ -94,7 +91,6 @@ our $CONFIGS = {
 		HOST_XHTML() => {
 			# 'default_profiles'      => 'http://www.w3.org/1999/xhtml/vocab', ## this differs between XHTML+RDFa 1.0 and 1.1.
 			'embedded_rdfxml'       => 0,
-			'prefix_empty'          => 'http://www.w3.org/1999/xhtml/vocab#',
 			'xhtml_base'            => 1,
 			'xhtml_elements'        => 1,
 			'xml_base'              => 0,
@@ -110,6 +106,7 @@ our $CONFIGS = {
 			'bookmark_end'          => undef,
 			'bookmark_name'         => undef,
 			'bookmark_start'        => undef,
+			'cite_attr'             => 0,
 			'default_profiles'      => 'tag:buzzword.org.uk,2010:rdfa:profile:rdfa10',
 			'dom_parser'            => 'xml',
 			'embedded_rdfxml'       => 1,
@@ -117,24 +114,26 @@ our $CONFIGS = {
 			'graph'                 => 0,
 			'graph_attr'            => 'graph',
 			'graph_type'            => 'id',
-			'graph_default'         => '_:RDFaDefaultGraph',
+			'graph_default'         => undef,
 			'graph_default_trine'   => undef,  # not officially exposed
+			'longdesc_attr'         => 0,
 			'lwp_ua'                => undef,
 			'ns'                    => undef,
 			'prefix_attr'           => 0,
 			'prefix_bare'           => 0,
-			'prefix_default'        => 0,
-			'prefix_empty'          => 'http://www.w3.org/1999/xhtml/vocab#',
+			'prefix_default'        => 'http://www.w3.org/1999/xhtml/vocab#',
 			'prefix_nocase_attr'    => 0,
 			'prefix_nocase_xmlns'   => 0,
 			'profiles'              => 0,
 			'profile_pi'            => 0,
 			'role_attr'             => 0,
 			'safe_anywhere'         => 0,
+			'skolemize'             => 0,
 			'tdb_service'           => 0,
 			'use_rtnlx'             => 0,
 			'user_agent'            => undef,
 			'vocab_attr'            => 0,
+			'vocab_default'         => undef,
 			'xhtml_base'            => 0,
 			'xhtml_elements'        => 0,
 			'xhtml_lang'            => 0,
@@ -151,31 +150,34 @@ our $CONFIGS = {
 			'bookmark_end'          => undef,
 			'bookmark_name'         => undef,
 			'bookmark_start'        => undef,
+			'cite_attr'             => 0,
 			'default_profiles'      => undef,
 			'dom_parser'            => 'xml',
 			'embedded_rdfxml'       => 1,
 			'full_uris'             => 1, #diff
 			'graph'                 => 0,
 			'graph_attr'            => 'graph',
-			'graph_type'            => 'id',
-			'graph_default'         => '_:RDFaDefaultGraph',
+			'graph_type'            => 'about',
+			'graph_default'         => undef,
 			'graph_default_trine'   => undef,
+			'longdesc_attr'         => 0,
 			'lwp_ua'                => undef,
 			'ns'                    => undef,
 			'prefix_attr'           => 1, #diff
 			'prefix_bare'           => 0,
-			'prefix_default'        => 0,
-			'prefix_empty'          => undef,
+			'prefix_default'        => 'http://www.w3.org/1999/xhtml/vocab#',
 			'prefix_nocase_attr'    => 1, #diff
 			'prefix_nocase_xmlns'   => 1, #diff
 			'profiles'              => 1, #diff
 			'profile_pi'            => 0,
 			'role_attr'             => 0,
 			'safe_anywhere'         => 1, #diff
+			'skolemize'             => 0,
 			'tdb_service'           => 0,
 			'use_rtnlx'             => 0,
 			'user_agent'            => undef,
 			'vocab_attr'            => 1, #diff
+			'vocab_default'         => undef,
 			'xhtml_base'            => 0,
 			'xhtml_elements'        => 0,
 			'xhtml_lang'            => 0,
@@ -441,7 +443,7 @@ sub _expand_keywords
 	$self->{default_profiles} .= ' tag:buzzword.org.uk,2010:rdfa:profile:ietf'
 		if $terms =~ /\b(iana|ietf)\b/i;
 
-	$self->{default_profiles} .= ' tag:buzzword.org.uk,2010:rdfa:profile:grddl'
+	$self->{default_profiles} .= ' http://www.w3.org/2003/g/data-view'
 		if $terms =~ /\b(grddl)\b/i;
 
 	$self->{default_profiles} .= ' tag:buzzword.org.uk,2010:rdfa:profile:aria-role'
@@ -540,6 +542,8 @@ in brackets.
 
 =item * B<bookmark_start>, B<bookmark_end>, B<bookmark_name> - Elements to treat like OpenDocument's E<lt>text:bookmark-startE<gt> and E<lt>text:bookmark-endE<gt> element, and associated text:name attribute. Must set all three to use this feature. Use Clark Notation to specify namespaces. [all undef]
 
+=item * B<cite_attr> - support @cite [0]
+
 =item * B<default_profiles> - whitespace-separated list of profiles to load by default. [undef]
 
 =item * B<dom_parser> - parser to use to turn a markup string into a DOM. 'html', 'opendocument' (i.e. zipped XML) or 'xml'. ['xml']
@@ -552,11 +556,13 @@ in brackets.
 
 =item * B<graph_attr> - attribute to use for named graphs. Use Clark Notation to specify a namespace. ['graph']
 
-=item * B<graph_type> - graph attribute behaviour ('id' or 'about'). ['id']
+=item * B<graph_type> - graph attribute behaviour ('id' or 'about'). ['about']
 
-=item * B<graph_default> - default graph name. ['_:RDFaDefaultGraph']
+=item * B<graph_default> - default graph name. [undef]
 
 =item * B<keyword_bundles> - NO LONGER SUPPORTED - use default_profiles instead.
+
+=item * B<longdesc_attr> - support @longdesc [0]
 
 =item * B<lwp_ua> - an LWP::UserAgent to use for HTTP requests. [undef]
 
@@ -566,9 +572,7 @@ in brackets.
 
 =item * B<prefix_bare> - support CURIEs with no colon+suffix. [0]
 
-=item * B<prefix_default> - URI for default prefix (e.g. rel="foo"). [undef]
-
-=item * B<prefix_empty> - URI for empty prefix (e.g. rel=":foo"). ['http://www.w3.org/1999/xhtml/vocab#']
+=item * B<prefix_default> - URI for default prefix (e.g. rel=":foo"). ['http://www.w3.org/1999/xhtml/vocab#']
 
 =item * B<prefix_nocase> - DEPRECATED - shortcut for prefix_nocase_attr and prefix_nocase_xmlns.
 
@@ -584,6 +588,8 @@ in brackets.
 
 =item * B<safe_anywhere> - allow Safe CURIEs in @rel/@rev/etc. [0, 1]
 
+=item * B<skolemize> - mint URIs instead of blank node identifiers. [0]
+
 =item * B<tdb_service> - use thing-described-by.org to name some bnodes. [0]
 
 =item * B<user_agent> - a User-Agent header to use for HTTP requests. Ignored if lwp_ua is provided. [undef]
@@ -591,6 +597,8 @@ in brackets.
 =item * B<use_rtnlx> - use RDF::Trine::Node::Literal::XML. 0=no, 1=if available. [0]
 
 =item * B<vocab_attr> - support @vocab from RDFa 1.1. [0, 1]
+
+=item * B<vocab_default> - default vocab URI (e.g. rel="foo"). [undef]
 
 =item * B<xhtml_base> - process <base> element. 0=no, 1=yes, 2=use it for RDF/XML too. [1]                      
 

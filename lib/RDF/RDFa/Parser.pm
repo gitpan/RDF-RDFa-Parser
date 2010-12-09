@@ -21,9 +21,11 @@ RDF::RDFa::Parser - flexible RDFa parser
 =cut
 
 use Data::UUID;
+use File::Spec;
 use File::ShareDir qw(dist_file);
 use HTML::HTML5::Parser;
 use HTML::HTML5::Sanity qw(fix_document);
+use HTTP::Cache::Transparent;
 use LWP::UserAgent;
 use RDF::RDFa::Parser::Config;
 use RDF::RDFa::Parser::OpenDocumentObjectModel;
@@ -35,6 +37,19 @@ use URI::Escape;
 use URI::URL;
 use XML::LibXML qw(:all);
 use XML::RegExp;
+
+BEGIN
+{
+	my $cache_dir = File::Spec->catdir(
+		File::Spec->tmpdir,
+		'RDF-RDFa-Parser',
+		'HTTP-Cache-Transparent',
+		);
+	HTTP::Cache::Transparent::init({
+		BasePath => $cache_dir,
+		NoUpdate => 15*60,  # 15 minutes - don't hammer servers
+		});
+}
 
 use constant {
 	ERR_WARNING  => 'w',
@@ -65,11 +80,11 @@ use 5.008;
 
 =head1 VERSION
 
-1.092
+1.093
 
 =cut
 
-our $VERSION = '1.092';
+our $VERSION = '1.093';
 our $HAS_AWOL;
 
 BEGIN
@@ -210,7 +225,7 @@ sub new
 
 =item C<< $p = RDF::RDFa::Parser->new_from_url($url, [$config], [$storage]) >>
 
-$url is a URL to fetch and parse.
+$url is a URL to fetch and parse, or an HTTP::Response object.
 
 $config optionally holds an RDF::RDFa::Parser::Config object which
 determines the set of rules used to parse the RDFa. The default is
@@ -227,26 +242,37 @@ This function can also be called as C<new_from_uri>. Same thing.
 sub new_from_url
 {
 	my ($class, $url, $config, $store)= @_;
-	
+
 	my $response = do
 		{
 			if (blessed($url) && $url->isa('HTTP::Message'))
-				{ $url; }
+			{
+				$url;
+			}
 			else
-				{ $config->lwp_ua->get($url);	}
+			{
+				my $ua;
+				if (blessed($config) and $config->isa('RDF::RDFa::Parser::Config'))
+					{ $ua = $config->lwp_ua; }
+				elsif (ref $config eq 'HASH')
+					{ $ua = RDF::RDFa::Parser::Config->new('xml', undef, %$config)->lwp_ua; }
+				else
+					{ $ua = RDF::RDFa::Parser::Config->new('xml', undef)->lwp_ua; }
+				$ua->get($url);
+			}
 		};
 	my $host = $response->content_type;
-	
-	if (blessed($config) && $config->isa('RDF::RDFa::Parser::Config'))
+
+	if (blessed($config) and $config->isa('RDF::RDFa::Parser::Config'))
 		{ $config = $config->rehost($host); }
 	elsif (ref $config eq 'HASH')
 		{ $config = RDF::RDFa::Parser::Config->new($host, undef, %$config); }
 	else
-		{ $config = RDF::RDFa::Parser::Config->new($host); }
+		{ $config = RDF::RDFa::Parser::Config->new($host, undef); }
 
 	return $class->new(
 		$response->decoded_content,
-		$response->base.'',
+		($response->base || $url).'',
 		$config,
 		$store,
 		);
@@ -329,7 +355,7 @@ sub graphs
 	my $self = shift;
 	$self->consume;
 	
-	my @graphs = keys(%{$self->{Graphs}});
+	my @graphs = keys(%{$self->{Graphs}});	
 	my %result;
 	foreach my $graph (@graphs)
 	{
@@ -538,21 +564,10 @@ sub consume
 	{
 		$self->{'options'}->{'graph_attr'} = 'graph'
 			unless defined $self->{'options'}->{'graph_attr'};
-		$self->{'options'}->{'graph_type'} = 'id'
+		$self->{'options'}->{'graph_type'} = 'about'
 			unless defined $self->{'options'}->{'graph_type'};
-		$self->{'options'}->{'graph_default'} = '_:RDFaDefaultGraph'
-			unless defined $self->{'options'}->{'graph_default'};
-		
-		if ((substr $self->{'options'}->{'graph_default'}, 0, 2) eq '_:')
-		{
-			$self->{'options'}->{'graph_default_trine'} =
-				RDF::Trine::Node::Blank->new( substr $self->{'options'}->{'graph_default'}, 2 );
-		}
-		else
-		{
-			$self->{'options'}->{'graph_default_trine'} =
-				RDF::Trine::Node::Resource->new( $self->{'options'}->{'graph_default'} );
-		}
+		$self->{'options'}->{'graph_default'} = $self->bnode
+			unless defined $self->{'options'}->{'graph_default'};		
 	}
 	
 	$self->_consume_element($self->dom->documentElement, init=>1);
@@ -585,57 +600,65 @@ sub _consume_element
 	
 	# The evaluation context.
 	my %args = @_;
-	my ($base, $parent_subject, $parent_object, $uri_mappings, $term_mappings,
-		$incomplete_triples, $language, $graph, $xml_base);
+	my ($base, $parent_subject, $parent_subject_elem, $parent_object, $parent_object_elem, 
+		$uri_mappings, $term_mappings, $incomplete_triples, $language, $graph, $graph_elem, $xml_base);
 		
 	if ($args{'init'})
 	{
 		# At the beginning of processing, an initial [evaluation context] is created
-		$base               = $self->uri;
-		$parent_subject     = $base;
-		$parent_object      = undef;
-		$uri_mappings       = {};
-		$term_mappings      = {};
-		$incomplete_triples = ();
-		$language           = undef;
-		$graph              = $self->{'options'}->{'graph'} ? $self->{'options'}->{'graph_default'} : undef;
-		$xml_base           = undef;
+		$base                = $self->uri;
+		$parent_subject      = $base;
+		$parent_subject_elem = $self->dom->documentElement;
+		$parent_object       = undef;
+		$parent_object_elem  = undef;
+		$uri_mappings        = {};
+		$term_mappings       = {};
+		$incomplete_triples  = ();
+		$language            = undef;
+		$graph               = $self->{'options'}->{'graph'} ? $self->{'options'}->{'graph_default'} : undef;
+		$graph_elem          = undef;
+		$xml_base            = undef;
+		
+		if ($self->{'options'}->{'vocab_default'})
+		{
+			$uri_mappings->{'(VOCAB)'} = $self->{'options'}->{'vocab_default'};
+		}
 		
 		if ($self->{'options'}->{'prefix_default'})
 		{
-			$uri_mappings->{'*'} = $self->{'options'}->{'prefix_default'};
-		}
-		
-		if ($self->{'options'}->{'prefix_empty'})
-		{
-			$uri_mappings->{'-'} = $self->{'options'}->{'prefix_empty'};
+			$uri_mappings->{'(DEFAULT PREFIX)'} = $self->{'options'}->{'prefix_default'};
 		}
 	}
 	else
 	{
-		$base               = $args{'base'};
-		$parent_subject     = $args{'parent_subject'};
-		$parent_object      = $args{'parent_object'};
-		$uri_mappings       = dclone($args{'uri_mappings'});
-		$term_mappings      = dclone($args{'term_mappings'});
-		$incomplete_triples = $args{'incomplete_triples'};
-		$language           = $args{'language'};
-		$graph              = $args{'graph'};
-		$xml_base           = $args{'xml_base'};		
+		$base                = $args{'base'};
+		$parent_subject      = $args{'parent_subject'};
+		$parent_subject_elem = $args{'parent_subject_elem'};
+		$parent_object       = $args{'parent_object'};
+		$parent_object_elem  = $args{'parent_object_elem'};
+		$uri_mappings        = dclone($args{'uri_mappings'});
+		$term_mappings       = dclone($args{'term_mappings'});
+		$incomplete_triples  = $args{'incomplete_triples'};
+		$language            = $args{'language'};
+		$graph               = $args{'graph'};
+		$graph_elem          = $args{'graph_elem'};
+		$xml_base            = $args{'xml_base'};		
 	}	
 
 	# Used by OpenDocument, otherwise usually undef.
 	my $rdfans = $self->{'options'}->{'ns'} || undef;
 
 	# First, the local values are initialized
-	my $recurse                  = 1;
-	my $skip_element             = 0;
-	my $new_subject              = undef;
-	my $current_object_resource  = undef;
-	my $local_uri_mappings       = $uri_mappings;
-	my $local_term_mappings      = $term_mappings;
-	my $local_incomplete_triples = ();
-	my $current_language         = $language;
+	my $recurse                      = 1;
+	my $skip_element                 = 0;
+	my $new_subject                  = undef;
+	my $new_subject_elem             = undef;
+	my $current_object_resource      = undef;
+	my $current_object_resource_elem = undef;
+	my $local_uri_mappings           = $uri_mappings;
+	my $local_term_mappings          = $term_mappings;
+	my $local_incomplete_triples     = ();
+	my $current_language             = $language;
 	
 	my $activity = 0;
 
@@ -725,6 +748,13 @@ sub _consume_element
 			if defined $xml_base;
 		
 		eval {
+			my $_map;
+			my $bnode_mapper = sub {
+				my $orig = shift;
+				$_map->{$orig} = $self->bnode
+					unless defined $_map->{$orig};
+				return $_map->{$orig};
+			};
 			my $parser  = RDF::Trine::Parser->new('rdfxml');
 			my $r       = $parser->parse(
 				$rdfxml_base,
@@ -734,35 +764,36 @@ sub _consume_element
 					my ($s, $p, @o);
 					
 					$s = $st->subject->is_blank ?
-						($g.'_'.$st->subject->blank_identifier) :
+						$bnode_mapper->($st->subject->blank_identifier) :
 						$st->subject->uri_value ;
-					$p = $st->predicate->is_blank ?
-						($g.'_'.$st->predicate->blank_identifier) :
-						$st->predicate->uri_value ;
+					$p = $st->predicate->uri_value ;
 					if ($st->object->is_literal)
 					{
-						$o[0] = $st->object->literal_value;
-						$o[1] = $st->object->literal_datatype;
-						$o[2] = $st->object->literal_value_language;
-						
-						$self->_insert_triple_literal(undef, $s, $p, @o,
+						@o = (
+							$st->object->literal_value,
+							$st->object->literal_datatype,
+							$st->object->literal_value_language,
+						);
+						$self->_insert_triple_literal({current=>$current_element},
+							$s, $p, @o,
 							($self->{'options'}->{'graph'} ? $g : undef));
 					}
 					else
 					{
-						$o[0] = $st->object->is_blank ?
-							($g.'_'.$st->object->blank_identifier) :
-							$st->object->uri_value ;
-						$self->_insert_triple_resource(undef, $s, $p, @o,
+						push @o, $st->object->is_blank ?
+							$bnode_mapper->($st->object->blank_identifier) :
+							$st->object->uri_value;
+						$self->_insert_triple_resource({current=>$current_element},
+							$s, $p, @o,
 							($self->{'options'}->{'graph'} ? $g : undef));
 					}				
 				});
 		};
 		
 		$self->_log_error(
-			ERR_WARNING,
+			ERR_ERROR,
 			ERR_CODE_RDFXML_MESS,
-			'Could not parse embedded RDF/XML content.',
+			"Could not parse embedded RDF/XML content: ${@}",
 			element => $current_element,
 			) if $@;
 		
@@ -853,7 +884,7 @@ sub _consume_element
 				}
 			}
 			my $profile_default_vocab = $profile->get_vocabulary;
-			$local_uri_mappings->{'*'} = $profile_default_vocab
+			$local_uri_mappings->{'(VOCAB)'} = $profile_default_vocab
 				if defined $profile_default_vocab;
 		}
 		else
@@ -868,7 +899,7 @@ sub _consume_element
 			return 0; # TODO: check this does what I want it to!
 		}
 	}
-
+	
 	# Next the [current element] is parsed for [URI mapping]s and these are
 	# added to the [local list of URI mappings]. Note that a [URI mapping] 
 	# will simply overwrite any current mapping in the list that has the same
@@ -980,7 +1011,7 @@ sub _consume_element
 	if ($self->{'options'}->{'vocab_attr'}
 	&& $current_element->hasAttributeNsSafe($rdfans, 'vocab'))
 	{
-		$local_uri_mappings->{'*'} = $self->uri(
+		$local_uri_mappings->{'(VOCAB)'} = $self->uri(
 			$current_element->getAttributeNsSafe($rdfans, 'vocab'),
 			{'element'=>$current_element,'xml_base'=>$xml_base});
 	}
@@ -1047,22 +1078,62 @@ sub _consume_element
 			} @role;	
 		if (@ROLE)
 		{
-			my $element_subject;
-			if ($current_element->hasAttribute('id'))
+			if ($current_element->hasAttribute('id')
+			and !defined $self->{element_subjects}->{$current_element->nodePath})
 			{
-				$element_subject = $self->uri(sprintf('#%s',
+				$self->{element_subjects}->{$current_element->nodePath} = $self->uri(sprintf('#%s',
 					$current_element->getAttribute('id')),
 					{'element'=>$current_element,'xml_base'=>$xml_base});
 			}
-			else
+			elsif (!defined $self->{element_subjects}->{$current_element->nodePath})
 			{
-				$element_subject = $self->bnode;
+				$self->{element_subjects}->{$current_element->nodePath} = $self->bnode;
 			}
-			
+
 			foreach my $r (@ROLE)
 			{
-				$self->_insert_triple_resource($current_element, $element_subject, 'http://www.w3.org/1999/xhtml/vocab#role', $r, $graph);
+				my $E = {
+					current   => $current_element,
+					subject   => $current_element,
+					predicate => $current_element,
+					object    => $current_element,
+					graph     => $graph_elem,
+					};
+				$self->_insert_triple_resource($E, $self->{element_subjects}->{$current_element->nodePath}, 'http://www.w3.org/1999/xhtml/vocab#role', $r, $graph);
 			}
+		}
+	}
+	
+	# EXTENSION: @cite
+	if ($self->{'options'}->{'cite_attr'}
+	&&  $current_element->hasAttributeNsSafe($rdfans, 'cite'))
+	{
+		my $citation = $self->uri(
+			$current_element->getAttributeNsSafe($rdfans, 'cite'),
+			{'element'=>$current_element,'xml_base'=>$hrefsrc_base}
+			);
+		if (defined $citation)
+		{
+			if ($current_element->hasAttribute('id')
+			and !defined $self->{element_subjects}->{$current_element->nodePath})
+			{
+				$self->{element_subjects}->{$current_element->nodePath} = $self->uri(sprintf('#%s',
+					$current_element->getAttribute('id')),
+					{'element'=>$current_element,'xml_base'=>$xml_base});
+			}
+			elsif (!defined $self->{element_subjects}->{$current_element->nodePath})
+			{
+				$self->{element_subjects}->{$current_element->nodePath} = $self->bnode;
+			}
+			
+			my $E = {
+				current   => $current_element,
+				subject   => $current_element,
+				predicate => $current_element,
+				object    => $current_element,
+				graph     => $graph_elem,
+				};
+			$self->_insert_triple_resource($E, $self->{element_subjects}->{$current_element->nodePath}, 'http://www.w3.org/1999/xhtml/vocab#cite', $citation, $graph);
 		}
 	}
 	
@@ -1123,6 +1194,7 @@ sub _consume_element
 				terms     => $local_term_mappings,
 				xml_base  => $xml_base,
 				);
+			$new_subject_elem = $current_element;
 		}
 			
 		# otherwise, by using the URI from @src, if present, obtained
@@ -1133,6 +1205,7 @@ sub _consume_element
 				$current_element->getAttributeNsSafe($rdfans, 'src'),
 				{'element'=>$current_element,'xml_base'=>$hrefsrc_base}
 				);
+			$new_subject_elem = $current_element;
 		}
 			
 		# otherwise , by using the URI from @resource, if present, obtained
@@ -1147,6 +1220,7 @@ sub _consume_element
 				terms     => $local_term_mappings,
 				xml_base  => $xml_base,
 				);
+			$new_subject_elem = $current_element;
 		}
 			
 		# otherwise , by using the URI from @href, if present, obtained
@@ -1157,6 +1231,7 @@ sub _consume_element
 				$current_element->getAttributeNsSafe($rdfans, 'href'),
 				{'element'=>$current_element,'xml_base'=>$hrefsrc_base}
 				);
+			$new_subject_elem = $current_element;
 		}
 			
 		# If no URI is provided by a resource attribute, then the first
@@ -1171,6 +1246,7 @@ sub _consume_element
 			&& ($current_element->tagName eq 'head' || $current_element->tagName eq 'body'))
 			{
 				$new_subject = $self->uri;
+				$new_subject_elem = $current_element;
 			}
 
 			# EXTENSION: atom elements
@@ -1179,6 +1255,7 @@ sub _consume_element
 			&& ($current_element->tagName eq 'feed' || $current_element->tagName eq 'entry'))
 			{
 				$new_subject = $self->_atom_magic($current_element);
+				$new_subject_elem = $current_element;
 			}
 
 			# if @instanceof is present, obtained according to the section
@@ -1188,6 +1265,7 @@ sub _consume_element
 				||  $current_element->hasAttributeNsSafe($rdfans, 'instanceof'))
 			{
 				$new_subject = $self->bnode($current_element);
+				$new_subject_elem = $current_element;
 				
 				if ($current_element->hasAttributeNsSafe($rdfans, 'instanceof')
 				&& !$current_element->hasAttributeNsSafe($rdfans, 'typeof'))
@@ -1207,6 +1285,7 @@ sub _consume_element
 			elsif ($parent_object)
 			{
 				$new_subject = $parent_object;
+				$new_subject_elem = $parent_object_elem;
 				$skip_element = 1
 					unless $current_element->hasAttributeNsSafe($rdfans, 'property');
 			}
@@ -1234,6 +1313,7 @@ sub _consume_element
 				terms     => $local_term_mappings,
 				xml_base  => $xml_base,
 				);
+			$new_subject_elem = $current_element;
 		}
 			
 		# otherwise, by using the URI from @src, if present, obtained
@@ -1244,6 +1324,7 @@ sub _consume_element
 				$current_element->getAttributeNsSafe($rdfans, 'src'),
 				{'element'=>$current_element,'xml_base'=>$hrefsrc_base}
 				);
+			$new_subject_elem = $current_element;
 		}
 
 		# If no URI is provided then the first match from the following rules
@@ -1258,6 +1339,7 @@ sub _consume_element
 			&& ($current_element->tagName eq 'head' || $current_element->tagName eq 'body'))
 			{
 				$new_subject = $self->uri;
+				$new_subject_elem = $current_element;
 			}
 			
 			# EXTENSION: atom elements
@@ -1266,6 +1348,7 @@ sub _consume_element
 			&& ($current_element->tagName eq 'feed' || $current_element->tagName eq 'entry'))
 			{
 				$new_subject = $self->_atom_magic($current_element);
+				$new_subject_elem = $current_element;
 			}
 			
 			# if @instanceof is present, obtained according to the section
@@ -1275,6 +1358,7 @@ sub _consume_element
 				||  $current_element->hasAttributeNsSafe($rdfans, 'instanceof'))
 			{
 				$new_subject = $self->bnode($current_element);
+				$new_subject_elem = $current_element;
 				
 				if ($current_element->hasAttributeNsSafe($rdfans, 'instanceof')
 				&& !$current_element->hasAttributeNsSafe($rdfans, 'typeof'))
@@ -1293,6 +1377,7 @@ sub _consume_element
 			elsif ($parent_object)
 			{
 				$new_subject = $parent_object;
+				$new_subject_elem = $parent_object_elem;
 			}
 		}
 		
@@ -1311,6 +1396,7 @@ sub _consume_element
 				terms     => $local_term_mappings,
 				xml_base  => $xml_base,
 				);
+			$current_object_resource_elem = $current_element;
 		}
 			
 		# otherwise, by using the URI from @href, if present, obtained according
@@ -1321,10 +1407,21 @@ sub _consume_element
 				$current_element->getAttributeNsSafe($rdfans, 'href'),
 				{'element'=>$current_element,'xml_base'=>$hrefsrc_base}
 				);
+			$current_object_resource_elem = $current_element;
 		}
 		
 		# Note that final value of the [current object resource] will either
 		# be null (from initialization), a full URI or a bnode. 		
+	}
+	
+	# NOTE: x876587
+	if (!defined $new_subject
+	and $current_element->nodePath eq $self->dom->documentElement->nodePath)
+	{
+		$new_subject = $self->uri('');
+		$new_subject_elem = $self->dom->documentElement;
+		$skip_element = 1
+		unless $current_element->hasAttributeNsSafe($rdfans, 'property');
 	}
 	
 	# If in any of the previous steps a [new subject] was set to a non-null
@@ -1382,14 +1479,42 @@ sub _consume_element
 			# object
 			#     full URI of 'type' 
 
-			$self->_insert_triple_resource($current_element, $new_subject, RDF_TYPE, $rdftype, $graph);
+			my $E = { # provenance tracking
+				current   => $current_element,
+				subject   => $new_subject_elem,
+				predicate => $current_element,
+				object    => $current_element,
+				graph     => $graph_elem,
+				};
+			$self->_insert_triple_resource($E, $new_subject, RDF_TYPE, $rdftype, $graph);
 			$activity++;
 		}
 
 		# Note that none of this block is executed if there is no [new subject]
 		# value, i.e., [new subject] remains null. 
 	}
-	
+
+	# EXTENSION: @longdesc
+	if ($self->{'options'}->{'longdesc_attr'}
+	&&  $current_element->hasAttributeNsSafe($rdfans, 'longdesc'))
+	{
+		my $longdesc = $self->uri(
+			$current_element->getAttributeNsSafe($rdfans, 'longdesc'),
+			{'element'=>$current_element,'xml_base'=>$hrefsrc_base}
+			);
+		if (defined $longdesc)
+		{
+			my $E = {
+				current   => $new_subject_elem,
+				subject   => $current_element,
+				predicate => $current_element,
+				object    => $current_element,
+				graph     => $graph_elem,
+				};
+			$self->_insert_triple_resource($E, $new_subject, 'http://www.w3.org/2007/05/powder-s#describedby', $longdesc, $graph);
+		}
+	}	
+
 	# If in any of the previous steps a [current object resource] was set to
 	# a non-null value, it is now used to generate triples
 	if ($current_object_resource)
@@ -1408,9 +1533,16 @@ sub _consume_element
 		#      object
 		#          [current object resource] 
 		
+		my $E = { # provenance tracking
+			current   => $current_element,
+			subject   => $new_subject_elem,
+			predicate => $current_element,
+			object    => $current_object_resource_elem,
+			graph     => $graph_elem,
+			};
 		foreach my $r (@REL)
 		{
-			$self->_insert_triple_resource($current_element, $new_subject, $r, $current_object_resource, $graph);
+			$self->_insert_triple_resource($E, $new_subject, $r, $current_object_resource, $graph);
 			$activity++;
 		}
 
@@ -1425,9 +1557,16 @@ sub _consume_element
 		#      object
 		#          [new subject] 
 		
+		$E = { # provenance tracking
+			current   => $current_element,
+			subject   => $current_object_resource_elem,
+			predicate => $current_element,
+			object    => $new_subject_elem,
+			graph     => $graph_elem,
+			};
 		foreach my $r (@REV)
 		{
-			$self->_insert_triple_resource($current_element, $current_object_resource, $r, $new_subject, $graph);
+			$self->_insert_triple_resource($E, $current_object_resource, $r, $new_subject, $graph);
 			$activity++;
 		}
 	}
@@ -1454,9 +1593,11 @@ sub _consume_element
 		push @$local_incomplete_triples,
 			map {
 				{
-					predicate => $_,
-					direction => 'forward',
-					graph     => $graph
+					predicate         => $_,
+					direction         => 'forward',
+					graph             => $graph,
+ 					predicate_element => $current_element,
+					graph_element     => $graph_elem,
 				};
 			} @REL;
 		
@@ -1473,15 +1614,18 @@ sub _consume_element
 		push @$local_incomplete_triples,
 			map {
 				{
-					predicate => $_,
-					direction => 'reverse',
-					graph     => $graph
+					predicate         => $_,
+					direction         => 'reverse',
+					graph             => $graph,
+					predicate_element => $current_element,
+					graph_element     => $graph_elem,
 				};
 			} @REV;
 		
 		$current_object_resource = $self->bnode;
+		$current_object_resource_elem = $current_element;
 	}
-	
+
 	# The next step of the iteration is to establish any [current object
 	# literal
 	my @current_object_literal;
@@ -1612,6 +1756,13 @@ sub _consume_element
 		}
 	}
 	
+	my $E = { # provenance tracking
+		current   => $current_element,
+		subject   => $new_subject_elem,
+		predicate => $current_element,
+		object    => $current_element,
+		graph     => $graph_elem,
+		};
 	foreach my $property (@prop)
 	{
 		# The [current object literal] is then used with each predicate to
@@ -1634,14 +1785,14 @@ sub _consume_element
 			);
 		next unless defined $p;
 		
-		$self->_insert_triple_literal($current_element, $new_subject, $p, @current_object_literal, $graph);
+		$self->_insert_triple_literal($E, $new_subject, $p, @current_object_literal, $graph);
 		$activity++;
 		
 		# Once the triple has been created, if the [datatype] of the
 		# [current object literal] is rdf:XMLLiteral, then the [recurse]
 		# flag is set to false.
 		$recurse = 0
-			if $datatype eq 'http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral';
+			if $datatype eq RDF_XMLLIT;
 	}
 
 	# If the [recurse] flag is 'true', all elements that are children of the 
@@ -1659,15 +1810,18 @@ sub _consume_element
 			if ($skip_element)
 			{
 				$flag = $self->_consume_element($kid,
-					base               => $base,
-					parent_subject     => $parent_subject,
-					parent_object      => $parent_object,
-					uri_mappings       => $uri_mappings,
-					term_mappings      => $term_mappings,
-					incomplete_triples => $incomplete_triples,
-					language           => $language,
-					graph              => $graph,
-					xml_base           => $xml_base,
+					base                => $base,
+					parent_subject      => $parent_subject,
+					parent_subject_elem => $parent_subject_elem,
+					parent_object       => $parent_object,
+					parent_object_elem  => $parent_object_elem,
+					uri_mappings        => $uri_mappings,
+					term_mappings       => $term_mappings,
+					incomplete_triples  => $incomplete_triples,
+					language            => $current_language,
+					graph               => $graph,
+					graph_elem          => $graph_elem,
+					xml_base            => $xml_base,
 				) || $flag;
 			}
 			
@@ -1675,15 +1829,18 @@ sub _consume_element
 			else
 			{
 				$flag = $self->_consume_element($kid,
-					base               => $base,
-					parent_subject     => $new_subject,
-					parent_object      => (defined $current_object_resource ? $current_object_resource : (defined $new_subject ? $new_subject : $parent_subject)),
-					uri_mappings       => $local_uri_mappings,
-					term_mappings      => $local_term_mappings,
-					incomplete_triples => $local_incomplete_triples,
-					language           => $current_language,
-					graph              => $graph,
-					xml_base           => $xml_base,
+					base                => $base,
+					parent_subject      => $new_subject,
+					parent_subject_elem => $new_subject_elem,
+					parent_object       => (defined $current_object_resource ? $current_object_resource : (defined $new_subject ? $new_subject : $parent_subject)),
+					parent_object_elem  => (defined $current_object_resource_elem ? $current_object_resource_elem : (defined $new_subject_elem ? $new_subject_elem : $parent_subject_elem)),
+					uri_mappings        => $local_uri_mappings,
+					term_mappings       => $local_term_mappings,
+					incomplete_triples  => $local_incomplete_triples,
+					language            => $current_language,
+					graph               => $graph,
+					graph_elem          => $graph_elem,
+					xml_base            => $xml_base,
 				) || $flag;
 			}
 		}	
@@ -1704,15 +1861,31 @@ sub _consume_element
 			my $direction    = $it->{direction};
 			my $predicate    = $it->{predicate};
 			my $parent_graph = $it->{graph};
-			
+
 			if ($direction eq 'forward')
 			{
-				$self->_insert_triple_resource($current_element, $parent_subject, $predicate, $new_subject, $parent_graph);
+				my $E = { # provenance tracking
+					current   => $current_element,
+					subject   => $parent_subject_elem,
+					predicate => $it->{predicate_element},
+					object    => $new_subject_elem,
+					graph     => $it->{graph_element},
+					};
+
+				$self->_insert_triple_resource($E, $parent_subject, $predicate, $new_subject, $parent_graph);
 				$activity++;
 			}
 			else
 			{
-				$self->_insert_triple_resource($current_element, $new_subject, $predicate, $parent_subject, $parent_graph);
+				my $E = { # provenance tracking
+					current   => $current_element,
+					subject   => $new_subject_elem,
+					predicate => $it->{predicate_element},
+					object    => $parent_subject_elem,
+					graph     => $it->{graph_element},
+					};
+				
+				$self->_insert_triple_resource($E, $new_subject, $predicate, $parent_subject, $parent_graph);
 				$activity++;
 			}
 		}
@@ -1840,21 +2013,48 @@ sub _print1
 	return undef;
 }
 
+=item C<< $p->element_subjects >>
+
+B<Advanced usage only.>
+
+Gets/sets a hashref of { xpath => RDF::Trine::Node } mappings.
+
+This is not touched during normal RDFa parsing, only being used by the @role and
+@cite features where RDF resources (i.e. URIs and blank nodes) are needed to
+represent XML elements themselves.
+
+=cut
+
+sub element_subjects
+{
+	my ($self) = shift;
+	$self->consume;
+	$self->{element_subjects} = shift if @_;
+	return $self->{element_subjects};
+}
+
 sub _insert_triple_resource
 {
 	my $self = shift;
 
-	my $suppress_triple = 0;
-	$suppress_triple = $self->{'sub'}->{'pretriple_resource'}($self, @_)
-		if defined $self->{'sub'}->{'pretriple_resource'};
-	return if $suppress_triple;
-	
 	my $element   = shift;  # A reference to the XML::LibXML element being parsed
 	my $subject   = shift;  # Subject URI or bnode
 	my $predicate = shift;  # Predicate URI
 	my $object    = shift;  # Resource URI or bnode
 	my $graph     = shift;  # Graph URI or bnode (if named graphs feature is enabled)
 
+	my $suppress_triple = 0;
+	$suppress_triple = $self->{'sub'}->{'pretriple_resource'}(
+		$self,
+		ref $element ? $element->{current} : undef,
+		$subject,
+		$predicate,
+		$object,
+		$graph,
+		)
+		if defined $self->{'sub'}->{'pretriple_resource'};
+	return if $suppress_triple;
+	
 	# First make sure the object node type is ok.
 	my $to;
 	if ($object =~ m/^_:(.*)/)
@@ -1874,11 +2074,6 @@ sub _insert_triple_literal
 {
 	my $self = shift;
 
-	my $suppress_triple = 0;
-	$suppress_triple = $self->{'sub'}->{'pretriple_literal'}($self, @_)
-		if defined $self->{'sub'}->{'pretriple_literal'};
-	return if $suppress_triple;
-
 	my $element   = shift;  # A reference to the XML::LibXML element being parsed
 	my $subject   = shift;  # Subject URI or bnode
 	my $predicate = shift;  # Predicate URI
@@ -1886,6 +2081,20 @@ sub _insert_triple_literal
 	my $datatype  = shift;  # Datatype URI (possibly undef or '')
 	my $language  = shift;  # Language (possibly undef or '')
 	my $graph     = shift;  # Graph URI or bnode (if named graphs feature is enabled)
+
+	my $suppress_triple = 0;
+	$suppress_triple = $self->{'sub'}->{'pretriple_literal'}(
+		$self,
+		ref $element ? $element->{current} : undef,
+		$subject,
+		$predicate,
+		$object,
+		$datatype,
+		$language,
+		$graph,
+		)
+		if defined $self->{'sub'}->{'pretriple_literal'};
+	return if $suppress_triple;
 
 	# Now we know there's a literal
 	my $to;
@@ -2148,7 +2357,15 @@ sub bnode
 		$self->{bnode_prefix} =~ s/-//g;
 	}
 
-	my $rv = sprintf('_:rdfa%snode%04d', $self->{bnode_prefix}, $self->{bnodes}++);
+	my $rv;
+	if ($self->{options}->{skolemize})
+	{
+		$rv = sprintf('tag:buzzword.org.uk,2010:RDF-RDFa-Parser:skolem:%s:%04d', $self->{bnode_prefix}, $self->{bnodes}++);
+	}
+	else
+	{
+		$rv = sprintf('_:rdfa%snode%04d', $self->{bnode_prefix}, $self->{bnodes}++);
+	}
 	
 	if ($save_me and defined $element)
 	{
@@ -2337,11 +2554,11 @@ sub __expand_curie
 	and ($is_safe || $args{'attribute'} =~ /^(rel|rev|property|typeof|datatype|role)$/i || $args{'allow_unsafe_curie'}))
 	{
 		$token =~ /^($XML::RegExp::NCName)?:(\S+)$/;
-		my $prefix = (defined $1 && length $1) ? $1 : '-';
+		my $prefix = (defined $1 && length $1) ? $1 : '(DEFAULT PREFIX)';
 		my $suffix = $2;
 		
-		if (defined $args{'prefixes'}->{'-'} && $prefix eq '-')
-			{ return $args{'prefixes'}->{'-'} . $suffix; }
+		if (defined $args{'prefixes'}->{'(DEFAULT PREFIX)'} && $prefix eq '(DEFAULT PREFIX)')
+			{ return $args{'prefixes'}->{'(DEFAULT PREFIX)'} . $suffix; }
 		elsif (defined $args{'prefixes'}->{'sensitive'}->{$prefix})
 			{ return $args{'prefixes'}->{'sensitive'}->{$prefix} . $suffix; }
 		elsif (defined $args{'prefixes'}->{'insensitive'}->{lc $prefix})
@@ -2349,7 +2566,7 @@ sub __expand_curie
 
 		if ($is_safe)
 		{
-			$prefix = ($prefix eq '-') ? '' : $prefix;
+			$prefix = ($prefix eq '(DEFAULT PREFIX)') ? '' : $prefix;
 			$self->_log_error(
 				ERR_ERROR,
 				ERR_CODE_CURIE_UNDEFINED,
@@ -2390,8 +2607,8 @@ sub __expand_curie
 	{
 		my $suffix = $token;
 		
-		if (defined $args{'prefixes'}->{'*'})
-			{ return $args{'prefixes'}->{'*'} . $suffix; }
+		if (defined $args{'prefixes'}->{'(VOCAB)'})
+			{ return $args{'prefixes'}->{'(VOCAB)'} . $suffix; }
 	
 		return undef if $is_safe;
 	}
@@ -2492,67 +2709,8 @@ sub hasAttributeNsSafe
 =head1 CALLBACKS
 
 Several callback functions are provided. These may be set using the C<set_callbacks> function,
-which taskes a hashref of keys pointing to coderefs. The keys are named for the event to fire the
+which takes a hashref of keys pointing to coderefs. The keys are named for the event to fire the
 callback on.
-
-=head2 pretriple_resource
-
-This is called when a triple has been found, but before preparing the triple for
-adding to the model. It is only called for triples with a non-literal object value.
-
-The parameters passed to the callback function are:
-
-=over 4
-
-=item * A reference to the C<RDF::RDFa::Parser> object
-
-=item * A reference to the C<XML::LibXML::Element> being parsed
-
-=item * Subject URI or bnode (string)
-
-=item * Predicate URI (string)
-
-=item * Object URI or bnode (string)
-
-=item * Graph URI or bnode (string or undef)
-
-=back
-
-The callback should return 1 to tell the parser to skip this triple (not add it to
-the graph); return 0 otherwise.
-
-=head2 pretriple_literal
-
-This is the equivalent of pretriple_resource, but is only called for triples with a
-literal object value.
-
-The parameters passed to the callback function are:
-
-=over 4
-
-=item * A reference to the C<RDF::RDFa::Parser> object
-
-=item * A reference to the C<XML::LibXML::Element> being parsed
-
-=item * Subject URI or bnode (string)
-
-=item * Predicate URI (string)
-
-=item * Object literal (string)
-
-=item * Datatype URI (string or undef)
-
-=item * Language (string or undef)
-
-=item * Graph URI or bnode (string or undef)
-
-=back
-
-Beware: sometimes both a datatype I<and> a language will be passed. 
-This goes beyond the normal RDF data model.)
-
-The callback should return 1 to tell the parser to skip this triple (not add it to
-the graph); return 0 otherwise.
 
 =head2 ontriple
 
@@ -2563,7 +2721,7 @@ callbacks.) The parameters passed to the callback function are:
 
 =item * A reference to the C<RDF::RDFa::Parser> object
 
-=item * A reference to the C<XML::LibXML::Element> being parsed
+=item * A hashref of relevant C<XML::LibXML::Element> objects (subject, predicate, object, graph, current)
 
 =item * An RDF::Trine::Statement object.
 
@@ -2637,6 +2795,69 @@ The return value of this callback is currently ignored, but you should return
 If you do not define an onerror callback, then errors will be output via STDERR
 and warnings will be silent. Either way, you can retrieve errors after parsing
 using the C<errors> method.
+
+=head2 pretriple_resource
+
+B<This callback is deprecated - use ontriple instead.>
+
+This is called when a triple has been found, but before preparing the triple for
+adding to the model. It is only called for triples with a non-literal object value.
+
+The parameters passed to the callback function are:
+
+=over 4
+
+=item * A reference to the C<RDF::RDFa::Parser> object
+
+=item * A reference to the C<XML::LibXML::Element> being parsed
+
+=item * Subject URI or bnode (string)
+
+=item * Predicate URI (string)
+
+=item * Object URI or bnode (string)
+
+=item * Graph URI or bnode (string or undef)
+
+=back
+
+The callback should return 1 to tell the parser to skip this triple (not add it to
+the graph); return 0 otherwise.
+
+=head2 pretriple_literal
+
+B<This callback is deprecated - use ontriple instead.>
+
+This is the equivalent of pretriple_resource, but is only called for triples with a
+literal object value.
+
+The parameters passed to the callback function are:
+
+=over 4
+
+=item * A reference to the C<RDF::RDFa::Parser> object
+
+=item * A reference to the C<XML::LibXML::Element> being parsed
+
+=item * Subject URI or bnode (string)
+
+=item * Predicate URI (string)
+
+=item * Object literal (string)
+
+=item * Datatype URI (string or undef)
+
+=item * Language (string or undef)
+
+=item * Graph URI or bnode (string or undef)
+
+=back
+
+Beware: sometimes both a datatype I<and> a language will be passed. 
+This goes beyond the normal RDF data model.)
+
+The callback should return 1 to tell the parser to skip this triple (not add it to
+the graph); return 0 otherwise.
 
 =head1 FEATURES
 
@@ -2774,9 +2995,9 @@ The name of the attribute which indicates graph URIs is by
 default 'graph', but can be changed using the 'graph_attr'
 Config option. This option accepts Clark Notation to specify a
 namespaced attribute. By default, the attribute value is
-interpreted as a fragment identifier (like the 'id' attribute),
-but if you set the 'graph_type' Config option to 'about',
-it will be treated as a URI or safe CURIE (like the 'about'
+interpreted as like the 'about' attribute (i.e. CURIEs, URIs, etc),
+but if you set the 'graph_type' Config option to 'id',
+it will be treated as setting a fragment identifier (like the 'id'
 attribute).
 
 The 'graph_default' Config option allows you to set the default
@@ -2788,7 +3009,7 @@ The optional parameter to the C<graph> method also becomes useful.
 
 OpenDocument (ZIP) host language support makes internal use
 of named graphs, so if you're parsing OpenDocument, tinker with
-the Config options at your own risk!
+the graph Config options at your own risk!
 
 =head2 Auto Config
 

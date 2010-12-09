@@ -70,6 +70,14 @@ my $p    = RDF::RDFa::Parser->new($testdoc, "http://example.net/document.xhtml",
 #use Data::Dumper;
 #diag(Dumper($profile));
 
+#$p->set_callbacks({
+#	ontoken => sub {
+#		my ($self, $elem, $curie, $uri) = @_;
+#		diag("[$curie] => <$uri> .\n");
+#		return $uri;
+#	}
+#});
+
 my $graph = $p->graph;
 
 ok(

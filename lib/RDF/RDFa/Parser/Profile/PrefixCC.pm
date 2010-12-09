@@ -1,18 +1,10 @@
 package RDF::RDFa::Parser::Profile::PrefixCC;
 
-use File::Spec;
-use HTTP::Cache::Transparent;
-
 use base qw(RDF::RDFa::Parser::Profile);
 use common::sense;
 use 5.008;
 
-our $VERSION = '1.092';
-
-BEGIN
-{
-	HTTP::Cache::Transparent::init({BasePath => File::Spec->tmpdir.'/cache/'});
-}
+our $VERSION = '1.093';
 
 sub new
 {

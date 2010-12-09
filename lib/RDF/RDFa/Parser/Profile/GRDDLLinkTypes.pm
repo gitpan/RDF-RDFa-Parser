@@ -4,12 +4,12 @@ use base qw(RDF::RDFa::Parser::Profile::AbstractLinkTypes);
 use common::sense;
 use 5.008;
 
-our $VERSION = '1.092';
+our $VERSION = '1.093';
 
 sub DATA
 {
 	return split /\r?\n/, <<'DATA';
-tag:buzzword.org.uk,2010:rdfa:profile:grddl	# profile URI
+http://www.w3.org/2003/g/data-view	# profile URI
 http://www.w3.org/2003/g/data-view#	# URI prefix 
 transformation
 profileTransformation
@@ -25,7 +25,7 @@ RDF::RDFa::Parser::Profile::GRDDLLInkTypes - GRDDL Link Types
 
 =head1 DESCRIPTION
 
-Hard-coded profile for GRDDL Link Types.
+Hard-coded profile for http://www.w3.org/2003/g/data-view.
 
 =head1 SEE ALSO
 

@@ -1,8 +1,5 @@
 package RDF::RDFa::Parser::Profile::RDF;
 
-use File::Spec;
-use HTTP::Cache::Transparent;
-use LWP::UserAgent;
 use RDF::RDFa::Parser;
 use RDF::RDFa::Parser::Config;
 use RDF::Trine;
@@ -11,12 +8,7 @@ use base qw(RDF::RDFa::Parser::Profile);
 use common::sense;
 use 5.008;
 
-our $VERSION = '1.092';
-
-BEGIN
-{
-	HTTP::Cache::Transparent::init({BasePath => File::Spec->tmpdir.'/cache/'});
-}
+our $VERSION = '1.093';
 
 sub new
 {

@@ -4,7 +4,7 @@ use base qw(RDF::RDFa::Parser::Profile);
 use common::sense;
 use 5.008;
 
-our $VERSION = '1.092';
+our $VERSION = '1.093';
 our %Positions;
 
 sub new
@@ -20,7 +20,14 @@ sub new
 		unless lc $uri eq $profile_uri;
 		
 	my $self = bless [], $class;
-	
+
+	if ( $self->refresh_data( $parser->{'options'}->lwp_ua, $uri ) )
+	{
+		my @DATA = $self->DATA;
+		shift @DATA;
+		shift @DATA;
+	}
+
 	while ($_ = shift @DATA)
 	{
 		my ($term)  = split /\s/;
@@ -31,6 +38,11 @@ sub new
 	}
 	
 	return $self;
+}
+
+sub refresh_data
+{
+	return;
 }
 
 sub canonical_term

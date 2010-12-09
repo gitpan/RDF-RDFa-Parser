@@ -10,6 +10,30 @@ Home page:    <http://search.cpan.org/dist/RDF-RDFa-Parser/>
 Bug tracker:  <http://rt.cpan.org/Dist/Display.html?Queue=RDF-RDFa-Parser>
 Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
 
+1.093 [2010-12-09] # RDFa 1.1 Release Candidate 3
+ - @graph is now parsed like @about by default.
+ - Change cache directory.
+ - Clarify language around default prefix versus default vocabulary (or in
+   RDFa 1.0 default prefix versus 'no prefix'). This involved renaming a
+   couple of configuration options: prefix_default => vocab_default;
+   prefix_empty => prefix_default.
+ - Deprecated pretriple_literal and pretriple_resource callbacks - use
+   ontriple instead.
+ - IETF link types now use an aggressively cached copy of
+   http://www.iana.org/assignments/link-relations/link-relations.xml.
+ - Improve HTTP caching behaviour.
+ - Second parameter to ontriple callback is now a hashref of elements
+   rather than just the current element - this change is to help support
+   the RDFa API.
+ - Use official GRDDL profile URI for hard-coded support for GRDDL keywords
+   instead of previously used internal identifier.
+ - (Addition) Support @cite - not part of RDFa, but often provides useful
+   information.
+ - (Addition) Support @longdesc - not part of RDFa, but often provides
+   useful information.
+ - (Bugfix) Fix failure parsing embedded RDF/XML with blank nodes.
+ - (Bugfix) new_from_url didn't work when called without a Config object.
+
 1.092 [2010-10-20] # RDFa 1.1 Release Candidate 2
  - If @graph support is enabled, and RDFa attributes are being used in a
    non-standard namespace, assume @graph is in that namespace too.
@@ -41,7 +65,7 @@ Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
 
 1.09_09 [2010-05-26] # RDFa 1.1 Preview 9
  - Improved DataRSS support; differentiate between DataRSS and plain Atom.
- - (Addition) Allow Config.pm to provide a list of defaul profiles to the
+ - (Addition) Allow Config.pm to provide a list of default profiles to the
    parser.
  - (Addition) Handle <?profile ?> processing instructions.
  - (Addition) Hard-coded the Yahoo SearchMonkey profile.

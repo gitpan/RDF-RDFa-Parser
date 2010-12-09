@@ -1,586 +1,631 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rdf:RDF xmlns:dbug="http://ontologi.es/doap-bugs#" xmlns:dc="http://purl.org/dc/terms/" xmlns:dcs="http://ontologi.es/doap-changeset#" xmlns:doap="http://usefulinc.com/ns/doap#" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r0">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r1"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r2"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r3"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r4"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar0">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar1"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar2"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar3"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar4"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-01"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r1">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar1">
 	<rdfs:label xml:lang="en">Make XML parser more tolerant.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r10">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar10">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Include some test cases as part of the installation.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r100">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar100">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Bugfix"/>
 	<rdfs:label xml:lang="en">Test Suite tests are failing on systems that don't have RDF::Query; make these tests optional.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r101">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar101">
 	<rdfs:label xml:lang="en">Support case-sensitive/-insensitive prefixes on a prefix-by-prefix basis rather than parser-by-parser.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r102">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar102">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Bugfix"/>
 	<rdfs:label xml:lang="en">@profile properly supports multiple URIs.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r103">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r104"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar103">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar104"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_06"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r104">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar104">
 	<rdfs:label xml:lang="en">Allow an LWP::UserAgent to be supplied when configuring the parser.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r105">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r106"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar105">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar106"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_07"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r106">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar106">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Bugfix"/>
 	<rdfs:label xml:lang="en">Remove 'my' from a couple of lines.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r107">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r108"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r109"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r110"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r111"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar107">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar108"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar109"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar110"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar111"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_09"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r108">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar108">
 	<rdfs:label xml:lang="en">Improved DataRSS support; differentiate between DataRSS and plain Atom.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r109">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar109">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Handle &lt;?profile ?> processing instructions.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r11">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r12"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r13"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r14"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r15"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar11">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar12"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar13"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar14"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar15"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-04"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r110">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar110">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Hard-coded the Yahoo SearchMonkey profile.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r111">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar111">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
-	<rdfs:label xml:lang="en">Allow Config.pm to provide a list of defaul profiles to the parser.</rdfs:label>
+	<rdfs:label xml:lang="en">Allow Config.pm to provide a list of default profiles to the parser.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r112">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r113"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar112">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar113"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_09"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r113">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar113">
 	<rdfs:label xml:lang="en">UTF-8 fixes necessitating requiring a newer version of RDF::Trine.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r114">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r115"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r116"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r117"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r118"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar114">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar115"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar116"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar117"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar118"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_10"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r115">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar115">
 	<rdfs:label xml:lang="en">Various media-type handling clean-ups.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r116">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar116">
 	<rdfs:label xml:lang="en">Auto-Config fixes and clean-ups.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r117">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar117">
 	<rdfs:label xml:lang="en">Rearrange some of the documentation in the FEATURES section.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r118">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar118">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Support for OpenDocument's slightly unusual flavour of RDFa.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r119">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r120"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r121"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r122"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r123"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar119">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar120"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar121"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar122"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar123"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_11"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r12">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar12">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Bugfix"/>
 	<rdfs:label xml:lang="en">Fix broken support for XML literals.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r120">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar120">
 	<rdfs:label xml:lang="en">Various clean-ups.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r121">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar121">
 	<rdfs:label xml:lang="en">Generate less-predictable blank node identifiers.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r122">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar122">
 	<rdfs:label xml:lang="en">Add test cases covering @profile.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r123">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar123">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Support rdfa:vocabulary in Profiles.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r124">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r125"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r126"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r127"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r128"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r129"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r130"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r131"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar124">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar125"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar126"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar127"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar128"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar129"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar130"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar131"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-091"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r125">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar125">
 	<rdfs:label xml:lang="en">If @graph support is enabled, and RDFa attributes are being used in a non-standard namespace, assume @graph is in that namespace too.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r126">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar126">
 	<rdfs:label xml:lang="en">RDFa Profiles establish both a case-sensitive and case-insensitive term mapping.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r127">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar127">
 	<rdfs:label xml:lang="en">Strongly deprecate keyword_bundles config option - use default_profiles instead.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r128">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar128">
 	<rdfs:label xml:lang="en">Reimplement RDFa 1.0 keyword concept using profiles.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r129">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar129">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Bugfix"/>
 	<rdfs:label xml:lang="en">There was an inconsistency between the code and documentation for the name of the oncurie/ontoken callback. It's now called ontoken.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r13">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar13">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Support for KjetilK's named graph idea.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r130">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar130">
 	<rdfs:label xml:lang="en">Load Profile modules via Module::Pluggable.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r131">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar131">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Bugfix"/>
 	<rdfs:label xml:lang="en">The final prefix defined in @prefix was being ignored due to a regexp bug. Fixed.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r132">
-	<dcs:timescale xml:lang="en">Mostly implemented, but dependent on progress in the W3C RDFa WG. Early to mid 2011?</dcs:timescale>
-	<rdfs:label xml:lang="en">RDFa 1.1 Support.</rdfs:label>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar132">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar133"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar134"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar135"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar136"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar137"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar138"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar139"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar140"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar141"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar142"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar143"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar144"/>
+	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-092"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r133">
-	<rdfs:label xml:lang="en">Option to automatically follow { &lt;> xhv:meta ?resource . } links.</rdfs:label>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar133">
+	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Bugfix"/>
+	<rdfs:label xml:lang="en">new_from_url didn't work when called without a Config object.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r134">
-	<rdfs:label xml:lang="en">Add support for native SVG semantics of &lt;svg:title> and &lt;svg:desc>, perhaps via a separate module a la XML::Atom::OWL.</rdfs:label>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar134">
+	<rdfs:label xml:lang="en">Second parameter to ontriple callback is now a hashref of elements rather than just the current element - this change is to help support the RDFa API.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r135">
-	<doap:browse rdf:resource="http://goddamn.co.uk/viewvc/perlmods/RDF-RDFa-Parser/"/>
-	<rdf:type rdf:resource="http://usefulinc.com/ns/doap#SVNRepository"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar135">
+	<rdfs:label xml:lang="en">Deprecated pretriple_literal and pretriple_resource callbacks - use ontriple instead.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r14">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar136">
+	<rdfs:label xml:lang="en">@graph is now parsed like @about by default.</rdfs:label>
+</rdf:Description>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar137">
+	<rdfs:label xml:lang="en">Use official GRDDL profile URI for hard-coded support for GRDDL keywords instead of previously used internal identifier.</rdfs:label>
+</rdf:Description>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar138">
+	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Bugfix"/>
+	<rdfs:label xml:lang="en">Fix failure parsing embedded RDF/XML with blank nodes.</rdfs:label>
+</rdf:Description>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar139">
+	<rdfs:label xml:lang="en">Improve HTTP caching behaviour.</rdfs:label>
+</rdf:Description>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar14">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Update"/>
 	<rdfs:label xml:lang="en">More test cases, including XML Literals and named graphs.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r15">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar140">
+	<rdfs:label xml:lang="en">Change cache directory.</rdfs:label>
+</rdf:Description>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar141">
+	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
+	<rdfs:label xml:lang="en">Support @cite - not part of RDFa, but often provides useful information.</rdfs:label>
+</rdf:Description>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar142">
+	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
+	<rdfs:label xml:lang="en">Support @longdesc - not part of RDFa, but often provides useful information.</rdfs:label>
+</rdf:Description>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar143">
+	<rdfs:label xml:lang="en">IETF link types now use an aggressively cached copy of http://www.iana.org/assignments/link-relations/link-relations.xml.</rdfs:label>
+</rdf:Description>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar144">
+	<rdfs:label xml:lang="en">Clarify language around default prefix versus default vocabulary (or in RDFa 1.0 default prefix versus 'no prefix'). This involved renaming a couple of configuration options: prefix_default => vocab_default; prefix_empty => prefix_default.</rdfs:label>
+</rdf:Description>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar145">
+	<doap:browse rdf:resource="http://goddamn.co.uk/viewvc/perlmods/RDF-RDFa-Parser/"/>
+	<rdf:type rdf:resource="http://usefulinc.com/ns/doap#SVNRepository"/>
+</rdf:Description>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar15">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Improve documentation and include it inline in the module code.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r16">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r17"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar16">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar17"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-10"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r17">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar17">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Update"/>
 	<rdfs:label xml:lang="en">Make named graphs handling more predictable for triples spread across multiple elements.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r18">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r19"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r20"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r21"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r22"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r23"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r24"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r25"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r26"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r27"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r28"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r29"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r30"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar18">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar19"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar20"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar21"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar22"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar23"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar24"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar25"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar26"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar27"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar28"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar29"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar30"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-11"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r19">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar19">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Update"/>
 	<rdfs:label xml:lang="en">The graph() and graphs() methods now return RDF::Trine::Model objects.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r2">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar2">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Bugfix"/>
 	<rdfs:label xml:lang="en">Fix bug in Turtle output.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r20">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar20">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Allow various parsing options to be passed to constructor.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r21">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar21">
 	<rdfs:label xml:lang="en">Support for @prefix now optional, off by default.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r22">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar22">
 	<rdfs:label xml:lang="en">Support for @lang now optional, off by default.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r23">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar23">
 	<rdfs:label xml:lang="en">Support for extended @rel/@rev now optional, off by default.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r24">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar24">
 	<rdfs:label xml:lang="en">Support for HEAD, BODY and BASE elements now optional, on by default.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r25">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar25">
 	<rdfs:label xml:lang="en">Support for full URIs instead of CURIEs now optional, off by default.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r26">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar26">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Add optional support for xml:base.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r27">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar27">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Add optional support for embedded RDF/XML.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r28">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar28">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Add optional support for XFN 1.1 keywords.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r29">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar29">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Removal"/>
 	<rdfs:label xml:lang="en">Diallow Safe CURIEs in @src/@href.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r3">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar3">
 	<rdfs:comment xml:lang="en">Suggested by danbri</rdfs:comment>
 	<rdfs:label xml:lang="en">Disable thing-described-by.org URIs by default.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r30">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar30">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Update"/>
 	<rdfs:label xml:lang="en">Module SVN repository now at &lt;http://goddamn.co.uk/viewvc/perlmods/></rdfs:label>
 	<rdfs:seeAlso rdf:resource="http://goddamn.co.uk/viewvc/perlmods/"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r31">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r32"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r33"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar31">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar32"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar33"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-20"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r32">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar32">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Use RDF::Trine::Node::Literal::XML if it exists.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r33">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar33">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Bugfix"/>
 	<rdfs:label xml:lang="en">Various test case compliance fixes (passes XHTML test suite).</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r34">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r35"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r36"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r37"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r38"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r39"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r40"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r41"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r42"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar34">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar35"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar36"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar37"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar38"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar39"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar40"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar41"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar42"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-21"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r35">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar35">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Bugfix"/>
 	<rdfs:label xml:lang="en">Various test case compliance fixes (passes HTML4 and HTML5 test suites)</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r36">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar36">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Flexible keyword extensibility (optional).</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r37">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar37">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Special rel='alternate stylesheet' handling (optional, good for HTML5).</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r38">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar38">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Allow suffix-less CURIEs without colons (optional).</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r39">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar39">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Allow case-insensitive CURIE prefixes (optional, good for HTML).</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r4">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar4">
 	<rdfs:comment xml:lang="en">I can no longer remember what this patch did!</rdfs:comment>
 	<rdfs:label xml:lang="en">Add KjetilK's patch.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r40">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar40">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Empty CURIE prefix can be configured (optional).</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r41">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar41">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Add Auto Config feature.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r42">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar42">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Make xml:lang support optional (enabled by default).</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r43">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r44"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r45"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r46"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r47"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r48"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r49"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar43">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar44"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar45"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar46"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar47"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar48"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar49"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-22"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r44">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar44">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Special support for RDFa in Atom (Yahoo's weirdly-named 'DataRSS').</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r45">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar45">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Add support for a default prefix (different from empty prefix).</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r46">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar46">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Include a catalogue of doctypes to speed up XML parsing.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r47">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar47">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Update"/>
 	<rdfs:label xml:lang="en">Upgrade distribution to my new packaging regime (signatures, auto-generated changelogs, etc)</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r48">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar48">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Update"/>
 	<rdfs:label xml:lang="en">Copyright 2010.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r49">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar49">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Change set_callbacks parameters and support additional callbacks.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r5">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r6"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar5">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar6"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-02"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r50">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r51"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r52"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r53"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r54"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r55"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar50">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar51"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar52"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar53"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar54"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar55"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-30"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r51">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar51">
 	<rdfs:label xml:lang="en">Improve named graph documentation.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r52">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar52">
 	<rdfs:label xml:lang="en">Correct name of XML::Atom::OWL module in POD.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r53">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar53">
 	<rdfs:label xml:lang="en">Document auto-config in non-XHTML XML.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r54">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar54">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Removal"/>
 	<rdfs:label xml:lang="en">&amp;set_callbacks no longer supports old argument syntax.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r55">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar55">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Removal"/>
 	<rdfs:label xml:lang="en">&amp;named_graphs no longer supported as a way to enable named graph support.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r56">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r57"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r58"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar56">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar57"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar58"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00_00"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r57">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar57">
 	<rdfs:label xml:lang="en">Fix double use of &amp;consume in POD SYNOPSIS.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r58">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar58">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Update"/>
 	<rdfs:label xml:lang="en">POD NAME section short description to match description in CPAN registered modules list.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r59">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r60"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r61"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r62"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r63"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r64"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar59">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar60"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar61"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar62"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar63"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar64"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00_01"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r6">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar6">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Bugfix"/>
 	<rdfs:label xml:lang="en">Bugfix for @property.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r60">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar60">
 	<rdfs:label xml:lang="en">Arrange methods in a more sensible order for documentation.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r61">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar61">
 	<rdfs:label xml:lang="en">Document HTML support better.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r62">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar62">
 	<rdfs:label xml:lang="en">Document Atom support better.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r63">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar63">
 	<rdfs:label xml:lang="en">Document SVG support better.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r64">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar64">
 	<rdfs:label xml:lang="en">Document RDF/XML support better.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r65">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r66"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar65">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar66"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00_02"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r66">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar66">
 	<rdfs:label xml:lang="en">Release RDF::RDFa::Parser 1.00 and RDF::RDFa::Parser::Redland 1.00.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r67">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r68"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar67">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar68"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r68">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar68">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Bugfix"/>
 	<rdfs:label xml:lang="en">Don't use &lt;img alt> in plain literal stringification.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r69">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r70"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar69">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar70"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00-001"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r7">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r10"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r8"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r9"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar7">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar10"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar8"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar9"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-03"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r70">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar70">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Bugfix"/>
 	<rdfs:label xml:lang="en">Properly enforce scoping of prefix mappings (use Storable qw/dclone/).</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r71">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r72"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r73"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r74"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r75"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r76"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r77"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r78"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar71">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar72"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar73"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar74"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar75"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar76"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar77"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar78"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r72">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar72">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Bugfix"/>
 	<rdfs:label xml:lang="en">Don't use &lt;img alt> in plain literal stringification.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r73">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar73">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Bugfix"/>
 	<rdfs:label xml:lang="en">Properly enforce scoping of prefix mappings (use Storable qw/dclone/).</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r74">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar74">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Update"/>
 	<rdfs:label xml:lang="en">Change syntax of @prefix to match current RDFa 1.1 editors' drafts.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r75">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar75">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Support @vocab attribute to set default attribute.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r76">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar76">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Support @profile attribute to load externally-defined keywords and terms.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r77">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar77">
 	<rdfs:label xml:lang="en">Refactor a lot of code, especially CURIE processing.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r78">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar78">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Regression"/>
 	<rdfs:label xml:lang="en">Broke support for CURIEs with zero-length suffxes.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r79">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r80"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar79">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar80"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_00"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r8">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar8">
 	<rdfs:label xml:lang="en">Rewrite callback stuff.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r80">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar80">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Bugfix"/>
 	<rdfs:label xml:lang="en">Fix packaging problem (profile modules were not in MANIFEST).</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r81">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r82"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r83"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r84"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r85"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r86"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar81">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar82"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar83"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar84"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar85"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar86"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_01"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r82">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar82">
 	<rdfs:label xml:lang="en">Refactor error handling code to add a new 'onerror' callback, and an 'errors' method to get a list of errors.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r83">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar83">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">New 'oncurie' callback.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r84">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar84">
 	<rdfs:label xml:lang="en">Deprecate OPTS_XXXX functions in favour of a new RDF::RDFa::Parser::Config object which allows host languages and RDFa versions to be combined more flexibly.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r85">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar85">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Bugfix"/>
 	<rdfs:label xml:lang="en">Allow CURIEs to have zero-length suffixes.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r86">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar86">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Regression"/>
 	<rdfs:label xml:lang="en">Broke auto_config.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r87">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r88"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r89"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar87">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar88"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar89"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_02"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r88">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar88">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Support @role attribute.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r89">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar89">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Update"/>
 	<rdfs:label xml:lang="en">Use latest list of IANA terms from draft-nottingham-http-link-header-09.txt.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r9">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar9">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Provide graph() method to output graph.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r90">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r91"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r92"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r93"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r94"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r95"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r96"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar90">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar91"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar92"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar93"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar94"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar95"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar96"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_03"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r91">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar91">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Bugfix"/>
 	<rdfs:label xml:lang="en">Fix auto_config.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r92">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar92">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Update"/>
 	<rdfs:label xml:lang="en">Provide more inclusive XML DTD catalogue.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r93">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar93">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Update"/>
 	<rdfs:label xml:lang="en">Integrate official RDFa test suite into module tests.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r94">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar94">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">new_from_url shortcut.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r95">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar95">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Addition"/>
 	<rdfs:label xml:lang="en">Special Open Graph Protocol support.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r96">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar96">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Regression"/>
 	<rdfs:label xml:lang="en">Makefile.PL doesn't reflect proper requirements from running tests.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r97">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r98"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar97">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar98"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_04"/>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r98">
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar98">
 	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#Bugfix"/>
 	<rdfs:label xml:lang="en">Tests require File::Slurp. Add this dep to Makefile.PL.</rdfs:label>
 </rdf:Description>
-<rdf:Description rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r99">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r100"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r101"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r102"/>
+<rdf:Description rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar99">
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar100"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar101"/>
+	<dcs:item rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar102"/>
 	<dcs:versus rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_05"/>
 </rdf:Description>
 <rdf:Description rdf:about="file:///home/tai/src/perlmods/RDF-RDFa-Parser/Changes.ttl">
@@ -618,6 +663,7 @@
 	<doap:release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00_02"/>
 	<doap:release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-091"/>
 	<doap:release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-092"/>
+	<doap:release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-093"/>
 	<doap:release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_00"/>
 	<doap:release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_01"/>
 	<doap:release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_02"/>
@@ -630,18 +676,10 @@
 	<doap:release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_09"/>
 	<doap:release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_10"/>
 	<doap:release rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_11"/>
-	<doap:repository rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r135"/>
+	<doap:repository rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar145"/>
 	<doap:shortdesc xml:lang="en">flexible RDFa parser</doap:shortdesc>
 	<doap:tester rdf:resource="http://tobyinkster.co.uk/#i"/>
 	<rdf:type rdf:resource="http://usefulinc.com/ns/doap#Project"/>
-</rdf:Description>
-<rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/roadmap_1_100">
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r132"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r133"/>
-	<dcs:item rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r134"/>
-	<dcs:milestone rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-100"/>
-	<rdf:type rdf:resource="http://ontologi.es/doap-changeset#ToDoList"/>
-	<rdfs:label xml:lang="en">Roadmap for RDF::RDFa::Parser 1.100</rdfs:label>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-01">
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-13</dc:issued>
@@ -653,42 +691,42 @@
 	<rdfs:seeAlso rdf:resource="http://buzzword.org.uk/swignition/rdfa"/>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-02">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r0"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar0"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-13</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.02.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.02</doap:revision>
 	<rdf:type rdf:resource="http://usefulinc.com/ns/doap#Version"/>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-03">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r5"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar5"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-14</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.03.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.03</doap:revision>
 	<rdf:type rdf:resource="http://usefulinc.com/ns/doap#Version"/>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-04">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r7"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar7"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-14</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.04.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.04</doap:revision>
 	<rdf:type rdf:resource="http://usefulinc.com/ns/doap#Version"/>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-10">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r11"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar11"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-19</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.1.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.10</doap:revision>
 	<rdf:type rdf:resource="http://usefulinc.com/ns/doap#Version"/>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-11">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r16"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar16"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-19</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.11.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.11</doap:revision>
 	<rdf:type rdf:resource="http://usefulinc.com/ns/doap#Version"/>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-20">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r18"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar18"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-11-24</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.20.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.20</doap:revision>
@@ -697,21 +735,21 @@
 	<rdfs:label xml:lang="en">Version 2 (kinda)</rdfs:label>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-21">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r31"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar31"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-11-28</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.21.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.21</doap:revision>
 	<rdf:type rdf:resource="http://usefulinc.com/ns/doap#Version"/>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-22">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r34"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar34"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-12-03</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.22.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.22</doap:revision>
 	<rdf:type rdf:resource="http://usefulinc.com/ns/doap#Version"/>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_0-30">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r43"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar43"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-01-18</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-0.30.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0.30</doap:revision>
@@ -719,7 +757,7 @@
 	<rdfs:label xml:lang="en">Version 3 (kinda)</rdfs:label>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r65"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar65"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-02-18</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00</doap:revision>
@@ -727,21 +765,21 @@
 	<rdfs:label xml:lang="en">Stable</rdfs:label>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00-001">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r67"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar67"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-03-26</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00.001.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00.001</doap:revision>
 	<rdf:type rdf:resource="http://usefulinc.com/ns/doap#Version"/>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00-002">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r69"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar69"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-04-09</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00.002.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00.002</doap:revision>
 	<rdf:type rdf:resource="http://usefulinc.com/ns/doap#Version"/>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00_00">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r50"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar50"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-01-29</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00_00.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00_00</doap:revision>
@@ -749,7 +787,7 @@
 	<rdfs:label xml:lang="en">1.00 Preview</rdfs:label>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00_01">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r56"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar56"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-02-04</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00_01.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00_01</doap:revision>
@@ -757,7 +795,7 @@
 	<rdfs:label xml:lang="en">1.00 Preview'</rdfs:label>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-00_02">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r59"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar59"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-02-05</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.00_02.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.00_02</doap:revision>
@@ -765,7 +803,7 @@
 	<rdfs:label xml:lang="en">1.00 Preview''</rdfs:label>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-091">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r119"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar119"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-10-06</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.091.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.091</doap:revision>
@@ -773,15 +811,23 @@
 	<rdfs:label xml:lang="en">RDFa 1.1 Release Candidate 1</rdfs:label>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-092">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r124"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar124"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-10-20</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.092.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.092</doap:revision>
 	<rdf:type rdf:resource="http://usefulinc.com/ns/doap#Version"/>
 	<rdfs:label xml:lang="en">RDFa 1.1 Release Candidate 2</rdfs:label>
 </rdf:Description>
+<rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-093">
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar132"/>
+	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-12-09</dc:issued>
+	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.093.tar.gz"/>
+	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.093</doap:revision>
+	<rdf:type rdf:resource="http://usefulinc.com/ns/doap#Version"/>
+	<rdfs:label xml:lang="en">RDFa 1.1 Release Candidate 3</rdfs:label>
+</rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_00">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r71"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar71"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-04-19</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_00.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_00</doap:revision>
@@ -789,7 +835,7 @@
 	<rdfs:label xml:lang="en">RDFa 1.1 Preview</rdfs:label>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_01">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r79"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar79"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-04-19</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_01.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_01</doap:revision>
@@ -797,7 +843,7 @@
 	<rdfs:label xml:lang="en">RDFa 1.1 Preview 2</rdfs:label>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_02">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r81"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar81"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-04-21</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_02.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_02</doap:revision>
@@ -805,7 +851,7 @@
 	<rdfs:label xml:lang="en">RDFa 1.1 Preview 3</rdfs:label>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_03">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r87"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar87"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-04-21</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_03.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_03</doap:revision>
@@ -813,7 +859,7 @@
 	<rdfs:label xml:lang="en">RDFa 1.1 Preview 4</rdfs:label>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_04">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r90"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar90"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-04-24</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_04.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_04</doap:revision>
@@ -821,7 +867,7 @@
 	<rdfs:label xml:lang="en">RDFa 1.1 Preview 5</rdfs:label>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_05">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r97"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar97"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-05-01</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_05.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_05</doap:revision>
@@ -829,7 +875,7 @@
 	<rdfs:label xml:lang="en">RDFa 1.1 Preview 6</rdfs:label>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_06">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r99"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar99"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-05-05</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_06.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_06</doap:revision>
@@ -837,7 +883,7 @@
 	<rdfs:label xml:lang="en">RDFa 1.1 Preview 7</rdfs:label>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_07">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r103"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar103"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-05-21</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_07.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_07</doap:revision>
@@ -845,7 +891,7 @@
 	<rdfs:label xml:lang="en">RDFa 1.1 Preview 8</rdfs:label>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_08">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r105"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar105"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-05-21</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_08.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_08</doap:revision>
@@ -853,7 +899,7 @@
 	<rdfs:label xml:lang="en">RDFa 1.1 Preview 8 - bugfix edition</rdfs:label>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_09">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r107"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar107"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-05-26</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_09.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_09</doap:revision>
@@ -861,7 +907,7 @@
 	<rdfs:label xml:lang="en">RDFa 1.1 Preview 9</rdfs:label>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_10">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r112"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar112"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-05-27</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_10.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_10</doap:revision>
@@ -869,7 +915,7 @@
 	<rdfs:label xml:lang="en">RDFa 1.1 Preview 10</rdfs:label>
 </rdf:Description>
 <rdf:Description rdf:about="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/v_1-09_11">
-	<dcs:changeset rdf:nodeID="rF174C07CDC9411DFBD0A8479FCD4DB15r114"/>
+	<dcs:changeset rdf:nodeID="r9A9C4CA803D511E092D2EBCC6B9E4B2Ar114"/>
 	<dc:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-06-16</dc:issued>
 	<doap:file-release rdf:resource="http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.09_11.tar.gz"/>
 	<doap:revision rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.09_11</doap:revision>
@@ -877,7 +923,6 @@
 	<rdfs:label xml:lang="en">RDFa 1.1 Preview 11</rdfs:label>
 </rdf:Description>
 <rdf:Description xmlns:ns1="http://www.w3.org/2002/07/owl#" rdf:about="http://tobyinkster.co.uk/#i">
-	<dcs:tasks rdf:resource="http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/roadmap_1_100"/>
 	<rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Person"/>
 	<ns1:sameAs rdf:resource="http://purl.org/NET/cpan-uri/person/tobyink"/>
 	<foaf:homepage rdf:resource="http://tobyinkster.co.uk/"/>
