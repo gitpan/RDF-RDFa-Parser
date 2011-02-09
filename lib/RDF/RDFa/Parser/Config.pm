@@ -26,7 +26,7 @@ use URI::Escape qw'uri_unescape';
 use RDF::RDFa::Parser::OpenDocumentObjectModel;
 
 our @EXPORT_OK = qw(HOST_ATOM HOST_DATARSS HOST_HTML4 HOST_HTML5 HOST_OPENDOCUMENT_XML HOST_OPENDOCUMENT_ZIP HOST_SVG HOST_XHTML HOST_XML RDFA_10 RDFA_11);
-our $VERSION = '1.093';
+our $VERSION = '1.094';
 our $CONFIGS = {
 	'host' => {
 		HOST_ATOM() => {
@@ -140,6 +140,7 @@ our $CONFIGS = {
 			'xml_base'              => 2,
 			'xml_lang'              => 1,
 			'xmllit_default'        => 1,
+			'xmllit_recurse'        => 0,
 			'xmlns_attr'            => 1,
 		},
 		RDFA_11() => {
@@ -183,7 +184,8 @@ our $CONFIGS = {
 			'xhtml_lang'            => 0,
 			'xml_base'              => 2,
 			'xml_lang'              => 1,
-			'xmllit_default'        => 0,
+			'xmllit_default'        => 0, #diff
+			'xmllit_recurse'        => 1, #diff
 			'xmlns_attr'            => 1,
 		},
 	},
@@ -252,6 +254,24 @@ sub new
 	$self->{'_opts'} = \%options;
 	
 	return $self;
+}
+
+sub tagsoup
+{
+	my ($class) = @_;
+	my @profiles = qw[
+		http://www.w3.org/1999/xhtml/vocab
+		tag:buzzword.org.uk,2010:rdfa:profile:ietf
+		tag:buzzword.org.uk,2010:rdfa:profile:forgotten
+		];
+	return $class->new(
+		HOST_HTML5,
+		RDFA_LATEST,
+		cite_attr        => 1,
+		default_profiles => join(' ', @profiles),
+		role_attr        => 1,
+		longdesc_attr    => 1,
+		);
 }
 
 sub host_from_media_type
@@ -612,9 +632,14 @@ in brackets.
 
 =item * B<xmllit_default> - Generate XMLLiterals enthusiastically. [1, 0]
 
+=item * B<xmllit_recurse> - Look for RDFa inside XMLLiterals. [0, 1]
+
 =item * B<xmlns_attr> - Support for 'xmlns:foo' to define CURIE prefixes. [1]
 
 =back
+
+An alternative constructor C<tagsoup> is provided with a useful set of
+options for dealing with content "from the wild".
 
 =head1 EXAMPLES
 
@@ -638,6 +663,15 @@ any RDF/XML chunks that are embedded in the document.
   use RDF::RDFa::Parser::Config qw(HOST_XHTML RDFA_11);
   $config = RDF::RDFa::Parser::Config->new(
     HOST_XHTML, RDFA_11, embedded_rdfxml=>1);
+  $parser = RDF::RDFa::Parser->new_from_url($url, $config);
+  $data   = $parser->graph;
+
+The following config is good for dealing with (X)HTML content from the
+wild:
+
+  $config = RDF::RDFa::Parser::Config->tagsoup;
+  $parser = RDF::RDFa::Parser->new_from_url($url, $config);
+  $data   = $parser->graph;
 
 =head1 SEE ALSO
 
@@ -649,7 +683,7 @@ Toby Inkster E<lt>tobyink@cpan.orgE<gt>.
 
 =head1 COPYRIGHT
 
-Copyright 2008-2010 Toby Inkster
+Copyright 2008-2011 Toby Inkster
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

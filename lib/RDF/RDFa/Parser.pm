@@ -6,17 +6,30 @@ RDF::RDFa::Parser - flexible RDFa parser
 
 =head1 SYNOPSIS
 
+If you're wanting to work with an RDF::Trine::Model that can be queried with SPARQL, etc:
+
  use RDF::RDFa::Parser;
- 
- ### Create an object...
- $p = RDF::RDFa::Parser->new_from_url($url);
- # or: $p = RDF::RDFa::Parser->new($markup, $base_url);
- 
- ### Get an RDF::Trine::Model containing the document's data...
- $data = $p->graph;
- 
- ### Get Open Graph Protocol data...
- $title = $p->opengraph('title');
+ my $url     = 'http://example.com/document.html';
+ my $options = RDF::RDFa::Parser::Config->new('xhtml', '1.1');
+ my $rdfa    = RDF::RDFa::Parser->new_from_url($url, $options);
+ my $model   = $rdfa->graph;
+
+For dealing with local data:
+
+ use RDF::RDFa::Parser;
+ my $base_url = 'http://example.com/document.html';
+ my $options  = RDF::RDFa::Parser::Config->new('xhtml', '1.1');
+ my $rdfa     = RDF::RDFa::Parser->new($markup, $base_url, $options);
+ my $model    = $rdfa->graph;
+
+A simple set of operations for working with Open Graph Protocol data:
+
+ use RDF::RDFa::Parser;
+ my $url     = 'http://www.rottentomatoes.com/m/net/';
+ my $options = RDF::RDFa::Parser::Config->tagsoup;
+ my $rdfa    = RDF::RDFa::Parser->new_from_url($url, $options);
+ print $rdfa->opengraph('title') . "\n";
+ print $rdfa->opengraph('image') . "\n";
 
 =cut
 
@@ -30,7 +43,7 @@ use LWP::UserAgent;
 use RDF::RDFa::Parser::Config;
 use RDF::RDFa::Parser::OpenDocumentObjectModel;
 use RDF::RDFa::Parser::Profile;
-use RDF::Trine 0.123;
+use RDF::Trine 0.130;
 use Scalar::Util qw(blessed);
 use Storable qw(dclone);
 use URI::Escape;
@@ -58,6 +71,8 @@ use constant {
 use constant {
 	ERR_CODE_PROFILE_UNUSABLE      =>  0x0101,
 	ERR_CODE_PROFILE_DISABLED      =>  0x0102,
+	ERR_CODE_PROFILE_HASH          =>  0x0103,
+	ERR_CODE_PROFILE_NOTURI        =>  0x0104,
 	ERR_CODE_RDFXML_MUDDLE         =>  0x0201,
 	ERR_CODE_RDFXML_MESS           =>  0x0202,
 	ERR_CODE_PREFIX_BUILTIN        =>  0x0301,
@@ -84,7 +99,7 @@ use 5.008;
 
 =cut
 
-our $VERSION = '1.093';
+our $VERSION = '1.094';
 our $HAS_AWOL;
 
 BEGIN
@@ -372,7 +387,7 @@ RDF terms, it returns the non-bnode objects of triples where the
 subject is the document base URI; and the predicate is $property,
 with non-URI $property strings taken as having the implicit prefix
 'http://ogp.me/ns#'. There is no distinction between literal and
-non-literal values.)
+non-literal values; literal datatypes and languages are dropped.)
 
 If $property is omitted, returns a list of possible properties.
 
@@ -393,10 +408,9 @@ See also: L<http://opengraphprotocol.org/>.
 
 sub opengraph
 {
-	my $self = shift;
+	my ($self, $property, %opts) = @_;
 	$self->consume;
 	
-	my $property = shift;
 	$property = $1
 		if defined $property && $property =~ m'^http://opengraphprotocol\.org/schema/(.*)$';
 	$property = $1
@@ -404,24 +418,54 @@ sub opengraph
 		
 	my $rtp;
 	if (defined $property && $property =~ /^[a-z][a-z0-9\-\.\+]*:/i)
-		{ $rtp = RDF::Trine::Node::Resource->new($property); }
-	elsif (defined $property)
-		{ $rtp = RDF::Trine::Node::Resource->new('http://ogp.me/ns#'.$property); }
-		
-	my $iter = $self->graph->get_statements(
-		RDF::Trine::Node::Resource->new($self->uri), $rtp, undef);
-	my $data = {};
-	while (my $st = $iter->next)
 	{
-		my $propkey = $st->predicate->uri;
-		$propkey = $1
-			if $propkey =~ m'^http://ogp\.me/ns#(.*)$'
-			|| $propkey =~ m'^http://opengraphprotocol\.org/schema/(.*)$';
-		
-		if ($st->object->is_resource)
-			{ push @{ $data->{$propkey} }, $st->object->uri; }	
-		elsif ($st->object->is_literal)
-			{ push @{ $data->{$propkey} }, $st->object->literal_value; }
+		$rtp = [ RDF::Trine::Node::Resource->new($property) ];
+	}
+	elsif (defined $property)
+	{
+		$rtp = [ 
+			RDF::Trine::Node::Resource->new('http://ogp.me/ns#'.$property),
+			RDF::Trine::Node::Resource->new('http://opengraphprotocol.org/schema/'.$property),
+			];
+	}
+	
+	my $data = {};
+	if ($rtp)
+	{
+		foreach my $rtp2 (@$rtp)
+		{
+			my $iter = $self->graph->get_statements(
+				RDF::Trine::Node::Resource->new($self->uri), $rtp2, undef);
+			while (my $st = $iter->next)
+			{
+				my $propkey = $st->predicate->uri;
+				$propkey = $1
+					if $propkey =~ m'^http://ogp\.me/ns#(.*)$'
+					|| $propkey =~ m'^http://opengraphprotocol\.org/schema/(.*)$';
+				
+				if ($st->object->is_resource)
+					{ push @{ $data->{$propkey} }, $st->object->uri; }	
+				elsif ($st->object->is_literal)
+					{ push @{ $data->{$propkey} }, $st->object->literal_value; }
+			}
+		}
+	}
+	else
+	{
+		my $iter = $self->graph->get_statements(
+			RDF::Trine::Node::Resource->new($self->uri), undef, undef);
+		while (my $st = $iter->next)
+		{
+			my $propkey = $st->predicate->uri;
+			$propkey = $1
+				if $propkey =~ m'^http://ogp\.me/ns#(.*)$'
+				|| $propkey =~ m'^http://opengraphprotocol\.org/schema/(.*)$';
+			
+			if ($st->object->is_resource)
+				{ push @{ $data->{$propkey} }, $st->object->uri; }	
+			elsif ($st->object->is_literal)
+				{ push @{ $data->{$propkey} }, $st->object->literal_value; }
+		}
 	}
 	
 	my @return;
@@ -430,7 +474,7 @@ sub opengraph
 	else
 		{ @return = keys %$data; }
 	
-	return (wantarray ? @return : $return[0]);	
+	return wantarray ? @return : $return[0];
 }
 
 =item C<< $p->dom >>
@@ -836,7 +880,7 @@ sub _consume_element
 	# Various weird/default profile features.
 	if ($current_element->isSameNode($self->dom->documentElement))
 	{
-		if ($self->{'options'}->{'profile_pi'})
+		if ($self->{options}{profile_pi})
 		{
 			foreach my $node ($self->dom->childNodes)
 			{
@@ -846,18 +890,41 @@ sub _consume_element
 				$uri =~ s/(^\s+|\s+$)//g;
 				push @profiles, $uri;
 			}
-		}
-		
-		if ($self->{'options'}->{'default_profiles'})
+		}		
+		if ($self->{options}{default_profiles})
 		{
 			push @profiles, $self->_split_tokens( $self->{'options'}->{'default_profiles'} );
-		}		
+		}
 	}
 
-	foreach my $uri (reverse @profiles)
+	PROFILE: foreach my $uri (reverse @profiles)
 	{
-		next unless $uri =~ /\S/; # skip duds
+		next PROFILE unless $uri =~ /\S/; # skip duds
 		
+		if ($uri =~ /^(.*)#/)
+		{
+			my $uri2 = $1;
+			$self->_log_error(
+				ERR_WARNING,
+				ERR_CODE_PROFILE_HASH,
+				sprintf("Profile '%s' contains hash; using '%s' instead.", $uri, $uri2),
+				uri     => $uri,
+				element => $current_element,
+				);
+			$uri = $uri2;
+		}
+
+		unless ($uri =~ /^[A-Z][A-Z0-9\.\+-]*:\S*$/i)
+		{
+			$self->_log_error(
+				ERR_WARNING,
+				ERR_CODE_PROFILE_NOTURI,
+				sprintf("Profile '%s' is not a URI; skipping.", $uri),
+				element => $current_element,
+				);
+			next PROFILE;
+		}
+
 		my $profile = RDF::RDFa::Parser::Profile->new(
 			$self->uri($uri, {'element'=>$current_element,'xml_base'=>$xml_base}),
 			$self);
@@ -892,8 +959,8 @@ sub _consume_element
 			$self->_log_error(
 				ERR_ERROR,
 				ERR_CODE_PROFILE_UNUSABLE,
-				sprintf("Unusable profile '%s'.", $current_element->getAttributeNsSafe($rdfans, 'profile')),
-				uri     => $current_element->getAttribute('profile'),
+				sprintf("Unusable profile '%s'.", $uri),
+				uri     => $uri,
 				element => $current_element,
 				);
 			return 0; # TODO: check this does what I want it to!
@@ -973,11 +1040,16 @@ sub _consume_element
 	&& $current_element->hasAttributeNsSafe($rdfans, 'prefix'))
 	{
 		my $pfx_attr = $current_element->getAttributeNsSafe($rdfans, 'prefix') . ' ';
-		while ($pfx_attr =~ /^\s*(\S+):[\s\r\n]*(\S*)[\s\r\n]+/gs)
+		my @bits     = split /[\s\r\n]+/, $pfx_attr;
+		while (@bits)
 		{
-			my $pfx = $self->{'options'}->{'prefix_nocase_attr'} ? (lc $1) : $1;
+			my ($bit1, $bit2, @rest) = @bits;
+			@bits = @rest;
+			$bit1 =~ s/:$//;
+			
+			my $pfx = $self->{'options'}->{'prefix_nocase_attr'} ? (lc $bit1) : $bit1;
 			my $cls = $self->{'options'}->{'prefix_nocase_attr'} ? 'insensitive' : 'sensitive';
-			my $uri = $2;
+			my $uri = $bit2;
 			
 			unless ($pfx =~ /^$XML::RegExp::NCName$/)
 			{
@@ -1665,11 +1737,11 @@ sub _consume_element
 		}
 		
 		# OpenDocument 1.2 extension
-		elsif (defined $self->{'options'}->{'bookmark_end'}
-		&& defined $self->{'options'}->{'bookmark_name'}
+		elsif (defined $self->{options}{bookmark_end}
+		&& defined $self->{options}{bookmark_name}
 		&& (
-			'{}'.$self->{'options'}->{'bookmark_start'} eq sprintf('{%s}%s',$current_element->namespaceURI,$current_element->localname)
-			|| $self->{'options'}->{'bookmark_start'} eq sprintf('{%s}%s',$current_element->namespaceURI,$current_element->localname)
+			'{}'.$self->{options}{bookmark_start} eq sprintf('{%s}%s',$current_element->namespaceURI,$current_element->localname)
+			|| $self->{options}{bookmark_start} eq sprintf('{%s}%s',$current_element->namespaceURI,$current_element->localname)
 		))
 		{
 			@current_object_literal = ($self->_element_to_bookmarked_string($current_element),
@@ -1702,7 +1774,7 @@ sub _consume_element
 			@current_object_literal = ($self->_element_to_xml($current_element, $current_language),
 				RDF_XMLLIT,
 				$current_language);
-			$recurse = 0;
+			$recurse = $self->{options}{xmllit_recurse};
 		}
 		
 		# as a [typed literal] if:
@@ -1735,11 +1807,12 @@ sub _consume_element
 		# in RDFa 1.1 by default generate a plain literal.
 		elsif (!$has_datatype and $current_element->getElementsByTagName('*'))
 		{
-			if ($self->{'options'}->{'xmllit_default'})
+			if ($self->{options}{xmllit_default})
 			{
 				@current_object_literal = ($self->_element_to_xml($current_element, $current_language),
 					RDF_XMLLIT,
 					$current_language);
+				$recurse = $self->{options}{xmllit_recurse};
 			}
 			else
 			{
@@ -1747,7 +1820,6 @@ sub _consume_element
 					undef,
 					$current_language);
 			}
-			$recurse = 0;
 		}
 
 		else
@@ -1791,8 +1863,8 @@ sub _consume_element
 		# Once the triple has been created, if the [datatype] of the
 		# [current object literal] is rdf:XMLLiteral, then the [recurse]
 		# flag is set to false.
-		$recurse = 0
-			if $datatype eq RDF_XMLLIT;
+#		$recurse = 0
+#			if $datatype eq RDF_XMLLIT;
 	}
 
 	# If the [recurse] flag is 'true', all elements that are children of the 
@@ -2104,9 +2176,9 @@ sub _insert_triple_literal
 
 	if (defined $datatype)
 	{
-		if ($datatype eq 'http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral')
+		if ($datatype eq RDF_XMLLIT)
 		{
-			if ($self->{'options'}->{'use_rtnlx'})
+			if ($self->{options}{use_rtnlx})
 			{
 				eval
 				{
@@ -3087,7 +3159,7 @@ DTDs.
 
 =head1 COPYRIGHT
 
-Copyright 2008-2010 Toby Inkster
+Copyright 2008-2011 Toby Inkster
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

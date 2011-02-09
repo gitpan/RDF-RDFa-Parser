@@ -83,7 +83,7 @@ my:v_0-10
 			[ rdfs:label "Fix broken support for XML literals."@en ; a dcs:Bugfix ] ,
 			[ rdfs:label "Support for KjetilK's named graph idea."@en ; a dcs:Addition ] ,
 			[ rdfs:label "More test cases, including XML Literals and named graphs."@en ; a dcs:Addition , dcs:Update ] ,
-			[ rdfs:label "Improve documentation and include it inline in the module code."@en ; a dcs:Addition ]
+			[ rdfs:label "Improve documentation and include it inline in the module code."@en ; a dcs:Addition , dcs:Documentation ]
 		] .
 
 my:v_0-11
@@ -167,9 +167,9 @@ my:v_0-30
 		dcs:item
 			[ rdfs:label "Special support for RDFa in Atom (Yahoo's weirdly-named 'DataRSS')."@en ; a dcs:Addition ] ,
 			[ rdfs:label "Add support for a default prefix (different from empty prefix)."@en ; a dcs:Addition ] ,
-			[ rdfs:label "Include a catalogue of doctypes to speed up XML parsing."@en ; a dcs:Addition ] ,
-			[ rdfs:label "Upgrade distribution to my new packaging regime (signatures, auto-generated changelogs, etc)"@en ; a dcs:Update ] ,
-			[ rdfs:label "Copyright 2010."@en ; a dcs:Update ] ,
+			[ rdfs:label "Include a catalogue of doctypes to speed up XML parsing."@en ; a dcs:Addition , dcs:Packaging ] ,
+			[ rdfs:label "Upgrade distribution to my new packaging regime (signatures, auto-generated changelogs, etc)"@en ; a dcs:Update , dcs:Packaging ] ,
+			[ rdfs:label "Copyright 2010."@en ; a dcs:Update , dcs:Documentation ] ,
 			[ rdfs:label "Change set_callbacks parameters and support additional callbacks."@en ; a dcs:Addition ]
 	] .
 	
@@ -183,9 +183,9 @@ my:v_1-00_00
 	dcs:changeset [
 		dcs:versus my:v_0-30 ;
 		dcs:item
-			[ rdfs:label "Improve named graph documentation."@en ] ,
-			[ rdfs:label "Correct name of XML::Atom::OWL module in POD."@en ] ,
-			[ rdfs:label "Document auto-config in non-XHTML XML."@en ] ,
+			[ rdfs:label "Improve named graph documentation."@en ; a dcs:Documentation ] ,
+			[ rdfs:label "Correct name of XML::Atom::OWL module in POD."@en ; a dcs:Documentation ] ,
+			[ rdfs:label "Document auto-config in non-XHTML XML."@en ; a dcs:Documentation ] ,
 			[ rdfs:label "&set_callbacks no longer supports old argument syntax."@en ; a dcs:Removal ] ,
 			[ rdfs:label "&named_graphs no longer supported as a way to enable named graph support."@en ; a dcs:Removal ]
 	] .
@@ -200,7 +200,7 @@ my:v_1-00_01
 	dcs:changeset [
 		dcs:versus my:v_1-00_00 ;
 		dcs:item
-			[ rdfs:label "Fix double use of &consume in POD SYNOPSIS."@en ] ,
+			[ rdfs:label "Fix double use of &consume in POD SYNOPSIS."@en ; a dcs:Documentation ] ,
 			[ rdfs:label "POD NAME section short description to match description in CPAN registered modules list."@en ; a dcs:Update ]
 		]  .
 
@@ -215,10 +215,10 @@ my:v_1-00_02
 		dcs:versus my:v_1-00_01 ;
 		dcs:item
 			[ rdfs:label "Arrange methods in a more sensible order for documentation."@en ] ,
-			[ rdfs:label "Document HTML support better."@en ] ,
-			[ rdfs:label "Document Atom support better."@en ] ,
-			[ rdfs:label "Document SVG support better."@en ] ,
-			[ rdfs:label "Document RDF/XML support better."@en ]
+			[ rdfs:label "Document HTML support better."@en ; a dcs:Documentation ] ,
+			[ rdfs:label "Document Atom support better."@en ; a dcs:Documentation ] ,
+			[ rdfs:label "Document SVG support better."@en ; a dcs:Documentation ] ,
+			[ rdfs:label "Document RDF/XML support better."@en ; a dcs:Documentation ]
 		]  .
 
 my:v_1-00
@@ -287,7 +287,7 @@ my:v_1-09_01
 	dcs:changeset [
 		dcs:versus my:v_1-09_00 ;
 		dcs:item
-			[ rdfs:label "Fix packaging problem (profile modules were not in MANIFEST)."@en ; a dcs:Bugfix ]
+			[ rdfs:label "Fix packaging problem (profile modules were not in MANIFEST)."@en ; a dcs:Bugfix, dcs:Packaging ]
 		] .
 		
 my:v_1-09_02
@@ -332,11 +332,11 @@ my:v_1-09_04
 		dcs:versus my:v_1-09_03 ;
 		dcs:item
 			[ rdfs:label "Fix auto_config."@en ; a dcs:Bugfix ] ,
-			[ rdfs:label "Provide more inclusive XML DTD catalogue."@en ; a dcs:Update ] ,
-			[ rdfs:label "Integrate official RDFa test suite into module tests."@en ; a dcs:Update ] ,
+			[ rdfs:label "Provide more inclusive XML DTD catalogue."@en ; a dcs:Update , dcs:Packaging ] ,
+			[ rdfs:label "Integrate official RDFa test suite into module tests."@en ; a dcs:Update , dcs:Packaging ] ,
 			[ rdfs:label "new_from_url shortcut."@en ; a dcs:Addition ] ,
 			[ rdfs:label "Special Open Graph Protocol support."@en ; a dcs:Addition ] ,
-			[ rdfs:label "Makefile.PL doesn't reflect proper requirements from running tests."@en ; a dcs:Regression ]
+			[ rdfs:label "Makefile.PL doesn't reflect proper requirements from running tests."@en ; a dcs:Regression , dcs:Packaging ]
 		] .
 
 my:v_1-09_05
@@ -349,7 +349,7 @@ my:v_1-09_05
 	dcs:changeset [
 		dcs:versus my:v_1-09_04 ;
 		dcs:item
-			[ rdfs:label "Tests require File::Slurp. Add this dep to Makefile.PL."@en ; a dcs:Bugfix ]
+			[ rdfs:label "Tests require File::Slurp. Add this dep to Makefile.PL."@en ; a dcs:Bugfix , dcs:Packaging ]
 		] .
 
 my:v_1-09_06
@@ -362,7 +362,7 @@ my:v_1-09_06
 	dcs:changeset [
 		dcs:versus my:v_1-09_05 ;
 		dcs:item
-			[ rdfs:label "Test Suite tests are failing on systems that don't have RDF::Query; make these tests optional."@en ; a dcs:Bugfix ] ,
+			[ rdfs:label "Test Suite tests are failing on systems that don't have RDF::Query; make these tests optional."@en ; a dcs:Bugfix , dcs:Packaging ] ,
 			[ rdfs:label "Support case-sensitive/-insensitive prefixes on a prefix-by-prefix basis rather than parser-by-parser."@en ] ,
 			[ rdfs:label "@profile properly supports multiple URIs."@en ; a dcs:Bugfix ]
 		] .
@@ -434,7 +434,7 @@ my:v_1-09_11
 		dcs:item
 			[ rdfs:label "Various media-type handling clean-ups."@en ] ,
 			[ rdfs:label "Auto-Config fixes and clean-ups."@en ] ,
-			[ rdfs:label "Rearrange some of the documentation in the FEATURES section."@en ] ,
+			[ rdfs:label "Rearrange some of the documentation in the FEATURES section."@en ; a dcs:Documentation ] ,
 			[ rdfs:label "Support for OpenDocument's slightly unusual flavour of RDFa."@en ; a dcs:Addition ]
 		] .
 
@@ -450,7 +450,7 @@ my:v_1-091
 		dcs:item
 			[ rdfs:label "Various clean-ups."@en ] ,
 			[ rdfs:label "Generate less-predictable blank node identifiers."@en ] ,
-			[ rdfs:label "Add test cases covering @profile."@en ] ,
+			[ rdfs:label "Add test cases covering @profile."@en ; a dcs:Packaging ] ,
 			[ rdfs:label "Support rdfa:vocabulary in Profiles."@en ; a dcs:Addition ]
 		] .
 
@@ -497,6 +497,27 @@ my:v_1-093
 			[ rdfs:label "Clarify language around default prefix versus default vocabulary (or in RDFa 1.0 default prefix versus 'no prefix'). This involved renaming a couple of configuration options: prefix_default => vocab_default; prefix_empty => prefix_default."@en ]
 		] .
 
+my:v_1-094
+
+	a               :Version ;
+	dc:issued       "2011-02-09"^^xsd:date ;
+	:revision       "1.094"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.094.tar.gz> ;
+	rdfs:label      "RDFa 1.1 Release Candidate 4"@en ;
+	dcs:changeset [
+		dcs:versus my:v_1-094 ;
+		dcs:item
+			[ rdfs:label "Improve SYNOPSIS section."@en ; a dcs:Documentation ] ,
+			[ rdfs:label "Copyright 2011."@en ; a dcs:Update, dcs:Documentation ] ,
+			[ rdfs:label "Issue warning when encountering a profile that is not a valid URI."@en ] ,
+			[ rdfs:label "Issue warning when encountering a profile URI contains a fragment identifier."@en ] ,
+			[ rdfs:label "Include 'tagsoup' configuration set for dealing with content from the wild."@en ; a dcs:Addition ] ,
+			[ rdfs:label "@prefix wasn't working - ignored all but the first prefix."@en ; a dcs:Bugfix ] ,
+			[ rdfs:label "Support new RDFa 1.1 feature where XMLLiterals are recursed into."@en ; a dcs:Update ] ,
+			[ rdfs:label "The opengraph method now recognises the old Open Graph Protocol namespace for better backcompat."@en ; a dcs:Addition ] ,
+			[ rdfs:label "The opengraph method now returns the first value in the list when called in scalar context. (Previously returned an arrayref.)"@en ]
+		] .
+
 #############################################################
 
 my:project
@@ -525,7 +546,8 @@ my:project
                    my:v_1-09_03 , my:v_1-09_04 ,  my:v_1-09_05 ,
                    my:v_1-09_06 , my:v_1-09_07 ,  my:v_1-09_08 ,
                    my:v_1-09_09 , my:v_1-09_10 ,  my:v_1-09_11 ,
-                   my:v_1-091   , my:v_1-092 ,    my:v_1-093 .
+                   my:v_1-091   , my:v_1-092 ,    my:v_1-093 ,
+                   my:v_1-094 .
 
 #############################################################
 

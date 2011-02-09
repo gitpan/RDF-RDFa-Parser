@@ -16,6 +16,7 @@ lib/RDF/RDFa/Parser/Profile.pm
 lib/RDF/RDFa/Parser/Profile/AbstractLinkTypes.pm
 lib/RDF/RDFa/Parser/Profile/AbstractRoles.pm
 lib/RDF/RDFa/Parser/Profile/ARIARoles.pm
+lib/RDF/RDFa/Parser/Profile/ForgetMeNot.pm
 lib/RDF/RDFa/Parser/Profile/GRDDLLinkTypes.pm
 lib/RDF/RDFa/Parser/Profile/HTML32LinkTypes.pm
 lib/RDF/RDFa/Parser/Profile/HTML4LinkTypes.pm

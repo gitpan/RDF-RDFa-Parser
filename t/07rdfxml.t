@@ -27,7 +27,11 @@ my $xhtml = <<EOF;
 </html>
 EOF
 
-my $parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/', {embedded_rdfxml=>1});
+my $parser = RDF::RDFa::Parser->new(
+	$xhtml,
+	'http://example.com/',
+	RDF::RDFa::Parser::Config->new(xhtml => '1.0', embedded_rdfxml=>1),
+	);
 $parser->consume;
 
 my $model;

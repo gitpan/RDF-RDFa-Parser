@@ -4,7 +4,7 @@ use base qw(RDF::RDFa::Parser::Profile::AbstractLinkTypes);
 use common::sense;
 use 5.008;
 
-our $VERSION = '1.093';
+our $VERSION = '1.094';
 
 sub DATA
 {
@@ -59,7 +59,7 @@ Toby Inkster E<lt>tobyink@cpan.orgE<gt>.
 
 =head1 COPYRIGHT
 
-Copyright 2008-2010 Toby Inkster
+Copyright 2008-2011 Toby Inkster
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

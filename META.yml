@@ -41,7 +41,7 @@ requires:
   Data::UUID: 0
   File::ShareDir: 0
   File::Spec: 0
-  File::Temp: 0
+  File::Temp: 0.17
   HTML::HTML5::Parser: 0
   HTML::HTML5::Sanity: 0
   HTTP::Cache::Transparent: 0
@@ -62,4 +62,4 @@ resources:
   homepage: http://search.cpan.org/dist/RDF-RDFa-Parser/
   license: http://dev.perl.org/licenses/
   repository: http://goddamn.co.uk/viewvc/perlmods/RDF-RDFa-Parser/
-version: 1.093
+version: 1.094

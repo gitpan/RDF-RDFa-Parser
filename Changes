@@ -10,6 +10,22 @@ Home page:    <http://search.cpan.org/dist/RDF-RDFa-Parser/>
 Bug tracker:  <http://rt.cpan.org/Dist/Display.html?Queue=RDF-RDFa-Parser>
 Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
 
+1.094 [2011-02-09] # RDFa 1.1 Release Candidate 4
+ - Issue warning when encountering a profile URI contains a fragment
+   identifier.
+ - Issue warning when encountering a profile that is not a valid URI.
+ - The opengraph method now returns the first value in the list when called
+   in scalar context. (Previously returned an arrayref.)
+ - (Addition) Include 'tagsoup' configuration set for dealing with content
+   from the wild.
+ - (Addition) The opengraph method now recognises the old Open Graph
+   Protocol namespace for better backcompat.
+ - (Bugfix) @prefix wasn't working - ignored all but the first prefix.
+ - (Documentation) Improve SYNOPSIS section.
+ - (Update) Copyright 2011.
+ - (Update) Support new RDFa 1.1 feature where XMLLiterals are recursed
+   into.
+
 1.093 [2010-12-09] # RDFa 1.1 Release Candidate 3
  - @graph is now parsed like @about by default.
  - Change cache directory.
@@ -49,16 +65,17 @@ Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
    for the name of the oncurie/ontoken callback. It's now called ontoken.
 
 1.091 [2010-10-06] # RDFa 1.1 Release Candidate 1
- - Add test cases covering @profile.
  - Generate less-predictable blank node identifiers.
  - Various clean-ups.
  - (Addition) Support rdfa:vocabulary in Profiles.
+ - (Packaging) Add test cases covering @profile.
 
 1.09_11 [2010-06-16] # RDFa 1.1 Preview 11
  - Auto-Config fixes and clean-ups.
- - Rearrange some of the documentation in the FEATURES section.
  - Various media-type handling clean-ups.
  - (Addition) Support for OpenDocument's slightly unusual flavour of RDFa.
+ - (Documentation) Rearrange some of the documentation in the FEATURES
+   section.
 
 1.09_10 [2010-05-27] # RDFa 1.1 Preview 10
  - UTF-8 fixes necessitating requiring a newer version of RDF::Trine.
@@ -80,18 +97,18 @@ Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
  - Support case-sensitive/-insensitive prefixes on a prefix-by-prefix basis
    rather than parser-by-parser.
  - (Bugfix) @profile properly supports multiple URIs.
- - (Bugfix) Test Suite tests are failing on systems that don't have
+ - (Packaging) Test Suite tests are failing on systems that don't have
    RDF::Query; make these tests optional.
 
 1.09_05 [2010-05-01] # RDFa 1.1 Preview 6
- - (Bugfix) Tests require File::Slurp. Add this dep to Makefile.PL.
+ - (Packaging) Tests require File::Slurp. Add this dep to Makefile.PL.
 
 1.09_04 [2010-04-24] # RDFa 1.1 Preview 5
  - (Addition) Special Open Graph Protocol support.
  - (Addition) new_from_url shortcut.
  - (Bugfix) Fix auto_config.
- - (Regression) Makefile.PL doesn't reflect proper requirements from
-   running tests.
+ - (Packaging) Makefile.PL doesn't reflect proper requirements from running
+   tests.
  - (Update) Integrate official RDFa test suite into module tests.
  - (Update) Provide more inclusive XML DTD catalogue.
 
@@ -111,7 +128,8 @@ Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
  - (Regression) Broke auto_config.
 
 1.09_01 [2010-04-19] # RDFa 1.1 Preview 2
- - (Bugfix) Fix packaging problem (profile modules were not in MANIFEST).
+ - (Packaging) Fix packaging problem (profile modules were not in
+   MANIFEST).
 
 1.09_00 [2010-04-19] # RDFa 1.1 Preview
  - Refactor a lot of code, especially CURIE processing.
@@ -134,20 +152,20 @@ Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
 
 1.00_02 [2010-02-05] # 1.00 Preview''
  - Arrange methods in a more sensible order for documentation.
- - Document Atom support better.
- - Document HTML support better.
- - Document RDF/XML support better.
- - Document SVG support better.
+ - (Documentation) Document Atom support better.
+ - (Documentation) Document HTML support better.
+ - (Documentation) Document RDF/XML support better.
+ - (Documentation) Document SVG support better.
 
 1.00_01 [2010-02-04] # 1.00 Preview'
- - Fix double use of &consume in POD SYNOPSIS.
+ - (Documentation) Fix double use of &consume in POD SYNOPSIS.
  - (Update) POD NAME section short description to match description in CPAN
    registered modules list.
 
 1.00_00 [2010-01-29] # 1.00 Preview
- - Correct name of XML::Atom::OWL module in POD.
- - Document auto-config in non-XHTML XML.
- - Improve named graph documentation.
+ - (Documentation) Correct name of XML::Atom::OWL module in POD.
+ - (Documentation) Document auto-config in non-XHTML XML.
+ - (Documentation) Improve named graph documentation.
  - (Removal) &named_graphs no longer supported as a way to enable named
    graph support.
  - (Removal) &set_callbacks no longer supports old argument syntax.
@@ -205,10 +223,10 @@ Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
    across multiple elements.
 
 0.10 [2009-01-19]
- - (Addition) Improve documentation and include it inline in the module
-   code.
  - (Addition) Support for KjetilK's named graph idea.
  - (Bugfix) Fix broken support for XML literals.
+ - (Documentation) Improve documentation and include it inline in the
+   module code.
  - (Update) More test cases, including XML Literals and named graphs.
 
 0.04 [2009-01-14]
