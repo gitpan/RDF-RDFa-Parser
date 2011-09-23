@@ -4,7 +4,7 @@ use base qw(RDF::RDFa::Parser::Profile::AbstractLinkTypes);
 use common::sense;
 use 5.008;
 
-our $VERSION = '1.094';
+our $VERSION = '1.095';
 
 sub DATA
 {
@@ -46,7 +46,7 @@ RDF::RDFa::Parser::Profile::HTML5LinkTypes - HTML5 Link Types
 
 =head1 DESCRIPTION
 
-Hard-coded profile for HTML5 Link Types.
+HTML5 Link Types.
 
 =head1 SEE ALSO
 

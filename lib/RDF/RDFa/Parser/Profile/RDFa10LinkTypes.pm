@@ -4,12 +4,12 @@ use base qw(RDF::RDFa::Parser::Profile::AbstractLinkTypes);
 use common::sense;
 use 5.008;
 
-our $VERSION = '1.094';
+our $VERSION = '1.095';
 
 sub DATA
 {
 	return split /\r?\n/, <<'DATA';
-tag:buzzword.org.uk,2010:rdfa:profile:rdfa10	# profile URI
+http://www.w3.org/1999/xhtml/vocab	# profile URI
 http://www.w3.org/1999/xhtml/vocab#	# URI prefix 
 alternate
 appendix
@@ -43,14 +43,13 @@ DATA
 
 =head1 NAME
 
-RDF::RDFa::Parser::Profile::RDFa10LinkTypes - RDFa 1.0 Link Types
+RDF::RDFa::Parser::Profile::RDFa10LinkTypes - XHTML+RDFa 1.0 Default Profile
 
 =head1 DESCRIPTION
 
-Hard-coded profile for RDFa 1.0 Link Types.
+Default profile for XHTML+RDFa 1.0.
 
-This differs from the http://www.w3.org/1999/xhtml/vocab profile slightly
-in that it only sets tokens for @rel and @rev.
+URI: http://www.w3.org/1999/xhtml/vocab
 
 =head1 SEE ALSO
 

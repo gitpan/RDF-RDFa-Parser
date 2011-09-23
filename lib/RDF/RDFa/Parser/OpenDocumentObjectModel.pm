@@ -1,6 +1,6 @@
 package RDF::RDFa::Parser::OpenDocumentObjectModel;
 
-our $VERSION = '1.094';
+our $VERSION = '1.095';
 our @Types = qw(
 	application/vnd.oasis.opendocument.chart
 	application/vnd.oasis.opendocument.database
@@ -154,3 +154,46 @@ sub parse_file
 }
 
 1;
+
+=head1 NAME
+
+RDF::RDFa::Parser::OpenDocumentObjectModel - DOM representation of an OpenDocument Format 1.2 file
+
+=head1 DESCRIPTION
+
+You should hopefully not need to use this module to be able to use RDF::RDFa::Parser. It's
+used internally by the parser to deal with OpenDocument Format input.
+
+This class provides a C<new> constructor and C<parse_file>, C<parse_fh> and C<parse_string>
+methods offering rought compatibility with the parsing interface described in L<XML::LibXML::Parser>.
+
+It represents an OpenDocument Format 1.2 file (internally a ZIP file containing various XML,
+RDF/XML and other files) into a single L<XML::LibXML::Document> with a root element
+C<od:Document>. The root element has several child elements with tag names C<od:Data>
+and C<od:Meta> which each contain a single child corresponding to the root element of
+(respectively) an XML or RDF/XML file found inside the ZIP. (C<od:Data> and C<od:Meta> elements
+each have a C<file> attribute indicating which file.) This representation is necessarily
+different to the "Flat XML" format offered by OpenOffice - trust me.
+
+The "od" namespace URI is L<http://purl.org/NET/cpan-uri/dist/RDF-RDFa-Parser/opendocument-dom-wrapper>.
+
+=head1 SEE ALSO
+
+L<RDF::RDFa::Parser>.
+
+L<XML::LibXML::Parser>,
+L<HTML::HTML5::Parser>.
+
+=head1 AUTHOR
+
+Toby Inkster E<lt>tobyink@cpan.orgE<gt>.
+
+=head1 COPYRIGHT
+
+Copyright 2008-2011 Toby Inkster
+
+This library is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut
+

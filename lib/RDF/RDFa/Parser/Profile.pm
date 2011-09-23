@@ -12,12 +12,12 @@ use Scalar::Util qw'blessed';
 
 our %Known;
 our @ExtraPlugins;
-our $VERSION = '1.094';
+our $VERSION = '1.095';
 
 sub new
 {
 	my ($class, $uri, $parser) = @_;
-
+	
 	# Return cached result.
 	return $Known{$uri}
 		if blessed($Known{$uri}) && $Known{$uri}->isa(__PACKAGE__);
@@ -29,6 +29,7 @@ sub new
 	# Try exotic profile modules first.
 	foreach my $m ((@ExtraPlugins, $class->plugins))
 	{
+#		next unless $m->VERSION >= $class->VERSION;
 		next if $m =~ /::Abstract/;
 		my $p = $m->new($uri, $parser);
 		if ($p)

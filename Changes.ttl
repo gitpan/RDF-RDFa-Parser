@@ -120,7 +120,7 @@ my:v_0-20
 			[ rdfs:label "Add optional support for embedded RDF/XML."@en ; a dcs:Addition ] ,
 			[ rdfs:label "Add optional support for XFN 1.1 keywords."@en ; a dcs:Addition ] ,
 			[ rdfs:label "Diallow Safe CURIEs in @src/@href."@en ; a dcs:Removal ] ,
-			[ rdfs:label "Module SVN repository now at <http://goddamn.co.uk/viewvc/perlmods/>"@en ; a dcs:Update ; rdfs:seeAlso <http://goddamn.co.uk/viewvc/perlmods/> ]
+			[ rdfs:label "Module SVN repository now at <http://goddamn.co.uk/svn-web/perlmods/browse/>"@en ; a dcs:Update ; rdfs:seeAlso <http://goddamn.co.uk/viewvc/perlmods/> ]
 		] .
 
 my:v_0-21
@@ -505,7 +505,7 @@ my:v_1-094
 	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.094.tar.gz> ;
 	rdfs:label      "RDFa 1.1 Release Candidate 4"@en ;
 	dcs:changeset [
-		dcs:versus my:v_1-094 ;
+		dcs:versus my:v_1-093 ;
 		dcs:item
 			[ rdfs:label "Improve SYNOPSIS section."@en ; a dcs:Documentation ] ,
 			[ rdfs:label "Copyright 2011."@en ; a dcs:Update, dcs:Documentation ] ,
@@ -518,6 +518,24 @@ my:v_1-094
 			[ rdfs:label "The opengraph method now returns the first value in the list when called in scalar context. (Previously returned an arrayref.)"@en ]
 		] .
 
+my:v_1-095
+
+	a               :Version ;
+	dc:issued       "2011-09-23"^^xsd:date ;
+	:revision       "1.095"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.095.tar.gz> ;
+	rdfs:label      "RDFa 1.1 Release Candidate 5"@en ;
+	dcs:changeset [
+		dcs:versus my:v_1-094 ;
+		dcs:item
+			[ rdfs:label "RDF::RDFa::Parser no longer does any HTTP caching. Caching should be handled at the application level."@en ; a dcs:Removal ] ,
+			[ rdfs:label "Change 'profiles' option to 'profile_attr', and disable it for RDFa 1.1 to match forthcoming WD."@en ; a dcs:Change , dcs:Update ] ,
+			[ rdfs:label "RDF::RDFa::Parser::Profile::RDFa11 for the default RDFa 1.1 profile."@en ; a dcs:Addition , dcs:Update ] ,
+			[ rdfs:label "Add 'src_sets_object' option, and enable it for RDFa 1.1."@en ; a dcs:Addition , dcs:Update ] ,
+			[ rdfs:label "Add 'inlist_attr' option, and enable it for RDFa 1.1. This enables support for RDF Collections."@en ; a dcs:Addition , dcs:Update ] ,
+			[ rdfs:label "Add 'vocab_triple' option, and enable it for RDFa 1.1."@en ; a dcs:Addition , dcs:Update ]
+		] .
+
 #############################################################
 
 my:project
@@ -526,10 +544,10 @@ my:project
 	:name           "RDF-RDFa-Parser" ;
 	:shortdesc      "flexible RDFa parser"@en ;
 	:programming-language  "Perl" ;
-	:homepage       <http://search.cpan.org/dist/RDF-RDFa-Parser/> ;
-	:download-page  <http://search.cpan.org/dist/RDF-RDFa-Parser/> ;
+	:homepage       <https://metacpan.org/release/RDF-RDFa-Parser> ;
+	:download-page  <https://metacpan.org/release/RDF-RDFa-Parser> ;
 	:bug-database   <http://rt.cpan.org/Dist/Display.html?Queue=RDF-RDFa-Parser> ;
-	:repository     [ a :SVNRepository ; :browse <http://goddamn.co.uk/viewvc/perlmods/RDF-RDFa-Parser/> ] ;
+	:repository     [ a :SVNRepository ; :browse <http://goddamn.co.uk/svn-web/perlmods/browse/RDF-RDFa-Parser/> ] ;
 	:maintainer     toby:i ;
 	:developer      toby:i ;
 	:documenter     toby:i ;
@@ -547,7 +565,7 @@ my:project
                    my:v_1-09_06 , my:v_1-09_07 ,  my:v_1-09_08 ,
                    my:v_1-09_09 , my:v_1-09_10 ,  my:v_1-09_11 ,
                    my:v_1-091   , my:v_1-092 ,    my:v_1-093 ,
-                   my:v_1-094 .
+                   my:v_1-094   , my:v_1-095 .
 
 #############################################################
 
@@ -556,7 +574,7 @@ toby:i
 	a               foaf:Person ;
 	foaf:name       "Toby Inkster" ;
 	foaf:homepage   <http://tobyinkster.co.uk/> ;
-	foaf:page       <http://search.cpan.org/~tobyink/> ;
+	foaf:page       <https://metacpan.org/author/TOBYINK> ;
 	foaf:mbox       <mailto:tobyink@cpan.org> ;
 	<http://www.w3.org/2002/07/owl#sameAs> <http://purl.org/NET/cpan-uri/person/tobyink> .
 

@@ -38,7 +38,6 @@ use File::Spec;
 use File::ShareDir qw(dist_file);
 use HTML::HTML5::Parser;
 use HTML::HTML5::Sanity qw(fix_document);
-use HTTP::Cache::Transparent;
 use LWP::UserAgent;
 use RDF::RDFa::Parser::Config;
 use RDF::RDFa::Parser::OpenDocumentObjectModel;
@@ -50,19 +49,6 @@ use URI::Escape;
 use URI::URL;
 use XML::LibXML qw(:all);
 use XML::RegExp;
-
-BEGIN
-{
-	my $cache_dir = File::Spec->catdir(
-		File::Spec->tmpdir,
-		'RDF-RDFa-Parser',
-		'HTTP-Cache-Transparent',
-		);
-	HTTP::Cache::Transparent::init({
-		BasePath => $cache_dir,
-		NoUpdate => 15*60,  # 15 minutes - don't hammer servers
-		});
-}
 
 use constant {
 	ERR_WARNING  => 'w',
@@ -89,17 +75,14 @@ use constant {
 use constant {
 	RDF_XMLLIT   => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral',
 	RDF_TYPE     => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type',
+	RDF_FIRST    => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first',
+	RDF_REST     => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest',
+	RDF_NIL      => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil',
 	};
 use common::sense;
 use 5.008;
 
-=head1 VERSION
-
-1.093
-
-=cut
-
-our $VERSION = '1.094';
+our $VERSION = '1.095';
 our $HAS_AWOL;
 
 BEGIN
@@ -604,19 +587,30 @@ sub consume
 	return if $self->{'consumed'};
 	$self->{'consumed'}++;
 		
-	if ($self->{'options'}->{'graph'})
+	if ($self->{options}{graph})
 	{
-		$self->{'options'}->{'graph_attr'} = 'graph'
-			unless defined $self->{'options'}->{'graph_attr'};
-		$self->{'options'}->{'graph_type'} = 'about'
-			unless defined $self->{'options'}->{'graph_type'};
-		$self->{'options'}->{'graph_default'} = $self->bnode
-			unless defined $self->{'options'}->{'graph_default'};		
+		$self->{options}{graph_attr} = 'graph'
+			unless defined $self->{options}{graph_attr};
+		$self->{options}{graph_type} = 'about'
+			unless defined $self->{options}{graph_type};
+		$self->{options}{graph_default} = $self->bnode
+			unless defined $self->{options}{graph_default};		
 	}
-	
+
+	local *XML::LibXML::Element::getAttributeNsSafe = sub
+	{
+		my ($element, $nsuri, $attribute) = @_;
+		return defined $nsuri ? $element->getAttributeNS($nsuri, $attribute) : $element->getAttribute($attribute);
+	};
+	local *XML::LibXML::Element::hasAttributeNsSafe = sub
+	{
+		my ($element, $nsuri, $attribute) = @_;
+		return defined $nsuri ? $element->hasAttributeNS($nsuri, $attribute) : $element->hasAttribute($attribute);
+	};
+
 	$self->_consume_element($self->dom->documentElement, init=>1);
 	
-	if ($self->{'options'}->{'atom_parser'} && $HAS_AWOL)
+	if ($self->{options}{atom_parser} && $HAS_AWOL)
 	{
 		my $awol = XML::Atom::OWL->new( $self->dom , $self->uri , undef, $self->{'model'} );
 		$awol->{'bnode_generator'} = $self;
@@ -638,14 +632,15 @@ sub _consume_element
 	# depth-first, although the [evaluation context] used for each set of rules
 	# will be based on previous rules that may have been applied.
 	my $current_element = shift;
-	
+
 	# shouldn't happen, but return 0 if it does.
 	return 0 unless $current_element->nodeType == XML_ELEMENT_NODE;
 	
 	# The evaluation context.
 	my %args = @_;
 	my ($base, $parent_subject, $parent_subject_elem, $parent_object, $parent_object_elem, 
-		$uri_mappings, $term_mappings, $incomplete_triples, $language, $graph, $graph_elem, $xml_base);
+		$list_mappings, $uri_mappings, $term_mappings, $incomplete_triples, $language,
+		$graph, $graph_elem, $xml_base);
 		
 	if ($args{'init'})
 	{
@@ -657,20 +652,21 @@ sub _consume_element
 		$parent_object_elem  = undef;
 		$uri_mappings        = {};
 		$term_mappings       = {};
-		$incomplete_triples  = ();
+		$incomplete_triples  = [];
+		$list_mappings       = {};
 		$language            = undef;
-		$graph               = $self->{'options'}->{'graph'} ? $self->{'options'}->{'graph_default'} : undef;
+		$graph               = $self->{options}{graph} ? $self->{options}{graph_default} : undef;
 		$graph_elem          = undef;
 		$xml_base            = undef;
 		
-		if ($self->{'options'}->{'vocab_default'})
+		if ($self->{options}{vocab_default})
 		{
-			$uri_mappings->{'(VOCAB)'} = $self->{'options'}->{'vocab_default'};
+			$uri_mappings->{'(VOCAB)'} = $self->{options}{vocab_default};
 		}
 		
-		if ($self->{'options'}->{'prefix_default'})
+		if ($self->{options}{prefix_default})
 		{
-			$uri_mappings->{'(DEFAULT PREFIX)'} = $self->{'options'}->{'prefix_default'};
+			$uri_mappings->{'(DEFAULT PREFIX)'} = $self->{options}{prefix_default};
 		}
 	}
 	else
@@ -683,6 +679,7 @@ sub _consume_element
 		$uri_mappings        = dclone($args{'uri_mappings'});
 		$term_mappings       = dclone($args{'term_mappings'});
 		$incomplete_triples  = $args{'incomplete_triples'};
+		$list_mappings       = $args{'list_mappings'}; #{%{$args{'list_mappings'}}}; # shallow clone
 		$language            = $args{'language'};
 		$graph               = $args{'graph'};
 		$graph_elem          = $args{'graph_elem'};
@@ -690,7 +687,7 @@ sub _consume_element
 	}	
 
 	# Used by OpenDocument, otherwise usually undef.
-	my $rdfans = $self->{'options'}->{'ns'} || undef;
+	my $rdfans = $self->{options}{ns} || undef;
 
 	# First, the local values are initialized
 	my $recurse                      = 1;
@@ -713,7 +710,7 @@ sub _consume_element
 	# if present, [current language] is set accordingly.
 	# Language information can be provided using the general-purpose XML
 	# attribute @xml:lang .
-	if ($self->{'options'}->{'xhtml_lang'}
+	if ($self->{options}{xhtml_lang}
 	&& $current_element->hasAttribute('lang'))
 	{
 		if ($self->_valid_lang( $current_element->getAttribute('lang') ))
@@ -731,7 +728,7 @@ sub _consume_element
 				) if $@;
 		}
 	}
-	if ($self->{'options'}->{'xml_lang'}
+	if ($self->{options}{xml_lang}
 	&& $current_element->hasAttributeNsSafe(XML_XML_NS, 'lang'))
 	{
 		if ($self->_valid_lang( $current_element->getAttributeNsSafe(XML_XML_NS, 'lang') ))
@@ -759,21 +756,21 @@ sub _consume_element
 		$xml_base = $self->uri($xml_base);
 	}
 	my $hrefsrc_base = $base;
-	if ($self->{'options'}->{'xml_base'}==2 && defined $xml_base)
+	if ($self->{options}{xml_base}==2 && defined $xml_base)
 	{
 		$hrefsrc_base = $xml_base;
 	}
 
 	# EXTENSION
 	# Parses embedded RDF/XML - mostly useful for non-XHTML documents, e.g. SVG.
-	if ($self->{'options'}->{'embedded_rdfxml'}
+	if ($self->{options}{embedded_rdfxml}
 	&& $current_element->localname eq 'RDF'
 	&& $current_element->namespaceURI eq 'http://www.w3.org/1999/02/22-rdf-syntax-ns#')
 	{
-		return 1 if $self->{'options'}->{'embedded_rdfxml'}==2;
+		return 1 if $self->{options}{embedded_rdfxml}==2;
 
 		my $g = $graph;
-		unless ($self->{'options'}->{'embedded_rdfxml'} == 3)
+		unless ($self->{options}{embedded_rdfxml} == 3)
 		{
 			$g = $self->bnode;
 		}
@@ -787,7 +784,7 @@ sub _consume_element
 		
 		my $rdfxml_base = $self->{'origbase'};
 		$rdfxml_base = $base
-			if $self->{'options'}->{'xhtml_base'}==2;
+			if $self->{options}{xhtml_base}==2;
 		$rdfxml_base = $xml_base
 			if defined $xml_base;
 		
@@ -820,7 +817,7 @@ sub _consume_element
 						);
 						$self->_insert_triple_literal({current=>$current_element},
 							$s, $p, @o,
-							($self->{'options'}->{'graph'} ? $g : undef));
+							($self->{options}{graph} ? $g : undef));
 					}
 					else
 					{
@@ -829,7 +826,7 @@ sub _consume_element
 							$st->object->uri_value;
 						$self->_insert_triple_resource({current=>$current_element},
 							$s, $p, @o,
-							($self->{'options'}->{'graph'} ? $g : undef));
+							($self->{options}{graph} ? $g : undef));
 					}				
 				});
 		};
@@ -860,10 +857,10 @@ sub _consume_element
 	my @profiles;
 
 	# RDFa 1.1 - @profile
-	if ($self->{'options'}->{'profiles'}
+	if ($self->{options}{profile_attr}
 	and $current_element->hasAttributeNsSafe($rdfans, 'profile'))
 	{
-		push @profiles, $self->_split_tokens( $current_element->getAttributeNsSafe($rdfans, 'profile') );		
+		push @profiles, $self->_split_tokens( $current_element->getAttributeNsSafe($rdfans, 'profile') );
 	}
 	elsif ($current_element->hasAttributeNsSafe($rdfans, 'profile')
 	and    $current_element->getAttributeNsSafe($rdfans, 'profile') ne 'http://www.w3.org/1999/xhtml/vocab')
@@ -893,7 +890,7 @@ sub _consume_element
 		}		
 		if ($self->{options}{default_profiles})
 		{
-			push @profiles, $self->_split_tokens( $self->{'options'}->{'default_profiles'} );
+			push @profiles, $self->_split_tokens( $self->{options}{default_profiles} );
 		}
 	}
 
@@ -928,7 +925,7 @@ sub _consume_element
 		my $profile = RDF::RDFa::Parser::Profile->new(
 			$self->uri($uri, {'element'=>$current_element,'xml_base'=>$xml_base}),
 			$self);
-			
+		
 		if (blessed($profile) && $profile->isa('RDF::RDFa::Parser::Profile'))
 		{
 			foreach my $mapping ($profile->get_prefixes)
@@ -1080,12 +1077,19 @@ sub _consume_element
 	}
 	
 	# RDFa 1.1 - @vocab support
-	if ($self->{'options'}->{'vocab_attr'}
+	if ($self->{options}{vocab_attr}
 	&& $current_element->hasAttributeNsSafe($rdfans, 'vocab'))
 	{
-		$local_uri_mappings->{'(VOCAB)'} = $self->uri(
-			$current_element->getAttributeNsSafe($rdfans, 'vocab'),
-			{'element'=>$current_element,'xml_base'=>$xml_base});
+		if ($current_element->getAttributeNsSafe($rdfans, 'vocab') eq '')
+		{
+			$local_uri_mappings->{'(VOCAB)'} = $self->{options}{vocab_default};
+		}
+		else
+		{
+			$local_uri_mappings->{'(VOCAB)'} = $self->uri(
+				$current_element->getAttributeNsSafe($rdfans, 'vocab'),
+				{'element'=>$current_element,'xml_base'=>$xml_base});
+		}
 	}
 	elsif ($current_element->hasAttributeNsSafe($rdfans, 'vocab'))
 	{
@@ -1132,6 +1136,24 @@ sub _consume_element
 		}
 	}
 
+	if ($self->{options}{vocab_triple}
+	and $self->{options}{vocab_attr}
+	and $current_element->hasAttributeNsSafe($rdfans, 'vocab')
+	and defined $local_uri_mappings->{'(VOCAB)'})
+	{
+		$self->_insert_triple_resource({
+			current   => $current_element,
+			subject   => $current_element->ownerDocument->documentElement,
+			predicate => $current_element,
+			object    => $current_element,
+			graph     => $graph_elem,
+			},
+			$base,
+			'http://www.w3.org/ns/rdfa#hasVocabulary',
+			$local_uri_mappings->{'(VOCAB)'},
+			$graph);
+	}
+		
 	# EXTENSION: @role
 	if ($self->{'options'}->{'role_attr'}
 	&&  $current_element->hasAttributeNsSafe($rdfans, 'role'))
@@ -1213,7 +1235,7 @@ sub _consume_element
 	my @rev = $self->_split_tokens( $current_element->getAttributeNsSafe($rdfans, 'rev') );
 
 	# EXTENSION: rel="alternate stylesheet"
-	if ($self->{'options'}->{'alt_stylesheet'}
+	if ($self->{options}{alt_stylesheet}
 	&&  (grep /^alternate$/i, @rel)
 	&&  (grep /^stylesheet$/i, @rel))
 	{
@@ -1271,7 +1293,8 @@ sub _consume_element
 			
 		# otherwise, by using the URI from @src, if present, obtained
 		# according to the section on CURIE and URI Processing.
-		if ($current_element->hasAttributeNsSafe($rdfans, 'src') && !defined $new_subject)
+		if ($current_element->hasAttributeNsSafe($rdfans, 'src') 
+		and !defined $new_subject)
 		{
 			$new_subject = $self->uri(
 				$current_element->getAttributeNsSafe($rdfans, 'src'),
@@ -1282,7 +1305,8 @@ sub _consume_element
 			
 		# otherwise , by using the URI from @resource, if present, obtained
 		# according to the section on CURIE and URI Processing ; 
-		if ($current_element->hasAttributeNsSafe($rdfans, 'resource') && !defined $new_subject)
+		if ($current_element->hasAttributeNsSafe($rdfans, 'resource')
+		and !defined $new_subject)
 		{
 			$new_subject = $self->_expand_curie(
 				$current_element->getAttributeNsSafe($rdfans, 'resource'), 
@@ -1297,7 +1321,8 @@ sub _consume_element
 			
 		# otherwise , by using the URI from @href, if present, obtained
 		# according to the section on CURIE and URI Processing.
-		if ($current_element->hasAttributeNsSafe($rdfans, 'href') && !defined $new_subject)
+		if ($current_element->hasAttributeNsSafe($rdfans, 'href')
+		and !defined $new_subject)
 		{
 			$new_subject = $self->uri(
 				$current_element->getAttributeNsSafe($rdfans, 'href'),
@@ -1390,7 +1415,9 @@ sub _consume_element
 			
 		# otherwise, by using the URI from @src, if present, obtained
 		# according to the section on CURIE and URI Processing.
-		if ($current_element->hasAttributeNsSafe($rdfans, 'src') && !defined $new_subject)
+		if ($current_element->hasAttributeNsSafe($rdfans, 'src')
+		and !defined $new_subject
+		and !$self->{options}{src_sets_object})  # RDFa 1.0/1.1 diff
 		{
 			$new_subject = $self->uri(
 				$current_element->getAttributeNsSafe($rdfans, 'src'),
@@ -1473,10 +1500,23 @@ sub _consume_element
 			
 		# otherwise, by using the URI from @href, if present, obtained according
 		# to the section on CURIE and URI Processing.
-		if ($current_element->hasAttributeNsSafe($rdfans, 'href') && !defined $current_object_resource)
+		if ($current_element->hasAttributeNsSafe($rdfans, 'href')
+		and !defined $current_object_resource)
 		{
 			$current_object_resource = $self->uri(
 				$current_element->getAttributeNsSafe($rdfans, 'href'),
+				{'element'=>$current_element,'xml_base'=>$hrefsrc_base}
+				);
+			$current_object_resource_elem = $current_element;
+		}
+		
+		# RDFa 1.1 uses @src like @href.
+		if ($current_element->hasAttributeNsSafe($rdfans, 'src')
+		and !defined $current_object_resource
+		and $self->{options}{src_sets_object})
+		{
+			$current_object_resource = $self->uri(
+				$current_element->getAttributeNsSafe($rdfans, 'src'),
 				{'element'=>$current_element,'xml_base'=>$hrefsrc_base}
 				);
 			$current_object_resource_elem = $current_element;
@@ -1587,10 +1627,39 @@ sub _consume_element
 		}
 	}	
 
+	# If in any of the previous steps a new subject was set to a non-null value
+	# different from the parent object; The list mapping taken from the
+	# evaluation context is set to a new, empty mapping.
+	if (defined $new_subject
+	and $new_subject ne $parent_object)
+	{
+		$list_mappings = {};
+	}
+
 	# If in any of the previous steps a [current object resource] was set to
-	# a non-null value, it is now used to generate triples
+	# a non-null value, it is now used to generate triples and add entries to
+	# the local list mapping
 	if ($current_object_resource)
 	{
+		# If the element contains both the inlist and the rel attributes: the
+		# rel may contain one or more IRIs, obtained according to the section
+		# on CURIE and IRI Processing each of which is used to add an entry to
+		# the list mapping as follows:
+		if ($current_element->hasAttributeNsSafe($rdfans, 'inlist')
+		and $current_element->hasAttributeNsSafe($rdfans, 'rel'))
+		{
+			foreach my $r (@REL)
+			{
+				# if the local list mapping does not contain a list associated with
+				# the IRI, instantiate a new list and add to local list mappings
+				$list_mappings->{$r} = [] unless defined $list_mappings->{$r};
+				
+				# add the current object resource to the list associated with the IRI
+				# in the local list mapping
+				push @{ $list_mappings->{$r} }, [resource => $current_object_resource];
+			}
+		}
+		
 		# Predicates for the [ current object resource ] can be set b
 		# using one or both of the @rel and @rev attributes:
 		#
@@ -1664,13 +1733,18 @@ sub _consume_element
 		
 		push @$local_incomplete_triples,
 			map {
-				{
+				$current_element->hasAttributeNsSafe($rdfans, 'inlist')
+				?{
+					list              => do { $list_mappings->{$_} = [] unless defined $list_mappings->{$_}; $list_mappings->{$_}; },
+					direction         => 'none',
+				}
+				:{
 					predicate         => $_,
 					direction         => 'forward',
 					graph             => $graph,
  					predicate_element => $current_element,
 					graph_element     => $graph_elem,
-				};
+				}
 			} @REL;
 		
 		#    * If present, @rev must contain one or more URIs, obtained
@@ -1857,8 +1931,16 @@ sub _consume_element
 			);
 		next unless defined $p;
 		
-		$self->_insert_triple_literal($E, $new_subject, $p, @current_object_literal, $graph);
-		$activity++;
+		if ($current_element->hasAttributeNsSafe($rdfans, 'inlist'))
+		{
+			$list_mappings->{$p} = [] unless defined $list_mappings->{$p};
+			push @{ $list_mappings->{$p} }, [literal => @current_object_literal];
+		}
+		else
+		{
+			$self->_insert_triple_literal($E, $new_subject, $p, @current_object_literal, $graph);
+			$activity++;
+		}
 		
 		# Once the triple has been created, if the [datatype] of the
 		# [current object literal] is rdf:XMLLiteral, then the [recurse]
@@ -1890,6 +1972,7 @@ sub _consume_element
 					uri_mappings        => $uri_mappings,
 					term_mappings       => $term_mappings,
 					incomplete_triples  => $incomplete_triples,
+					list_mappings       => $list_mappings,
 					language            => $current_language,
 					graph               => $graph,
 					graph_elem          => $graph_elem,
@@ -1909,6 +1992,7 @@ sub _consume_element
 					uri_mappings        => $local_uri_mappings,
 					term_mappings       => $local_term_mappings,
 					incomplete_triples  => $local_incomplete_triples,
+					list_mappings       => $list_mappings,
 					language            => $current_language,
 					graph               => $graph,
 					graph_elem          => $graph_elem,
@@ -1917,7 +2001,67 @@ sub _consume_element
 			}
 		}	
 	}
-	
+
+	# Once all the child elements have been traversed, list triples are
+	# generated, if necessary.
+	foreach my $iri (keys %$list_mappings)
+	{
+		# For each IRI in the local list mapping, if the equivalent list does
+		# not exist in the evaluation context, indicating that the list was
+		# originally defined on the current element, use the list as follows:
+		next if defined $args{list_mappings}->{$iri};
+		
+		# Create a new 'bnode' array containing newly created bnodes, one for
+		# each element in the list
+		my @bnode = map { $self->bnode; } @{ $list_mappings->{$iri} };		
+		my $first = @bnode ? $bnode[0] : undef;
+		
+		while (my $bnode = shift @bnode)
+		{
+			my $value = shift @{ $list_mappings->{$iri} };
+			my $type  = shift @$value;
+			
+			my $E = { # provenance tracking
+				current   => $current_element,
+				graph     => $graph_elem,
+				};
+			if ($type eq 'literal')
+			{
+				$self->_insert_triple_literal($E, $bnode, RDF_FIRST, @$value, $graph);
+			}
+			else
+			{
+				$self->_insert_triple_resource($E, $bnode, RDF_FIRST, @$value, $graph);
+			}
+
+			if (exists $bnode[0])
+			{
+				$self->_insert_triple_resource($E, $bnode, RDF_REST, $bnode[0], $graph);
+			}
+			else
+			{
+				$self->_insert_triple_resource($E, $bnode, RDF_REST, RDF_NIL, $graph);
+			}
+		}
+		
+		my $E = { # provenance tracking
+			current   => $current_element,
+			subject   => $new_subject_elem,
+			predicate => $current_element,
+			graph     => $graph_elem,
+			};
+		if ($first)
+		{
+			$self->_insert_triple_resource($E, $new_subject, $iri, $first, $graph);
+		}
+		else
+		{
+			# This step isn't mentioned in RDFa Core. Need to check with WG. Poss spec error.
+			$self->_insert_triple_resource($E, $new_subject, $iri, RDF_NIL, $graph);
+		}
+		$activity++;
+	}
+
 #	# If the [skip element] flag is 'false', and either: the previous step
 #	# resulted in a 'true' flag, or [new subject] was set to a non-null and
 #	# non-bnode value, then any [incomplete triple]s within the current context
@@ -1934,7 +2078,11 @@ sub _consume_element
 			my $predicate    = $it->{predicate};
 			my $parent_graph = $it->{graph};
 
-			if ($direction eq 'forward')
+			if ($direction eq 'none' and defined $it->{list})
+			{
+				push @{$it->{list}}, [resource => $new_subject];
+			}
+			elsif ($direction eq 'forward')
 			{
 				my $E = { # provenance tracking
 					current   => $current_element,
@@ -1947,7 +2095,7 @@ sub _consume_element
 				$self->_insert_triple_resource($E, $parent_subject, $predicate, $new_subject, $parent_graph);
 				$activity++;
 			}
-			else
+			elsif ($direction eq 'reverse')
 			{
 				my $E = { # provenance tracking
 					current   => $current_element,
@@ -1959,6 +2107,10 @@ sub _consume_element
 				
 				$self->_insert_triple_resource($E, $new_subject, $predicate, $parent_subject, $parent_graph);
 				$activity++;
+			}
+			else
+			{
+				die "Direction is '$direction'??";
 			}
 		}
 	}
@@ -2760,20 +2912,6 @@ sub OPTS_XML
 		@_);
 }
 
-1;
-
-# naughty hack
-package XML::LibXML::Element;
-sub getAttributeNsSafe
-{
-	my ($element, $nsuri, $attribute) = @_;
-	return defined $nsuri ? $element->getAttributeNS($nsuri, $attribute) : $element->getAttribute($attribute);
-}
-sub hasAttributeNsSafe
-{
-	my ($element, $nsuri, $attribute) = @_;
-	return defined $nsuri ? $element->hasAttributeNS($nsuri, $attribute) : $element->hasAttribute($attribute);
-}
 1;
 
 =back

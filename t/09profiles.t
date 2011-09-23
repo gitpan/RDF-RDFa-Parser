@@ -63,7 +63,7 @@ my $testdoc = <<'TESTDOC';
 </html>
 TESTDOC
 
-my $opts = RDF::RDFa::Parser::Config->new('xhtml','1.1');
+my $opts = RDF::RDFa::Parser::Config->new('xhtml','1.1', profile_attr=>1);
 my $p    = RDF::RDFa::Parser->new($testdoc, "http://example.net/document.xhtml", $opts);
 
 #my $profile = RDF::RDFa::Parser::Profile::JustTesting->new("http://example.com/profile", $p);

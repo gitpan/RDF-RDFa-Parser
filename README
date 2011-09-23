@@ -28,9 +28,6 @@ SYNOPSIS
      print $rdfa->opengraph('title') . "\n";
      print $rdfa->opengraph('image') . "\n";
 
-VERSION
-    1.093
-
 DESCRIPTION
   Constructors
     "$p = RDF::RDFa::Parser->new($markup, $base, [$config], [$storage])"

@@ -8,7 +8,7 @@ use base qw(RDF::RDFa::Parser::Profile);
 use common::sense;
 use 5.008;
 
-our $VERSION = '1.094';
+our $VERSION = '1.095';
 
 sub new
 {
@@ -229,11 +229,11 @@ __END__
 
 =head1 NAME
 
-RDF::RDFa::Parser::Profile::RDF - profiles written in RDF
+RDF::RDFa::Parser::Profile::RDF - custom profiles written in RDF
 
 =head1 DESCRIPTION
 
-This is the recommended format for profiles in RDFa 1.1.
+This was the recommended format for profiles in early drafts of RDFa 1.1.
 
 This module provides C<new_from_response> and C<new_from_model>
 constructors which may prove useful for subclassing.

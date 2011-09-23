@@ -1,21 +1,18 @@
 package RDF::RDFa::Parser::Profile::XHTML;
 
-use File::Spec;
-use HTTP::Cache::Transparent;
-
 use base qw(RDF::RDFa::Parser::Profile);
 use common::sense;
 use 5.008;
 
-our $VERSION = '1.094';
+our $VERSION = '1.095';
 
 sub new
 {
 	my ($class, $uri, $parser) = @_;
 	
 	return undef
-		unless $uri eq 'http://www.w3.org/1999/xhtml/vocab'
-		||     $uri =~ m!^http://www\.w3\.org/1999/xhtml/vocab#!;
+		unless $uri eq 'http://www.w3.org/profile/html-rdfa-1.1'
+		||     $uri =~ m!^http://www\.w3\.org/profile/html-rdfa-1\.1#!;
 	
 	my $self = bless [], $class;
 
@@ -23,10 +20,14 @@ sub new
 	while ($_ = shift @DATA)
 	{
 		chomp;
-		my ($term)  = split /\s/;
+		my ($term, $full)  = split /\s/;
 		next unless $term;
-		push @$self, [$term, 'http://www.w3.org/1999/xhtml/vocab#'.$term, 0, '*'];
-		push @$self, [$term, 'http://www.w3.org/1999/xhtml/vocab#'.$term, 1, '*'];
+		
+		$full = 'http://www.w3.org/1999/xhtml/vocab#'.$term unless $full;
+		$full = "http://www.w3.org${full}" if $full =~ m'^/';
+		
+		push @$self, [$term, $full, 0, '*'];
+		push @$self, [$term, $full, 1, '*'];
 	}
 	
 	return $self;
@@ -53,6 +54,7 @@ glossary
 help
 icon
 index
+itsRules
 last
 license
 meta
@@ -65,6 +67,7 @@ stylesheet
 subsection
 start
 top
+transaction	/2003/g/data-view#transformation
 up
 DATA
 }
@@ -73,11 +76,13 @@ DATA
 
 =head1 NAME
 
-RDF::RDFa::Parser::Profile::XHTML - XHTML+RDFa Profile
+RDF::RDFa::Parser::Profile::XHTML - XHTML+RDFa 1.1 Profile
 
 =head1 DESCRIPTION
 
-Hard-coded profile for 	http://www.w3.org/1999/xhtml/vocab
+Default profile for (X)HTML+RDFa 1.1.
+
+URI: http://www.w3.org/profile/html-rdfa-1.1
 
 =head1 SEE ALSO
 

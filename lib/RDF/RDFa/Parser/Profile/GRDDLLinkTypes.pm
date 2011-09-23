@@ -4,7 +4,7 @@ use base qw(RDF::RDFa::Parser::Profile::AbstractLinkTypes);
 use common::sense;
 use 5.008;
 
-our $VERSION = '1.094';
+our $VERSION = '1.095';
 
 sub DATA
 {
@@ -21,11 +21,11 @@ DATA
 
 =head1 NAME
 
-RDF::RDFa::Parser::Profile::GRDDLLInkTypes - GRDDL Link Types
+RDF::RDFa::Parser::Profile::GRDDLLinkTypes - GRDDL Link Types
 
 =head1 DESCRIPTION
 
-Hard-coded profile for http://www.w3.org/2003/g/data-view.
+URI: http://www.w3.org/2003/g/data-view.
 
 =head1 SEE ALSO
 

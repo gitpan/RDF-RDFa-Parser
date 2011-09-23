@@ -4,7 +4,7 @@ use base qw(RDF::RDFa::Parser::Profile::AbstractLinkTypes);
 use common::sense;
 use 5.008;
 
-our $VERSION = '1.094';
+our $VERSION = '1.095';
 
 sub canonical_uri
 {
@@ -43,7 +43,7 @@ RDF::RDFa::Parser::Profile::HTML4LinkTypes - HTML 4.x Link Types
 
 =head1 DESCRIPTION
 
-Hard-coded profile for HTML 4.x Link Types.
+HTML 4.x Link Types.
 
 =head1 SEE ALSO
 

@@ -22,11 +22,11 @@ use constant {
 use common::sense;
 use 5.008;
 
-use URI::Escape qw'uri_unescape';
 use RDF::RDFa::Parser::OpenDocumentObjectModel;
+use URI::Escape qw'uri_unescape';
 
 our @EXPORT_OK = qw(HOST_ATOM HOST_DATARSS HOST_HTML4 HOST_HTML5 HOST_OPENDOCUMENT_XML HOST_OPENDOCUMENT_ZIP HOST_SVG HOST_XHTML HOST_XML RDFA_10 RDFA_11);
-our $VERSION = '1.094';
+our $VERSION = '1.095';
 our $CONFIGS = {
 	'host' => {
 		HOST_ATOM() => {
@@ -107,15 +107,16 @@ our $CONFIGS = {
 			'bookmark_name'         => undef,
 			'bookmark_start'        => undef,
 			'cite_attr'             => 0,
-			'default_profiles'      => 'tag:buzzword.org.uk,2010:rdfa:profile:rdfa10',
+			'default_profiles'      => 'http://www.w3.org/1999/xhtml/vocab',
 			'dom_parser'            => 'xml',
 			'embedded_rdfxml'       => 1,
 			'full_uris'             => 0,
 			'graph'                 => 0,
 			'graph_attr'            => 'graph',
-			'graph_type'            => 'id',
+			'graph_type'            => 'about',
 			'graph_default'         => undef,
 			'graph_default_trine'   => undef,  # not officially exposed
+			'inlist_attr'           => 0,
 			'longdesc_attr'         => 0,
 			'lwp_ua'                => undef,
 			'ns'                    => undef,
@@ -124,16 +125,18 @@ our $CONFIGS = {
 			'prefix_default'        => 'http://www.w3.org/1999/xhtml/vocab#',
 			'prefix_nocase_attr'    => 0,
 			'prefix_nocase_xmlns'   => 0,
-			'profiles'              => 0,
+			'profile_attr'          => 0,
 			'profile_pi'            => 0,
 			'role_attr'             => 0,
 			'safe_anywhere'         => 0,
 			'skolemize'             => 0,
+			'src_sets_object'       => 0,
 			'tdb_service'           => 0,
 			'use_rtnlx'             => 0,
 			'user_agent'            => undef,
 			'vocab_attr'            => 0,
 			'vocab_default'         => undef,
+			'vocab_triple'          => 0,
 			'xhtml_base'            => 0,
 			'xhtml_elements'        => 0,
 			'xhtml_lang'            => 0,
@@ -152,7 +155,7 @@ our $CONFIGS = {
 			'bookmark_name'         => undef,
 			'bookmark_start'        => undef,
 			'cite_attr'             => 0,
-			'default_profiles'      => undef,
+			'default_profiles'      => 'http://www.w3.org/profile/rdfa-1.1',
 			'dom_parser'            => 'xml',
 			'embedded_rdfxml'       => 1,
 			'full_uris'             => 1, #diff
@@ -161,6 +164,7 @@ our $CONFIGS = {
 			'graph_type'            => 'about',
 			'graph_default'         => undef,
 			'graph_default_trine'   => undef,
+			'inlist_attr'           => 1, #diff
 			'longdesc_attr'         => 0,
 			'lwp_ua'                => undef,
 			'ns'                    => undef,
@@ -169,16 +173,18 @@ our $CONFIGS = {
 			'prefix_default'        => 'http://www.w3.org/1999/xhtml/vocab#',
 			'prefix_nocase_attr'    => 1, #diff
 			'prefix_nocase_xmlns'   => 1, #diff
-			'profiles'              => 1, #diff
+			'profile_attr'          => 0,
 			'profile_pi'            => 0,
 			'role_attr'             => 0,
 			'safe_anywhere'         => 1, #diff
+			'src_sets_object'       => 1, #diff
 			'skolemize'             => 0,
 			'tdb_service'           => 0,
 			'use_rtnlx'             => 0,
 			'user_agent'            => undef,
 			'vocab_attr'            => 1, #diff
 			'vocab_default'         => undef,
+			'vocab_triple'          => 1,
 			'xhtml_base'            => 0,
 			'xhtml_elements'        => 0,
 			'xhtml_lang'            => 0,
@@ -191,9 +197,7 @@ our $CONFIGS = {
 	},
 	'combination' => {
 		'xhtml+1.1' => {
-			# XHTML+RDFa 1.1 uses the XHV vocab, which differs slightly
-			# from RDFa 1.0's default vocab.
-			'default_profiles'      => 'http://www.w3.org/1999/xhtml/vocab',
+			'default_profiles'      => 'http://www.w3.org/profile/html-rdfa-1.1',
 			
 			# XHTML+RDFa 1.1 wants to use @lang, though
 			# neither XHTML's host language rules, nor
@@ -201,14 +205,10 @@ our $CONFIGS = {
 			'xhtml_lang'            => 1,
 		},
 		'html4+1.1' => {
-			# HTML+RDFa 1.1 uses the XHV vocab, which differs slightly
-			# from RDFa 1.0's default vocab.
-			'default_profiles'      => 'http://www.w3.org/1999/xhtml/vocab',
+			'default_profiles'      => 'http://www.w3.org/profile/html-rdfa-1.1',
 		},
 		'html5+1.1' => {
-			# HTML+RDFa 1.1 uses the XHV vocab, which differs slightly
-			# from RDFa 1.0's default vocab.
-			'default_profiles'      => 'http://www.w3.org/1999/xhtml/vocab',
+			'default_profiles'      => 'http://www.w3.org/profile/html-rdfa-1.1',
 		},
 	},
 };
@@ -512,9 +512,9 @@ are accepted (e.g. 'text/html' or 'image/svg+xml').
 
 =item * B<< RDF::RDFa::Parser::Config->HOST_HTML5 >>
 
-=item * B<< RDF::RDFa::Parser::Config->HOST_OPENDOCUMENT_XML >>
+=item * B<< RDF::RDFa::Parser::Config->HOST_OPENDOCUMENT_XML >> (Flat XML: "FODT", "FODS", etc)
 
-=item * B<< RDF::RDFa::Parser::Config->HOST_OPENDOCUMENT_ZIP >>
+=item * B<< RDF::RDFa::Parser::Config->HOST_OPENDOCUMENT_ZIP >> ("ODT", "ODS", etc)
 
 =item * B<< RDF::RDFa::Parser::Config->HOST_SVG >>
 
@@ -564,7 +564,7 @@ in brackets.
 
 =item * B<cite_attr> - support @cite [0]
 
-=item * B<default_profiles> - whitespace-separated list of profiles to load by default. [undef]
+=item * B<default_profiles> - whitespace-separated list of profiles to load by default. ['http://www.w3.org/1999/xhtml/vocab', 'http://www.w3.org/profiles/rdfa-1.1 http://www.w3.org/profiles/html-rdfa-1.1']
 
 =item * B<dom_parser> - parser to use to turn a markup string into a DOM. 'html', 'opendocument' (i.e. zipped XML) or 'xml'. ['xml']
 
@@ -600,7 +600,7 @@ in brackets.
 
 =item * B<prefix_nocase_xmlns> - ignore case-sensitivity of CURIE prefixes defined via xmlns. [0, 1]
 
-=item * B<profiles> - support RDFa profiles. [0, 1]
+=item * B<profile_attr> - support RDFa profile attribute. [0]
 
 =item * B<profile_pi> - support DataRSS-style profile processing instruction. [0]
 
@@ -609,6 +609,8 @@ in brackets.
 =item * B<safe_anywhere> - allow Safe CURIEs in @rel/@rev/etc. [0, 1]
 
 =item * B<skolemize> - mint URIs instead of blank node identifiers. [0]
+
+=item * B<src_sets_object> - @src sets object URI (like @href) [0, 1]
 
 =item * B<tdb_service> - use thing-described-by.org to name some bnodes. [0]
 
@@ -619,6 +621,8 @@ in brackets.
 =item * B<vocab_attr> - support @vocab from RDFa 1.1. [0, 1]
 
 =item * B<vocab_default> - default vocab URI (e.g. rel="foo"). [undef]
+
+=item * B<vocab_triple> - generate triple from @vocab. [0, 1]
 
 =item * B<xhtml_base> - process <base> element. 0=no, 1=yes, 2=use it for RDF/XML too. [1]                      
 

@@ -4,7 +4,7 @@ use base qw(RDF::RDFa::Parser::Profile);
 use common::sense;
 use 5.008;
 
-our $VERSION = '1.094';
+our $VERSION = '1.095';
 our %Positions;
 
 sub new

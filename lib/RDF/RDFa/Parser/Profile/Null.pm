@@ -4,7 +4,7 @@ use base qw(RDF::RDFa::Parser::Profile);
 use common::sense;
 use 5.008;
 
-our $VERSION = '1.094';
+our $VERSION = '1.095';
 
 sub new
 {
@@ -29,7 +29,7 @@ sub new
 
 =head1 NAME
 
-RDF::RDFa::Parser::Profile::Null - hard-coded null profiles
+RDF::RDFa::Parser::Profile::Null - ignorable profiles
 
 =head1 DESCRIPTION
 

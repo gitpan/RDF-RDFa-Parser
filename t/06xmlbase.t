@@ -19,7 +19,8 @@ my $xhtml = <<EOF;
 </html>
 EOF
 
-$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/perl');
+my $config = RDF::RDFa::Parser::Config->new('xhtml', '1.0');
+$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/perl', $config);
 $parser->consume;
 $model = $parser->graph;
 
@@ -37,7 +38,8 @@ ok($model->count_statements(
 		),
 	"Default behaviour respects BASE element - src and href.");
 
-$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/perl', {xhtml_base=>0});
+$config = RDF::RDFa::Parser::Config->new('xhtml', '1.0', xhtml_base=>0);
+$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/perl', $config);
 $parser->consume;
 $model = $parser->graph;
 
@@ -55,7 +57,8 @@ ok($model->count_statements(
 		),
 	"Can switch off BASE element - src and href.");
 
-$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/perl', {xml_base=>1});
+$config = RDF::RDFa::Parser::Config->new('xhtml', '1.0', xml_base=>1);
+$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/perl', $config);
 $parser->consume;
 $model = $parser->graph;
 
@@ -73,7 +76,8 @@ ok($model->count_statements(
 		),
 	"Can switch on xml:base attribute selectively - src and href don't use it.");
 
-$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/perl', {xml_base=>2});
+$config = RDF::RDFa::Parser::Config->new('xhtml', '1.0', xml_base=>2);
+$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/perl', $config);
 $parser->consume;
 $model = $parser->graph;
 
@@ -91,7 +95,8 @@ ok($model->count_statements(
 		),
 	"Can switch on xml:base attribute completely - src and href.");
 
-$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/perl', {xml_base=>1,xhtml_base=>0});
+$config = RDF::RDFa::Parser::Config->new('xhtml', '1.0', xml_base=>1,xhtml_base=>0);
+$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/perl', $config);
 $parser->consume;
 $model = $parser->graph;
 
@@ -128,7 +133,8 @@ $xhtml = <<EOF;
 </html>
 EOF
 
-$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/perl', {xml_base=>0,embedded_rdfxml=>1});
+$config = RDF::RDFa::Parser::Config->new('xhtml', '1.0', xml_base=>0,embedded_rdfxml=>1);
+$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/perl', $config);
 $parser->consume;
 $model = $parser->graph;
 
@@ -158,7 +164,8 @@ $xhtml = <<EOF;
 </html>
 EOF
 
-$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/perl', {xml_base=>0,xhtml_base=>2,embedded_rdfxml=>1});
+$config = RDF::RDFa::Parser::Config->new('xhtml', '1.0', xml_base=>0,xhtml_base=>2,embedded_rdfxml=>1);
+$parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/perl', $config);
 $parser->consume;
 $model = $parser->graph;
 
@@ -186,6 +193,7 @@ $xhtml = <<EOF;
 </html>
 EOF
 
+$config = RDF::RDFa::Parser::Config->new('xhtml', '1.0', xml_base=>1);
 $parser = RDF::RDFa::Parser->new($xhtml, 'http://example.com/perl', {xml_base=>1});
 $parser->consume;
 $model = $parser->graph;

@@ -15,7 +15,7 @@ our $cache_path = File::Spec->catfile(
 	'link-relations.xml',
 	);
 
-our $VERSION = '1.094';
+our $VERSION = '1.095';
 
 my $hard_coded = <<'DATA';
 tag:buzzword.org.uk,2010:rdfa:profile:ietf	# profile URI
@@ -64,6 +64,7 @@ start
 stylesheet
 subsection
 successor-version
+tag
 up
 version-history
 via

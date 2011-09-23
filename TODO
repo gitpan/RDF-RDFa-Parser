@@ -7,4 +7,6 @@
 	<html property="ex:foo" content="foo" about="" />
 	See note 'x876587' in source code. Need to check rdfa-syntax algorithm to see if intended!
 
-* Make HTTP caching optional?
+* Build modules for default RDFa Core 1.1 and XHTML+RDFa 1.1 profiles
+
+* Support @inlist

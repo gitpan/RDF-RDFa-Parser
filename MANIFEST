@@ -14,7 +14,6 @@ lib/RDF/RDFa/Parser/Config.pm
 lib/RDF/RDFa/Parser/OpenDocumentObjectModel.pm
 lib/RDF/RDFa/Parser/Profile.pm
 lib/RDF/RDFa/Parser/Profile/AbstractLinkTypes.pm
-lib/RDF/RDFa/Parser/Profile/AbstractRoles.pm
 lib/RDF/RDFa/Parser/Profile/ARIARoles.pm
 lib/RDF/RDFa/Parser/Profile/ForgetMeNot.pm
 lib/RDF/RDFa/Parser/Profile/GRDDLLinkTypes.pm
@@ -25,6 +24,7 @@ lib/RDF/RDFa/Parser/Profile/IETFLinkTypes.pm
 lib/RDF/RDFa/Parser/Profile/Null.pm
 lib/RDF/RDFa/Parser/Profile/PrefixCC.pm
 lib/RDF/RDFa/Parser/Profile/RDFa10LinkTypes.pm
+lib/RDF/RDFa/Parser/Profile/RDFa11.pm
 lib/RDF/RDFa/Parser/Profile/RDF.pm
 lib/RDF/RDFa/Parser/Profile/SearchMonkey.pm
 lib/RDF/RDFa/Parser/Profile/XHTML.pm
@@ -44,7 +44,6 @@ inc/Module/Install/ReadmeFromPod.pm
 inc/Module/Install/Share.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
-inc/Test/Signature.pm
 
 share/catalogue/index.xml
 share/catalogue/www.w3.org/MarkUp/DTD/aria-attributes-1.mod
@@ -166,7 +165,6 @@ share/catalogue/www.w3.org/TR/xhtml-modularization/DTD/xhtml-struct-1.mod
 share/catalogue/www.w3.org/TR/xhtml-modularization/DTD/xhtml-style-1.mod
 share/catalogue/www.w3.org/TR/xhtml-modularization/DTD/xhtml-text-1.mod
 
-t/00sig.t
 t/01basic.t
 t/02curie.t
 t/03lang.t

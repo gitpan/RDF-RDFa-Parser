@@ -1,13 +1,10 @@
 package RDF::RDFa::Parser::Profile::ForgetMeNot;
 
-use File::Spec;
-use HTTP::Cache::Transparent;
-
 use base qw(RDF::RDFa::Parser::Profile);
 use common::sense;
 use 5.008;
 
-our $VERSION = '1.094';
+our $VERSION = '1.095';
 
 sub new
 {

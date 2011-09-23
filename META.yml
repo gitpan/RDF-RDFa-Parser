@@ -37,14 +37,12 @@ recommends:
   Archive::Zip: 0
 requires:
   Carp: 0
-  Data::Dumper: 0
   Data::UUID: 0
   File::ShareDir: 0
   File::Spec: 0
   File::Temp: 0.17
   HTML::HTML5::Parser: 0
   HTML::HTML5::Sanity: 0
-  HTTP::Cache::Transparent: 0
   LWP::UserAgent: 0
   Module::Pluggable: 0
   RDF::Trine: 0.123
@@ -59,7 +57,7 @@ requires:
   perl: 5.8.0
 resources:
   bugtracker: http://rt.cpan.org/Dist/Display.html?Queue=RDF-RDFa-Parser
-  homepage: http://search.cpan.org/dist/RDF-RDFa-Parser/
+  homepage: https://metacpan.org/release/RDF-RDFa-Parser
   license: http://dev.perl.org/licenses/
-  repository: http://goddamn.co.uk/viewvc/perlmods/RDF-RDFa-Parser/
-version: 1.094
+  repository: http://goddamn.co.uk/svn-web/perlmods/browse/RDF-RDFa-Parser/
+version: 1.095
