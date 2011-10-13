@@ -71,5 +71,3 @@ ok($model->count_statements(
 		),
 	'oncurie CURIE rewriting worked.');
 
-use RDF::TrineShortcuts;
-print rdf_string($model => 'turtle');

@@ -6,9 +6,9 @@ use RDF::Trine;
 
 use base qw(RDF::RDFa::Parser::Profile);
 use common::sense;
-use 5.008;
+use 5.010;
 
-our $VERSION = '1.095';
+our $VERSION = '1.096';
 
 sub new
 {

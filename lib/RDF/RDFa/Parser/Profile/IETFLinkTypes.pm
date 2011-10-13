@@ -4,7 +4,7 @@ use base qw(RDF::RDFa::Parser::Profile::AbstractLinkTypes);
 use common::sense;
 use constant
 	REGISTRY_URL => 'http://www.iana.org/assignments/link-relations/link-relations.xml';
-use 5.008;
+use 5.010;
 
 use File::Spec;
 use XML::LibXML;
@@ -15,7 +15,7 @@ our $cache_path = File::Spec->catfile(
 	'link-relations.xml',
 	);
 
-our $VERSION = '1.095';
+our $VERSION = '1.096';
 
 my $hard_coded = <<'DATA';
 tag:buzzword.org.uk,2010:rdfa:profile:ietf	# profile URI
@@ -79,13 +79,16 @@ sub refresh_data
 	my ($self, $ua, $uri) = @_;
 
 	return undef if $loaded;
-	
-	unless (-e $cache_path and -M $cache_path < 60*60*24)
+
+	eval
 	{
-		$ua->mirror(REGISTRY_URL, $cache_path);
-		my $atime = my $mtime = time;
-		utime $atime, $mtime, $cache_path;
-	}
+		unless (-e $cache_path and -M $cache_path < 60*60*24)
+		{
+			$ua->mirror(REGISTRY_URL, $cache_path);
+			my $atime = my $mtime = time;
+			utime $atime, $mtime, $cache_path;
+		}
+	};
 	
 	if (-e $cache_path)
 	{

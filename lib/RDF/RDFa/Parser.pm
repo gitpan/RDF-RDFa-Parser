@@ -33,6 +33,7 @@ A simple set of operations for working with Open Graph Protocol data:
 
 =cut
 
+use Carp qw();
 use Data::UUID;
 use File::Spec;
 use File::ShareDir qw(dist_file);
@@ -55,22 +56,22 @@ use constant {
 	ERR_ERROR    => 'e',
 	};
 use constant {
-	ERR_CODE_PROFILE_UNUSABLE      =>  0x0101,
-	ERR_CODE_PROFILE_DISABLED      =>  0x0102,
-	ERR_CODE_PROFILE_HASH          =>  0x0103,
-	ERR_CODE_PROFILE_NOTURI        =>  0x0104,
-	ERR_CODE_RDFXML_MUDDLE         =>  0x0201,
-	ERR_CODE_RDFXML_MESS           =>  0x0202,
-	ERR_CODE_PREFIX_BUILTIN        =>  0x0301,
-	ERR_CODE_PREFIX_ILLEGAL        =>  0x0302,
-	ERR_CODE_PREFIX_DISABLED       =>  0x0303,
-	ERR_CODE_INSTANCEOF_USED       =>  0x0401,
-	ERR_CODE_INSTANCEOF_OVERRULED  =>  0x0402,
-	ERR_CODE_CURIE_FELLTHROUGH     =>  0x0501,
-	ERR_CODE_CURIE_UNDEFINED       =>  0x0502,
-	ERR_CODE_BNODE_WRONGPLACE      =>  0x0601,
-	ERR_CODE_VOCAB_DISABLED        =>  0x0701,
-	ERR_CODE_LANG_INVALID          =>  0x0801,
+	ERR_CODE_PROFILE_DISABLED      =>  'PROF01',
+	ERR_CODE_PROFILE_HASH          =>  'PROF02',
+	ERR_CODE_PROFILE_NOTURI        =>  'PROF03',
+	ERR_CODE_PROFILE_UNUSABLE      =>  'PROF04',
+	ERR_CODE_RDFXML_MUDDLE         =>  'RDFX01',
+	ERR_CODE_RDFXML_MESS           =>  'RDFX02',
+	ERR_CODE_PREFIX_BUILTIN        =>  'PRFX01',
+	ERR_CODE_PREFIX_ILLEGAL        =>  'PRFX02',
+	ERR_CODE_PREFIX_DISABLED       =>  'PRFX03',
+	ERR_CODE_INSTANCEOF_USED       =>  'INST01',
+	ERR_CODE_INSTANCEOF_OVERRULED  =>  'INST02',
+	ERR_CODE_CURIE_FELLTHROUGH     =>  'CURI01',
+	ERR_CODE_CURIE_UNDEFINED       =>  'CURI02',
+	ERR_CODE_BNODE_WRONGPLACE      =>  'BNOD01',
+	ERR_CODE_VOCAB_DISABLED        =>  'VOCA01',
+	ERR_CODE_LANG_INVALID          =>  'LANG01',
 	};
 use constant {
 	RDF_XMLLIT   => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral',
@@ -80,9 +81,9 @@ use constant {
 	RDF_NIL      => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nil',
 	};
 use common::sense;
-use 5.008;
+use 5.010;
 
-our $VERSION = '1.095';
+our $VERSION = '1.096';
 our $HAS_AWOL;
 
 BEGIN
@@ -223,6 +224,8 @@ sub new
 
 =item C<< $p = RDF::RDFa::Parser->new_from_url($url, [$config], [$storage]) >>
 
+=item C<< $p = RDF::RDFa::Parser->new_from_uri($url, [$config], [$storage]) >>
+
 $url is a URL to fetch and parse, or an HTTP::Response object.
 
 $config optionally holds an RDF::RDFa::Parser::Config object which
@@ -233,7 +236,8 @@ Content-Type header; it's probably sensible to keep the default.
 $storage optionally holds an RDF::Trine::Store object. If undef, then
 a new temporary store is created.
 
-This function can also be called as C<new_from_uri>. Same thing.
+This function can also be called as C<new_from_url> or C<new_from_uri>.
+Same thing.
 
 =cut
 
@@ -472,13 +476,6 @@ sub dom
 	return $self->{dom};
 }
 
-sub xhtml
-{
-	my $self = shift;
-	warn "The ->xhtml method is deprecated. Use ->dom->toString instead.\n";
-	return $self->dom->toString;
-}
-
 =item C<< $p->uri( [$other_uri] ) >>
 
 Returns the base URI of the document being parsed. This will usually be the
@@ -547,6 +544,101 @@ sub errors
 	return @{$self->{errors}};
 }
 
+=item C<< $p->processor_graph >>
+
+As per C<< $p->errors >> but returns data as an RDF model.
+
+=cut
+
+sub processor_graph
+{
+	my ($self, $model, $context) = @_;
+	$model ||= RDF::Trine::Model->new( RDF::Trine::Store->temporary_store );
+
+	my $RDF   = RDF::Trine::Namespace->new('http://www.w3.org/1999/02/22-rdf-syntax-ns#');
+	my $RDFA  = RDF::Trine::Namespace->new('http://www.w3.org/ns/rdfa#');
+	my $CNT   = RDF::Trine::Namespace->new('http://www.w3.org/2011/content#');
+	my $PTR   = RDF::Trine::Namespace->new('http://www.w3.org/2009/pointers#');
+	my $DC    = RDF::Trine::Namespace->new('http://purl.org/dc/terms/');
+	my $ERR   = RDF::Trine::Namespace->new('tag:buzzword.org.uk,2010:RDF-RDFa-Parser:error:');
+
+	my $uuid  = Data::UUID->new;
+	my $mkuri = sub
+	{
+		my $id = $uuid->create_str;
+		return $ERR->$id;
+	};
+
+	my $st = sub
+	{
+		my @n = map
+			{ blessed($_) ? $_ : RDF::Trine::Node::Literal->new($_); }
+			@_;
+		if ($context)
+		{
+			$model->add_statement(
+				RDF::Trine::Statement::Quad->new(@n, $context)
+				);
+		}
+		else
+		{
+			$model->add_statement(
+				RDF::Trine::Statement->new(@n)
+				);
+		}
+	};
+
+	my $typemap = {(
+		ERR_CODE_PROFILE_DISABLED      , '',
+		ERR_CODE_PROFILE_HASH          , '',
+		ERR_CODE_PROFILE_NOTURI        , 'ProfileReferenceError',
+		ERR_CODE_PROFILE_UNUSABLE      , 'ProfileReferenceError',
+		ERR_CODE_RDFXML_MUDDLE         , '',
+		ERR_CODE_RDFXML_MESS           , 'DocumentError',
+		ERR_CODE_PREFIX_BUILTIN        , 'DocumentError',
+		ERR_CODE_PREFIX_ILLEGAL        , 'DocumentError',
+		ERR_CODE_PREFIX_DISABLED       , '',
+		ERR_CODE_INSTANCEOF_USED       , '',
+		ERR_CODE_INSTANCEOF_OVERRULED  , '',
+		ERR_CODE_CURIE_FELLTHROUGH     , '',
+		ERR_CODE_CURIE_UNDEFINED       , 'UnresolvedCURIE',
+		ERR_CODE_BNODE_WRONGPLACE      , '',
+		ERR_CODE_VOCAB_DISABLED        , '',
+		ERR_CODE_LANG_INVALID          ,	'DocumentError',
+		)};
+		
+	foreach my $err ($self->errors)
+	{
+		my $iri = $mkuri->();
+		my ($level, $code, $message, $args) = @$err;
+		
+		if ($level eq ERR_WARNING)
+		{
+			$st->($iri, $RDF->type, $RDFA->Warning);
+		}
+		elsif ($level eq ERR_ERROR)
+		{
+			$st->($iri, $RDF->type, $RDFA->Error);
+		}
+		if (my $class = $typemap->{$code})
+		{
+			$st->($iri, $RDF->type, $RDFA->$class);
+		}
+		
+		$st->($iri, $DC->description, $message);
+		
+		if (blessed($args->{element}) and $args->{element}->can('nodePath'))
+		{
+			my $p_iri = $mkuri->();
+			$st->($iri, $RDFA->context, $p_iri);
+			$st->($p_iri, $RDF->type, $PTR->XPathPointer);
+			$st->($p_iri, $PTR->expression, $args->{element}->nodePath);
+		}
+	}
+	
+	return $model;
+}
+
 sub _log_error
 {
 	my ($self, $level, $code, $message, %args) = @_;
@@ -557,13 +649,10 @@ sub _log_error
 	}
 	elsif ($level eq ERR_ERROR)
 	{
-		warn sprintf("%04X: %s\n", $code, $message);
-		warn sprintf("... with URI <%s>\n",
-			$args{'uri'})
+		Carp::carp(sprintf("%04X: %s\n", $code, $message));
+		Carp::carp(sprintf("... with URI <%s>\n", $args{'uri'}))
 			if defined $args{'uri'};
-		warn sprintf("... on element '%s' with path '%s'\n",
-			$args{'element'}->localname,
-			$args{'element'}->nodePath)
+		Carp::carp(sprintf("... on element '%s' with path '%s'\n", $args{'element'}->localname, $args{'element'}->nodePath))
 			if blessed($args{'element'}) && $args{'element'}->isa('XML::LibXML::Node');
 	}
 	
@@ -1652,14 +1741,29 @@ sub _consume_element
 			{
 				# if the local list mapping does not contain a list associated with
 				# the IRI, instantiate a new list and add to local list mappings
-				$list_mappings->{$r} = [] unless defined $list_mappings->{$r};
+				$list_mappings->{'REL:'.$r} = [] unless defined $list_mappings->{'REL:'.$r};
 				
 				# add the current object resource to the list associated with the IRI
 				# in the local list mapping
-				push @{ $list_mappings->{$r} }, [resource => $current_object_resource];
+				push @{ $list_mappings->{'REL:'.$r} }, [resource => $current_object_resource];
 			}
 		}
-		
+
+		if ($current_element->hasAttributeNsSafe($rdfans, 'inlist')
+		and $current_element->hasAttributeNsSafe($rdfans, 'rev'))
+		{
+			foreach my $r (@REV)
+			{
+				# if the local list mapping does not contain a list associated with
+				# the IRI, instantiate a new list and add to local list mappings
+				$list_mappings->{'REV:'.$r} = [] unless defined $list_mappings->{'REV:'.$r};
+				
+				# add the current object resource to the list associated with the IRI
+				# in the local list mapping
+				push @{ $list_mappings->{'REV:'.$r} }, [resource => $current_object_resource];
+			}
+		}
+
 		# Predicates for the [ current object resource ] can be set b
 		# using one or both of the @rel and @rev attributes:
 		#
@@ -1735,7 +1839,7 @@ sub _consume_element
 			map {
 				$current_element->hasAttributeNsSafe($rdfans, 'inlist')
 				?{
-					list              => do { $list_mappings->{$_} = [] unless defined $list_mappings->{$_}; $list_mappings->{$_}; },
+					list              => do { $list_mappings->{'REL:'.$_} = [] unless defined $list_mappings->{'REL:'.$_}; $list_mappings->{'REL:'.$_}; },
 					direction         => 'none',
 				}
 				:{
@@ -1759,13 +1863,18 @@ sub _consume_element
 		
 		push @$local_incomplete_triples,
 			map {
-				{
+				$current_element->hasAttributeNsSafe($rdfans, 'inlist')
+				?{
+					list              => do { $list_mappings->{'REV:'.$_} = [] unless defined $list_mappings->{'REV:'.$_}; $list_mappings->{'REV:'.$_}; },
+					direction         => 'none',
+				}
+				:{
 					predicate         => $_,
 					direction         => 'reverse',
 					graph             => $graph,
 					predicate_element => $current_element,
 					graph_element     => $graph_elem,
-				};
+				}
 			} @REV;
 		
 		$current_object_resource = $self->bnode;
@@ -1933,8 +2042,8 @@ sub _consume_element
 		
 		if ($current_element->hasAttributeNsSafe($rdfans, 'inlist'))
 		{
-			$list_mappings->{$p} = [] unless defined $list_mappings->{$p};
-			push @{ $list_mappings->{$p} }, [literal => @current_object_literal];
+			$list_mappings->{'PROPERTY:'.$p} = [] unless defined $list_mappings->{'PROPERTY:'.$p};
+			push @{ $list_mappings->{'PROPERTY:'.$p} }, [literal => @current_object_literal];
 		}
 		else
 		{
@@ -2002,7 +2111,9 @@ sub _consume_element
 		}	
 	}
 
-	# Once all the child elements have been traversed, list triples are
+	### use Data::Dumper; print Dumper($list_mappings);
+	
+	# Once all the child elements have been traversed, list triples are 
 	# generated, if necessary.
 	foreach my $iri (keys %$list_mappings)
 	{
@@ -2050,18 +2161,25 @@ sub _consume_element
 			predicate => $current_element,
 			graph     => $graph_elem,
 			};
-		if ($first)
+		
+		my ($attr, $iri) = split /:/, $iri, 2;
+		
+		if (defined $first)
 		{
-			$self->_insert_triple_resource($E, $new_subject, $iri, $first, $graph);
+			$attr eq 'REV'
+				? $self->_insert_triple_resource($E, $first, $iri, $new_subject, $graph)
+				: $self->_insert_triple_resource($E, $new_subject, $iri, $first, $graph);
 		}
 		else
 		{
-			# This step isn't mentioned in RDFa Core. Need to check with WG. Poss spec error.
-			$self->_insert_triple_resource($E, $new_subject, $iri, RDF_NIL, $graph);
+			$attr eq 'REV'
+				? $self->_insert_triple_resource($E, RDF_NIL, $iri, $new_subject, $graph)
+				: $self->_insert_triple_resource($E, $new_subject, $iri, RDF_NIL, $graph);
 		}
+			
 		$activity++;
 	}
-
+	
 #	# If the [skip element] flag is 'false', and either: the previous step
 #	# resulted in a 'true' flag, or [new subject] was set to a non-null and
 #	# non-bnode value, then any [incomplete triple]s within the current context
@@ -2191,7 +2309,7 @@ sub _print0
 		"<$pred>",
 		($object =~ /^_:/ ? $object : "<$object>"));
 	
-	return undef;
+	return;
 }
 
 sub _print1
@@ -2234,7 +2352,7 @@ sub _print1
 		((length $lang && !length $dt) ? "\@$lang" : '')
 		);
 	
-	return undef;
+	return;
 }
 
 =item C<< $p->element_subjects >>
@@ -2855,63 +2973,6 @@ sub __expand_curie
 	return undef;
 }
 
-sub OPTS_XHTML
-{
-	warn "OPTS_XHTML is deprecated.\n";
-	return RDF::RDFa::Parser::Config->new(
-		RDF::RDFa::Parser::Config->HOST_XHTML,
-		RDF::RDFa::Parser::Config->RDFA_10,
-		@_);
-}
-sub OPTS_XHTML_11
-{
-	warn "OPTS_XHTML_11 is deprecated.\n";
-	return RDF::RDFa::Parser::Config->new(
-		RDF::RDFa::Parser::Config->HOST_XHTML,
-		RDF::RDFa::Parser::Config->RDFA_11,
-		@_);
-}
-sub OPTS_HTML4
-{
-	warn "OPTS_HTML4 is deprecated.\n";
-	return RDF::RDFa::Parser::Config->new(
-		RDF::RDFa::Parser::Config->HOST_HTML4,
-		RDF::RDFa::Parser::Config->RDFA_11,
-		@_);
-}
-sub OPTS_HTML5
-{
-	warn "OPTS_HTML5 is deprecated.\n";
-	return RDF::RDFa::Parser::Config->new(
-		RDF::RDFa::Parser::Config->HOST_HTML5,
-		RDF::RDFa::Parser::Config->RDFA_11,
-		@_);
-}
-sub OPTS_SVG
-{
-	warn "OPTS_SVG is deprecated.\n";
-	return RDF::RDFa::Parser::Config->new(
-		RDF::RDFa::Parser::Config->HOST_SVG,
-		RDF::RDFa::Parser::Config->RDFA_10,
-		@_);
-}
-sub OPTS_ATOM
-{
-	warn "OPTS_ATOM is deprecated.\n";
-	return RDF::RDFa::Parser::Config->new(
-		RDF::RDFa::Parser::Config->HOST_ATOM,
-		RDF::RDFa::Parser::Config->RDFA_10,
-		@_);
-}
-sub OPTS_XML
-{
-	warn "OPTS_XML is deprecated.\n";
-	return RDF::RDFa::Parser::Config->new(
-		RDF::RDFa::Parser::Config->HOST_XML,
-		RDF::RDFa::Parser::Config->RDFA_10,
-		@_);
-}
-
 1;
 
 =back
@@ -3122,7 +3183,7 @@ The E<lt>feedE<gt> and E<lt>entryE<gt> elements are treated specially, setting
 a new subject; IANA-registered rel keywords are recognised.
 
 By passing C<< atom_parser=>1 >> as a Config option, you can also handle
-Atom's native semantics. (Uses XML::Atom::OWL. If this module is not installed,
+Atom's native semantics. (Uses L<XML::Atom::OWL>. If this module is not installed,
 this option is silently ignored.)
 
 Otherwise, the same as XML.
@@ -3280,7 +3341,7 @@ If this is missing, the parser should still work, but will be very slow.
 L<RDF::RDFa::Parser::Config>, L<RDF::RDFa::Parser::Profile>. 
 
 L<XML::LibXML>, L<RDF::Trine>, L<HTML::HTML5::Parser>, L<HTML::HTML5::Sanity>,
-L<XML::Atom::OWL>.
+L<RDF::RDFa::Generator>, L<RDF::RDFa::Linter>.
 
 L<http://www.perlrdf.org/>.
 

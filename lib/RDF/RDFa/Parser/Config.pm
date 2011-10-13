@@ -20,13 +20,13 @@ use constant {
 	RDFA_GUESS  => 'guess',
 };
 use common::sense;
-use 5.008;
+use 5.010;
 
 use RDF::RDFa::Parser::OpenDocumentObjectModel;
 use URI::Escape qw'uri_unescape';
 
 our @EXPORT_OK = qw(HOST_ATOM HOST_DATARSS HOST_HTML4 HOST_HTML5 HOST_OPENDOCUMENT_XML HOST_OPENDOCUMENT_ZIP HOST_SVG HOST_XHTML HOST_XML RDFA_10 RDFA_11);
-our $VERSION = '1.095';
+our $VERSION = '1.096';
 our $CONFIGS = {
 	'host' => {
 		HOST_ATOM() => {

@@ -1,7 +1,7 @@
 package RDF::RDFa::Parser::Profile;
 
 use common::sense;
-use 5.008;
+use 5.010;
 
 use Module::Pluggable
 	search_path => ['RDF::RDFa::Parser::Profile'],
@@ -12,7 +12,7 @@ use Scalar::Util qw'blessed';
 
 our %Known;
 our @ExtraPlugins;
-our $VERSION = '1.095';
+our $VERSION = '1.096';
 
 sub new
 {

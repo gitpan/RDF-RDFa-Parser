@@ -49,6 +49,7 @@ DESCRIPTION
         object. If undef, then a new temporary store is created.
 
     "$p = RDF::RDFa::Parser->new_from_url($url, [$config], [$storage])"
+    "$p = RDF::RDFa::Parser->new_from_uri($url, [$config], [$storage])"
         $url is a URL to fetch and parse, or an HTTP::Response object.
 
         $config optionally holds an RDF::RDFa::Parser::Config object which
@@ -59,7 +60,8 @@ DESCRIPTION
         $storage optionally holds an RDF::Trine::Store object. If undef,
         then a new temporary store is created.
 
-        This function can also be called as "new_from_uri". Same thing.
+        This function can also be called as "new_from_url" or
+        "new_from_uri". Same thing.
 
     "$p = RDF::RDFa::Parser->new_from_response($response, [$config],
     [$storage])"
@@ -129,6 +131,9 @@ DESCRIPTION
 
     "$p->errors"
         Returns a list of errors and warnings that occurred during parsing.
+
+    "$p->processor_graph"
+        As per "$p->errors" but returns data as an RDF model.
 
     "$p->consume"
         Advanced usage only.
@@ -492,7 +497,7 @@ SEE ALSO
     RDF::RDFa::Parser::Config, RDF::RDFa::Parser::Profile.
 
     XML::LibXML, RDF::Trine, HTML::HTML5::Parser, HTML::HTML5::Sanity,
-    XML::Atom::OWL.
+    RDF::RDFa::Generator, RDF::RDFa::Linter.
 
     <http://www.perlrdf.org/>.
 
