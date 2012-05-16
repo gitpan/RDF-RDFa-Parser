@@ -1,10 +1,3 @@
-* Ability to crawl xhv:meta and maybe rdfs:seeAlso, powder-s:describedby, etc links.
-	- This might be better as a separate module?
-	- Overlaps with HTTP-LRDD?
-
-* Investigate why the following two root elements produced different triples:
-	<html property="ex:foo" content="foo" />
-	<html property="ex:foo" content="foo" about="" />
-	See note 'x876587' in source code. Need to check rdfa-syntax algorithm to see if intended!
-
 * Track changes to RDFa 1.1
+
+* Attempt to get tests for XHTML5 and XML passing

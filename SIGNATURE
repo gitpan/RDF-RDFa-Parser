@@ -14,26 +14,15 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 bd5e6a8f6fbdfa1a27d475e23ac798a0ab2c970f Changes
-SHA1 f3296a09eb07898f3ba6dd0ece615dafc1b57e16 LICENSE
-SHA1 bb18aa010d0c1287cf83c74aff7cdaeca63e5ee3 MANIFEST
-SHA1 9a9037a30a1f57d6f75a4962b55853c8ef6460f4 META.yml
+SHA1 3dbb3dfa9d2733cdf37cc84dc2b484632cdb81f2 Changes
+SHA1 1d54db0b8134eb1c8ea0cee400f9dc612bcaa61a LICENSE
+SHA1 505313e4a2977578739fe9221c509a1a72aefc79 MANIFEST
+SHA1 5ff4190c8aef0919894d6e4468da3e324ae18ac5 META.yml
 SHA1 5391cc35db658809505db2be59d47aa2f073c376 Makefile.PL
-SHA1 76e815722ec1a5251174368f82f950049d9ac7b6 README
-SHA1 f6165b6fddf2db814574f6988a0b4372ad9e0a32 TODO
-SHA1 c746f28e465643971b84d0e4078ffa50759eb4df examples/README
-SHA1 5204fac859b7e5020ba99c4925f84b627f23e723 examples/example-uri.pl
-SHA1 1a988f0100cd1847a40d4c25f4e3d1b196f27552 examples/example0.pl
-SHA1 0c096b27c802ffbc76bb3524a62d6906e3bf61ec examples/example1.pl
-SHA1 28f388797f4c71cc7e47860dd1e71a8bf3212470 examples/example2.pl
-SHA1 ad425455ee4000bab448a9fe305dc609cf89e2e3 examples/example3.pl
-SHA1 cd12ba9dea38487c124f9b7a9fac4411a66e3700 examples/example4.pl
-SHA1 09a7fe9aaa321d6585d5df5e89a3e70af7733814 examples/example5.pl
-SHA1 898aeee7bc34fedc2d111c2bbc7a8ff5ef17b21f examples/example6.odt
-SHA1 8baedd8333a5278c5d74acf74fe56c7a7053f1ba examples/example6.pl
-SHA1 c46c319567b816deb5c046fdf0da7460d18306e9 examples/example7.pl
-SHA1 4a6cd20b81da879ac6327a6ad9efd82464f10546 examples/example8.pl
-SHA1 b523ee2974f15e7d71c794d006b805c60ea0e8f5 examples/example9.pl
+SHA1 aeb9ee27c60a21abf7ea4de64b2e70265264f49a README
+SHA1 306fc99581a696a96d71282c041f864b29ec219f TODO
+SHA1 d884d36734412091fd5b0819addf7c4af7bcf807 examples/rdfa10-to-ntriples.pl
+SHA1 eb1a8c8df6a1c14329925e7fae0425f6670fc33b examples/rdfa11-to-ntriples.pl
 SHA1 5d94bc10deff1dd74e4bc5dfa6fc015e39271f15 inc/Module/AutoInstall.pm
 SHA1 40106479d4e07f379cb82ca1d69fca92e3a40f47 inc/Module/Install.pm
 SHA1 34a24a530ecf0365cc02e4150b06c9bed702a441 inc/Module/Install/AutoInstall.pm
@@ -50,33 +39,17 @@ SHA1 b86d0385e10881db680d28bde94f275e49e34a27 inc/Module/Install/TrustMetaYml.pm
 SHA1 1326052d1df1065debee74f9d8583a734b9b3d00 inc/Module/Install/Win32.pm
 SHA1 bb607f3715c40fc3bc1c46496587cdb215bc4fa2 inc/Module/Install/WriteAll.pm
 SHA1 26d58a041cd6b3d21db98b32e8fd1841aae21204 inc/Module/Package.pm
-SHA1 4db02ca3854a0d95bf38139e9b714cc85b618189 inc/Module/Package/Dist/RDF.pm
-SHA1 775bd24f2fdbb6dce51a8b5b0cdb01fccfce83c4 inc/Scalar/Util.pm
-SHA1 b1b664983568bf822c327599eb88e223483ae96a inc/Scalar/Util/PP.pm
+SHA1 6b807287940754cc31a3db59f2b22e363d5525be inc/Module/Package/Dist/RDF.pm
+SHA1 e31c281782183601e1e057c5914f63269e043932 inc/Scalar/Util.pm
+SHA1 5eae2f71c45a996a296d2445b18d0589307111f0 inc/Scalar/Util/PP.pm
 SHA1 eef6bff62046bff2ce08ba132d0b58fba30f40b4 inc/YAML/Tiny.pm
-SHA1 3baf1f514423dbba8664e7aff88e17346182d88b lib/RDF/RDFa/Parser.pm
-SHA1 ebd59472c779791dace6306aed7875d738dbce8f lib/RDF/RDFa/Parser/Config.pm
-SHA1 306058cb23dedfd1e8a7d5afa61356035a60e89a lib/RDF/RDFa/Parser/OpenDocumentObjectModel.pm
-SHA1 b12d37360651c53d07929f0909e693c3ba19b2d6 lib/RDF/RDFa/Parser/Profile.pm
-SHA1 743c72a06c77ec126a23c052c29e4bda273b3a17 lib/RDF/RDFa/Parser/Profile/ARIARoles.pm
-SHA1 6285bd63bff212a9cd0997ebf8c858f9398fab1d lib/RDF/RDFa/Parser/Profile/AbstractLinkTypes.pm
-SHA1 e79212343a4ad3e4d2fe074235dad1c8f670dae1 lib/RDF/RDFa/Parser/Profile/ForgetMeNot.pm
-SHA1 179a68786bb7d572ee217897dea28f24d42e09a2 lib/RDF/RDFa/Parser/Profile/GRDDLLinkTypes.pm
-SHA1 7b8da1de6c01f5418e7de3e8239bd608b2a0cef6 lib/RDF/RDFa/Parser/Profile/HTML32LinkTypes.pm
-SHA1 12d7fc0e8b4a55223284d73ce3d336dd16e63b74 lib/RDF/RDFa/Parser/Profile/HTML4LinkTypes.pm
-SHA1 01c25f715fc5202ec794528d609d65feb829db51 lib/RDF/RDFa/Parser/Profile/HTML5LinkTypes.pm
-SHA1 6298c9b14ca3a03d1878aa96d8146ac4cdb711e8 lib/RDF/RDFa/Parser/Profile/IETFLinkTypes.pm
-SHA1 fa3415e3fdf6a27bc510bbfd4261722d70dafa3e lib/RDF/RDFa/Parser/Profile/Null.pm
-SHA1 0368262483b3f1e1f6fb4b8e913e54d4949fbb03 lib/RDF/RDFa/Parser/Profile/PrefixCC.pm
-SHA1 874d0c9713d5367cce6cba3d5ed3c75b826b1b59 lib/RDF/RDFa/Parser/Profile/RDF.pm
-SHA1 b50b9a5be724a8dbcc9889eecb8116c6a073b7a4 lib/RDF/RDFa/Parser/Profile/RDFa10LinkTypes.pm
-SHA1 e0dddfdba9390ac271a3d8f2e936a194cd52a775 lib/RDF/RDFa/Parser/Profile/RDFa11.pm
-SHA1 a67476e10b9cbaaf2f1f5f57d949d00973dcf086 lib/RDF/RDFa/Parser/Profile/SearchMonkey.pm
-SHA1 8bd8bdd70c2a91d1241a1e3c8313d5969c6a51ec lib/RDF/RDFa/Parser/Profile/XHTML.pm
-SHA1 1f239f632915f5d01afdc43fa0117b897ee0eacc lib/RDF/RDFa/Parser/Profile/XHTMLRoles.pm
-SHA1 a2b83be1add841656098b0915bc5e008b5ca7003 meta/changes.ttl
-SHA1 6b576b3506ba74ab75b3e05522a96175fc008217 meta/doap.ttl
-SHA1 f872b247e10aa29b8f68780eea4409f24d69901f meta/makefile.ttl
+SHA1 c18309685bb0fe88563604b0f8112fba4a92a441 lib/RDF/RDFa/Parser.pm
+SHA1 650b10dd1bf31c56b7cbd0788468c60ee7afabdc lib/RDF/RDFa/Parser/Config.pm
+SHA1 22d454e850f7938c842233112c97faca91027eda lib/RDF/RDFa/Parser/InitialContext.pm
+SHA1 0b79e680177ba812d5601991da8e7a910a545ad2 lib/RDF/RDFa/Parser/OpenDocumentObjectModel.pm
+SHA1 c911b6664478ced43d4dceb9d28378d1b02e3f7e meta/changes.ttl
+SHA1 62f51df6ba01008bfc22f7ce7a55a2604b07588d meta/doap.ttl
+SHA1 c276f86c44b9c1438341d2ef996b7486af3dd9fe meta/makefile.ttl
 SHA1 ef2d6d99d8dfea7159e583f9b5ad35d5814f2271 share/catalogue/index.xml
 SHA1 9a3157a5419d575ea91bd0b912d139573423c94c share/catalogue/www.w3.org/MarkUp/DTD/aria-attributes-1.mod
 SHA1 88053f10e8d2fd58ccbab81dc2bbdfdf90016c3c share/catalogue/www.w3.org/MarkUp/DTD/html4-rdfa-1.dtd
@@ -204,11 +177,10 @@ SHA1 02dde52dfe7b0dbd8230ffa5e435e68fd40a1baa t/05namedgraphs.t
 SHA1 b2340c8bce4d33e4f01ba2ca25a1c3d904f6f4f6 t/06xmlbase.t
 SHA1 2ba0149b0dd5ca8a950032dfdd660dcf1b2dd68d t/07rdfxml.t
 SHA1 2227c12c1acdc5802ceb16a16b470886b5e7b3ae t/08atom.t
-SHA1 8f5f5f853dfb71f9313c12786eed50f21ffa767a t/09profiles.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAk6XUxQACgkQzr+BKGoqfTkYjwCeP0wGQXYP3kLfLu9QDLUcFqsz
-R4oAnj3hsneB9g89v+gNtwZfNKOl5yJK
-=n+Qr
+iEYEARECAAYFAk+z2s4ACgkQzr+BKGoqfTkiLQCgizEIIVtuhwb7Cx+RwaIrY8xu
+llkAoKozxc77kTh66PugXyu29MTj5DbX
+=yC2z
 -----END PGP SIGNATURE-----

@@ -359,8 +359,7 @@ FEATURES
 
     *   DataRSS
 
-        Support for the <?profile?> processing instruction; defines some
-        default prefixes. Otherwise, the same as Atom.
+        Defines some default prefixes. Otherwise, the same as Atom.
 
     *   OpenDocument XML
 
@@ -471,6 +470,11 @@ FEATURES
     Any Config option may be given using auto config, except 'use_rtnlx',
     'dom_parser', and of course 'auto_config' itself.
 
+  Profiles
+    Support for Profiles (an experimental RDFa 1.1 feature) was added in
+    version 1.09_00, but dropped after version 1.096, because the feature
+    was removed from draft specs.
+
 BUGS
     RDF::RDFa::Parser 0.21 passed all approved tests in the XHTML+RDFa test
     suite at the time of its release.
@@ -480,6 +484,28 @@ BUGS
     tests in the HTML4+RDFa and HTML5+RDFa test suites at the time of its
     release; except test cases 0113 and 0121, which the author of this
     module believes mandate incorrect HTML parsing.
+
+    RDF::RDFa::Parser 1.096_01 passes all approved tests on the default
+    graph (not the processor graph) in the RDFa 1.1 test suite for language
+    versions 1.0 and host languages xhtml1, html4 and html5, with the
+    following exceptions which are skipped:
+
+    *   0140 - wilful violation, pending proof that the test is backed up by
+        the spec.
+
+    *   0198 - an XML canonicalisation test that may be dropped in the
+        future.
+
+    *   0212 - wilful violation, as passing this test would require
+        regressing on the old RDFa 1.0 test suite.
+
+    *   0251 to 0256 pass with RDFa 1.1 and are skipped in RDFa 1.0 because
+        they use RDFa-1.1-specific syntax.
+
+    *   0256 is additionally skipped in HTML4 mode, as the author believes
+        xml:lang should be ignored in HTML versions prior to HTML5.
+
+    *   0303 - wilful violation, as this feature is simply awful.
 
     Please report any bugs to <http://rt.cpan.org/>.
 
@@ -494,12 +520,12 @@ BUGS
             missing, the parser should still work, but will be very slow.
 
 SEE ALSO
-    RDF::RDFa::Parser::Config, RDF::RDFa::Parser::Profile.
+    RDF::RDFa::Parser::Config.
 
     XML::LibXML, RDF::Trine, HTML::HTML5::Parser, HTML::HTML5::Sanity,
     RDF::RDFa::Generator, RDF::RDFa::Linter.
 
-    <http://www.perlrdf.org/>.
+    <http://www.perlrdf.org/>, <http://rdfa.info>.
 
 AUTHOR
     Toby Inkster <tobyink@cpan.org>.
@@ -509,9 +535,14 @@ ACKNOWLEDGEMENTS
     RDF::Trine models. Neubert Joachim taught me to use XML catalogues,
     which massively speeds up parsing of XHTML files that have DTDs.
 
-COPYRIGHT
-    Copyright 2008-2011 Toby Inkster
+COPYRIGHT AND LICENCE
+    Copyright 2008-2012 Toby Inkster
 
-    This library is free software; you can redistribute it and/or modify it
-    under the same terms as Perl itself.
+    This is free software; you can redistribute it and/or modify it under
+    the same terms as the Perl 5 programming language system itself.
+
+DISCLAIMER OF WARRANTIES
+    THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
+    WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+    MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 

@@ -9,10 +9,10 @@
 	:test_requires "Test::More 0.61" , "HTTP::Response" ;
 	:recommends "Archive::Zip" ;
 	:requires "common::sense" , "Carp" , "Data::UUID" , "File::ShareDir" ,
-		"File::Spec" , "File::Temp 0.17", "HTML::HTML5::Parser" ,
-		"HTML::HTML5::Sanity" , "LWP::UserAgent" , "Module::Pluggable" ,
-		"RDF::Trine 0.123" , "Scalar::Util" , "Storable" , "URI::file" ,
-		"URI::Escape" , "URI::URL" , "XML::LibXML 1.66" , "XML::RegExp" .
+		"File::Temp 0.17", "HTML::HTML5::Parser" , "parent" ,
+		"HTML::HTML5::Sanity" , "LWP::UserAgent" ,
+		"RDF::Trine 0.135" , "Scalar::Util" , "Storable" , "URI::file" ,
+		"URI::Escape" , "URI", "XML::LibXML 1.66" , "XML::RegExp" .
 
 _:main <http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#fileName> "lib/RDF/RDFa/Parser.pm" .
 

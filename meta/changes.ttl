@@ -532,11 +532,37 @@ my:v_1-096
 	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.096.tar.gz> ;
 	rdfs:label      "RDFa 1.1 Release Candidate 6"@en ;
 	dcs:changeset [
-		dcs:versus my:v_1-096 ;
+		dcs:versus my:v_1-095 ;
 		dcs:item
 			[ rdfs:label "Allow @inlist to work with @rev."@en ] ,
 			[ rdfs:label "use 5.010"@en ; a dcs:Update ] ,
 			[ rdfs:label "Build package with Module::Package::RDF"@en ; a dcs:Packaging ] ,
 			[ rdfs:label "Move some tests from 't' to 'xt'."@en ; a dcs:Packaging ]			
+		] .
+
+my:project :release my:v_1-096_01 .
+my:v_1-096_01
+	a               :Version ;
+	dc:issued       "2012-05-16"^^xsd:date ;
+	:revision       "1.096_01"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.096_01.tar.gz> ;
+	rdfs:label      "RDFa 1.1 Release Candidate 6.01"@en ;
+	dcs:changeset [
+		dcs:versus my:v_1-096 ;
+		dcs:item
+			[ rdfs:label "Support CURIEs which end in colon."@en ; a dcs:Bugfix ] ,
+			[ rdfs:label "Currently passing RDFa 1.1 test suite (in 'xt' tests, available in repo but not on CPAN)."@en ; a dcs:Packaging ] ,
+			[ rdfs:label "Start cleaning up 'examples' directory."@en ; a dcs:Packaging ] ,
+			[ rdfs:label "Support HTML5 <time> element, and @datetime attribute."@en ; a dcs:Addition ] ,
+			[ rdfs:label "Support HTML5 <data> element, and @value attribute."@en ; a dcs:Addition ] ,
+			[ rdfs:label "@vocab takes precedence over terms."@en ; a dcs:Update ] ,
+			[ rdfs:label "Implement support for @property with resource objects."@en ; a dcs:Update ] ,
+			[ rdfs:label "Change RDFa 1.1 @typeof bindings; can bind to objects."@en ; a dcs:Update ] ,
+			[ rdfs:label "Roll back @inlist plus @rev support."@en ; a dcs:Removal ] ,
+			[ rdfs:label "When _:foo found in a predicate, don't generate a random bnode identifier, instead treat as a weird URI."@en ; a dcs:Bugfix ] ,
+			[ rdfs:label "Replace rdfa:hasVocabulary predicate with rdfa:usesVocabulary."@en ; a dcs:Update ] ,
+			[ rdfs:label "RDF::RDFa::Parser::InitialContext."@en ; a dcs:Addition ] ,
+			[ rdfs:label "Dropped a little relative URI resolution hack that I don't think is needed any more."@en ; a dcs:Removal ] ,
+			[ rdfs:label "Remove @profile support, plus entire profile mechanism."@en ; a dcs:Removal ]
 		] .
 

@@ -1,53 +1,19 @@
 package RDF::RDFa::Parser;
 
-=head1 NAME
-
-RDF::RDFa::Parser - flexible RDFa parser
-
-=head1 SYNOPSIS
-
-If you're wanting to work with an RDF::Trine::Model that can be queried with SPARQL, etc:
-
- use RDF::RDFa::Parser;
- my $url     = 'http://example.com/document.html';
- my $options = RDF::RDFa::Parser::Config->new('xhtml', '1.1');
- my $rdfa    = RDF::RDFa::Parser->new_from_url($url, $options);
- my $model   = $rdfa->graph;
-
-For dealing with local data:
-
- use RDF::RDFa::Parser;
- my $base_url = 'http://example.com/document.html';
- my $options  = RDF::RDFa::Parser::Config->new('xhtml', '1.1');
- my $rdfa     = RDF::RDFa::Parser->new($markup, $base_url, $options);
- my $model    = $rdfa->graph;
-
-A simple set of operations for working with Open Graph Protocol data:
-
- use RDF::RDFa::Parser;
- my $url     = 'http://www.rottentomatoes.com/m/net/';
- my $options = RDF::RDFa::Parser::Config->tagsoup;
- my $rdfa    = RDF::RDFa::Parser->new_from_url($url, $options);
- print $rdfa->opengraph('title') . "\n";
- print $rdfa->opengraph('image') . "\n";
-
-=cut
-
 use Carp qw();
 use Data::UUID;
-use File::Spec;
 use File::ShareDir qw(dist_file);
 use HTML::HTML5::Parser;
 use HTML::HTML5::Sanity qw(fix_document);
 use LWP::UserAgent;
 use RDF::RDFa::Parser::Config;
+use RDF::RDFa::Parser::InitialContext;
 use RDF::RDFa::Parser::OpenDocumentObjectModel;
-use RDF::RDFa::Parser::Profile;
 use RDF::Trine 0.130;
 use Scalar::Util qw(blessed);
 use Storable qw(dclone);
 use URI::Escape;
-use URI::URL;
+use URI;
 use XML::LibXML qw(:all);
 use XML::RegExp;
 
@@ -56,10 +22,6 @@ use constant {
 	ERR_ERROR    => 'e',
 	};
 use constant {
-	ERR_CODE_PROFILE_DISABLED      =>  'PROF01',
-	ERR_CODE_PROFILE_HASH          =>  'PROF02',
-	ERR_CODE_PROFILE_NOTURI        =>  'PROF03',
-	ERR_CODE_PROFILE_UNUSABLE      =>  'PROF04',
 	ERR_CODE_RDFXML_MUDDLE         =>  'RDFX01',
 	ERR_CODE_RDFXML_MESS           =>  'RDFX02',
 	ERR_CODE_PREFIX_BUILTIN        =>  'PRFX01',
@@ -83,7 +45,7 @@ use constant {
 use common::sense;
 use 5.010;
 
-our $VERSION = '1.096';
+our $VERSION = '1.096_01';
 our $HAS_AWOL;
 
 BEGIN
@@ -92,33 +54,6 @@ BEGIN
 	eval "use XML::Atom::OWL;";
 	$HAS_AWOL = $@ ? 0 : 1;
 }
-
-=head1 DESCRIPTION
-
-=head2 Constructors
-
-=over 4
-
-=item C<< $p = RDF::RDFa::Parser->new($markup, $base, [$config], [$storage]) >>
-
-This method creates a new RDF::RDFa::Parser object and returns it.
-
-The $markup variable may contain an XHTML/XML string, or a
-XML::LibXML::Document. If a string, the document is parsed using
-XML::LibXML::Parser or HTML::HTML5::Parser, depending on the
-configuration in $config. XML well-formedness errors will cause the
-function to die.
-
-$base is a URL used to resolve relative links found in the document.
-
-$config optionally holds an RDF::RDFa::Parser::Config object which
-determines the set of rules used to parse the RDFa. It defaults to
-XHTML+RDFa 1.1.
-
-B<Advanced usage note:> $storage optionally holds an RDF::Trine::Store
-object. If undef, then a new temporary store is created.
-
-=cut
 
 sub new
 {
@@ -222,25 +157,6 @@ sub new
 	return $self;
 }
 
-=item C<< $p = RDF::RDFa::Parser->new_from_url($url, [$config], [$storage]) >>
-
-=item C<< $p = RDF::RDFa::Parser->new_from_uri($url, [$config], [$storage]) >>
-
-$url is a URL to fetch and parse, or an HTTP::Response object.
-
-$config optionally holds an RDF::RDFa::Parser::Config object which
-determines the set of rules used to parse the RDFa. The default is
-to determine the configuration by looking at the HTTP response
-Content-Type header; it's probably sensible to keep the default.
-
-$storage optionally holds an RDF::Trine::Store object. If undef, then
-a new temporary store is created.
-
-This function can also be called as C<new_from_url> or C<new_from_uri>.
-Same thing.
-
-=cut
-
 sub new_from_url
 {
 	my ($class, $url, $config, $store)= @_;
@@ -282,32 +198,7 @@ sub new_from_url
 
 *new_from_uri = \&new_from_url;
 
-=item C<< $p = RDF::RDFa::Parser->new_from_response($response, [$config], [$storage]) >>
-
-$response is an C<HTTP::Response> object.
-
-Otherwise the same as C<new_from_url>. 
-
-=cut
-
 *new_from_response = \&new_from_url;
-
-=back
-
-=head2 Public Methods
-
-=over 4
-
-=item C<< $p->graph  >>
-
-This will return an RDF::Trine::Model containing all the RDFa
-data found on the page.
-
-B<Advanced usage note:> If passed a graph URI as a parameter,
-will return a single named graph from within the page. This
-feature is only useful if you're using named graphs.
-
-=cut
 
 sub graph
 {
@@ -341,17 +232,6 @@ sub graph
 	}
 }
 
-=item C<< $p->graphs >>
-
-B<Advanced usage only.>
-
-Will return a hashref of all named graphs, where the graph name is a
-key and the value is a RDF::Trine::Model tied to a temporary storage.
-
-This method is only useful if you're using named graphs.
-
-=cut
-
 sub graphs
 {
 	my $self = shift;
@@ -365,33 +245,6 @@ sub graphs
 	}
 	return \%result;
 }
-
-=item C<< $p->opengraph([$property])  >>
-
-If $property is provided, will return the value or list of values (if
-called in list context) for that Open Graph Protocol property. (In pure
-RDF terms, it returns the non-bnode objects of triples where the
-subject is the document base URI; and the predicate is $property,
-with non-URI $property strings taken as having the implicit prefix
-'http://ogp.me/ns#'. There is no distinction between literal and
-non-literal values; literal datatypes and languages are dropped.)
-
-If $property is omitted, returns a list of possible properties.
-
-Example:
-
-  foreach my $property (sort $p->opengraph)
-  {
-    print "$property :\n";
-    foreach my $val (sort $p->opengraph($property))
-    {
-      print "  * $val\n";
-    }
-  }
-
-See also: L<http://opengraphprotocol.org/>.
-
-=cut
 
 sub opengraph
 {
@@ -464,33 +317,11 @@ sub opengraph
 	return wantarray ? @return : $return[0];
 }
 
-=item C<< $p->dom >>
-
-Returns the parsed XML::LibXML::Document.
-
-=cut
-
 sub dom
 {
 	my $self = shift;
 	return $self->{dom};
 }
-
-=item C<< $p->uri( [$other_uri] ) >>
-
-Returns the base URI of the document being parsed. This will usually be the
-same as the base URI provided to the constructor, but may differ if the
-document contains a <base> HTML element.
-
-Optionally it may be passed a parameter - an absolute or relative URI - in
-which case it returns the same URI which it was passed as a parameter, but
-as an absolute URI, resolved relative to the document's base URI.
-
-This seems like two unrelated functions, but if you consider the consequence
-of passing a relative URI consisting of a zero-length string, it in fact makes
-sense.
-
-=cut
 
 sub uri
 {
@@ -520,35 +351,15 @@ sub uri
 		$base = $opts->{'xml_base'} || $self->{baseuri};
 	}
 	
-	my $url = url $param, $base;
-	my $rv  = $url->abs->as_string;
-
-	# This is needed to pass test case 0114.
-	while ($rv =~ m!^(http://.*)(\.\./|\.)+(\.\.|\.)?$!i)
-	{
-		$rv = $1;
-	}
-	
-	return $rv;
+	my $rv = $self->{options}{uri_class}->new_abs($param, $base);
+	return "$rv";
 }
-
-=item C<< $p->errors >>
-
-Returns a list of errors and warnings that occurred during parsing.
-
-=cut
 
 sub errors
 {
 	my $self = shift;
 	return @{$self->{errors}};
 }
-
-=item C<< $p->processor_graph >>
-
-As per C<< $p->errors >> but returns data as an RDF model.
-
-=cut
 
 sub processor_graph
 {
@@ -589,10 +400,6 @@ sub processor_graph
 	};
 
 	my $typemap = {(
-		ERR_CODE_PROFILE_DISABLED      , '',
-		ERR_CODE_PROFILE_HASH          , '',
-		ERR_CODE_PROFILE_NOTURI        , 'ProfileReferenceError',
-		ERR_CODE_PROFILE_UNUSABLE      , 'ProfileReferenceError',
 		ERR_CODE_RDFXML_MUDDLE         , '',
 		ERR_CODE_RDFXML_MESS           , 'DocumentError',
 		ERR_CODE_PREFIX_BUILTIN        , 'DocumentError',
@@ -659,16 +466,6 @@ sub _log_error
 	push @{$self->{errors}}, [$level, $code, $message, \%args];
 }
 
-=item C<< $p->consume >>
-
-B<Advanced usage only.>
-
-The document is parsed for RDFa. As of RDF::RDFa::Parser 1.09x,
-this is called automatically when needed; you probably don't need
-to touch it unless you're doing interesting things with callbacks.
-
-=cut
-
 sub consume
 {
 	my $self = shift;
@@ -697,7 +494,7 @@ sub consume
 		return defined $nsuri ? $element->hasAttributeNS($nsuri, $attribute) : $element->hasAttribute($attribute);
 	};
 
-	$self->_consume_element($self->dom->documentElement, init=>1);
+	$self->_consume_element($self->dom->documentElement, { init => 1});
 	
 	if ($self->{options}{atom_parser} && $HAS_AWOL)
 	{
@@ -726,21 +523,24 @@ sub _consume_element
 	return 0 unless $current_element->nodeType == XML_ELEMENT_NODE;
 	
 	# The evaluation context.
-	my %args = @_;
+	my $args = shift;
 	my ($base, $parent_subject, $parent_subject_elem, $parent_object, $parent_object_elem, 
 		$list_mappings, $uri_mappings, $term_mappings, $incomplete_triples, $language,
 		$graph, $graph_elem, $xml_base);
 		
-	if ($args{'init'})
+	if ($args->{'init'})
 	{
+		my $init = RDF::RDFa::Parser::InitialContext->new(
+			$self->{options}{initial_context},
+		);
 		# At the beginning of processing, an initial [evaluation context] is created
 		$base                = $self->uri;
 		$parent_subject      = $base;
 		$parent_subject_elem = $self->dom->documentElement;
 		$parent_object       = undef;
 		$parent_object_elem  = undef;
-		$uri_mappings        = {};
-		$term_mappings       = {};
+		$uri_mappings        = +{ insensitive => $init->uri_mappings  };
+		$term_mappings       = +{ insensitive => $init->term_mappings };
 		$incomplete_triples  = [];
 		$list_mappings       = {};
 		$language            = undef;
@@ -760,19 +560,19 @@ sub _consume_element
 	}
 	else
 	{
-		$base                = $args{'base'};
-		$parent_subject      = $args{'parent_subject'};
-		$parent_subject_elem = $args{'parent_subject_elem'};
-		$parent_object       = $args{'parent_object'};
-		$parent_object_elem  = $args{'parent_object_elem'};
-		$uri_mappings        = dclone($args{'uri_mappings'});
-		$term_mappings       = dclone($args{'term_mappings'});
-		$incomplete_triples  = $args{'incomplete_triples'};
-		$list_mappings       = $args{'list_mappings'}; #{%{$args{'list_mappings'}}}; # shallow clone
-		$language            = $args{'language'};
-		$graph               = $args{'graph'};
-		$graph_elem          = $args{'graph_elem'};
-		$xml_base            = $args{'xml_base'};		
+		$base                = $args->{'base'};
+		$parent_subject      = $args->{'parent_subject'};
+		$parent_subject_elem = $args->{'parent_subject_elem'};
+		$parent_object       = $args->{'parent_object'};
+		$parent_object_elem  = $args->{'parent_object_elem'};
+		$uri_mappings        = dclone($args->{'uri_mappings'});
+		$term_mappings       = dclone($args->{'term_mappings'});
+		$incomplete_triples  = $args->{'incomplete_triples'};
+		$list_mappings       = $args->{'list_mappings'};
+		$language            = $args->{'language'};
+		$graph               = $args->{'graph'};
+		$graph_elem          = $args->{'graph_elem'};
+		$xml_base            = $args->{'xml_base'};
 	}	
 
 	# Used by OpenDocument, otherwise usually undef.
@@ -785,9 +585,11 @@ sub _consume_element
 	my $new_subject_elem             = undef;
 	my $current_object_resource      = undef;
 	my $current_object_resource_elem = undef;
+	my $typed_resource               = undef;
+	my $typed_resource_elem          = undef;	
 	my $local_uri_mappings           = $uri_mappings;
 	my $local_term_mappings          = $term_mappings;
-	my $local_incomplete_triples     = ();
+	my $local_incomplete_triples     = [];
 	my $current_language             = $language;
 	
 	my $activity = 0;
@@ -941,116 +743,6 @@ sub _consume_element
 			'Encountered embedded RDF/XML content, but not configured to parse or skip it.',
 			element => $current_element,
 			);
-	}
-
-	my @profiles;
-
-	# RDFa 1.1 - @profile
-	if ($self->{options}{profile_attr}
-	and $current_element->hasAttributeNsSafe($rdfans, 'profile'))
-	{
-		push @profiles, $self->_split_tokens( $current_element->getAttributeNsSafe($rdfans, 'profile') );
-	}
-	elsif ($current_element->hasAttributeNsSafe($rdfans, 'profile')
-	and    $current_element->getAttributeNsSafe($rdfans, 'profile') ne 'http://www.w3.org/1999/xhtml/vocab')
-	{
-		$self->_log_error(
-			ERR_WARNING,
-			ERR_CODE_PROFILE_DISABLED,
-			sprintf("Encountered profile '%s', but profiles are disabled.", $current_element->getAttributeNsSafe($rdfans, 'profile')),
-			uri     => $current_element->getAttributeNsSafe($rdfans, 'profile'),
-			element => $current_element,
-			);
-	}
-
-	# Various weird/default profile features.
-	if ($current_element->isSameNode($self->dom->documentElement))
-	{
-		if ($self->{options}{profile_pi})
-		{
-			foreach my $node ($self->dom->childNodes)
-			{
-				next unless $node->nodeType == XML_PI_NODE;
-				next unless $node->nodeName == 'profile';
-				my $uri = $node->getData;
-				$uri =~ s/(^\s+|\s+$)//g;
-				push @profiles, $uri;
-			}
-		}		
-		if ($self->{options}{default_profiles})
-		{
-			push @profiles, $self->_split_tokens( $self->{options}{default_profiles} );
-		}
-	}
-
-	PROFILE: foreach my $uri (reverse @profiles)
-	{
-		next PROFILE unless $uri =~ /\S/; # skip duds
-		
-		if ($uri =~ /^(.*)#/)
-		{
-			my $uri2 = $1;
-			$self->_log_error(
-				ERR_WARNING,
-				ERR_CODE_PROFILE_HASH,
-				sprintf("Profile '%s' contains hash; using '%s' instead.", $uri, $uri2),
-				uri     => $uri,
-				element => $current_element,
-				);
-			$uri = $uri2;
-		}
-
-		unless ($uri =~ /^[A-Z][A-Z0-9\.\+-]*:\S*$/i)
-		{
-			$self->_log_error(
-				ERR_WARNING,
-				ERR_CODE_PROFILE_NOTURI,
-				sprintf("Profile '%s' is not a URI; skipping.", $uri),
-				element => $current_element,
-				);
-			next PROFILE;
-		}
-
-		my $profile = RDF::RDFa::Parser::Profile->new(
-			$self->uri($uri, {'element'=>$current_element,'xml_base'=>$xml_base}),
-			$self);
-		
-		if (blessed($profile) && $profile->isa('RDF::RDFa::Parser::Profile'))
-		{
-			foreach my $mapping ($profile->get_prefixes)
-			{
-				my ($prefix, $uri, $insensitive) = @$mapping;
-				$prefix = lc $prefix if $insensitive;
-				$insensitive = $insensitive ? 'insensitive' : 'sensitive';
-				$local_uri_mappings->{$insensitive}->{$prefix} = $uri;				
-			}
-			foreach my $mapping ($profile->get_terms)
-			{
-				my ($term, $uri, $insensitive, $attrs) = @$mapping;
-				$term = lc $term if $insensitive;
-				$insensitive = $insensitive ? 'insensitive' : 'sensitive';
-				$attrs = [ split /\s+/, ($attrs||'*') ];
-				
-				foreach my $attr (@$attrs)
-				{
-					$local_term_mappings->{$insensitive}->{$attr}->{$term} = $uri;
-				}
-			}
-			my $profile_default_vocab = $profile->get_vocabulary;
-			$local_uri_mappings->{'(VOCAB)'} = $profile_default_vocab
-				if defined $profile_default_vocab;
-		}
-		else
-		{
-			$self->_log_error(
-				ERR_ERROR,
-				ERR_CODE_PROFILE_UNUSABLE,
-				sprintf("Unusable profile '%s'.", $uri),
-				uri     => $uri,
-				element => $current_element,
-				);
-			return 0; # TODO: check this does what I want it to!
-		}
 	}
 	
 	# Next the [current element] is parsed for [URI mapping]s and these are
@@ -1238,7 +930,7 @@ sub _consume_element
 			graph     => $graph_elem,
 			},
 			$base,
-			'http://www.w3.org/ns/rdfa#hasVocabulary',
+			'http://www.w3.org/ns/rdfa#usesVocabulary',
 			$local_uri_mappings->{'(VOCAB)'},
 			$graph);
 	}
@@ -1355,21 +1047,11 @@ sub _consume_element
 		defined $x ? ($x) : ();
 		} @rev;
 
-	# If the [current element] contains no valid @rel or @rev URI, obtained
-	# according to the section on CURIE and URI Processing, then the next step 
-	# is to establish a value for [new subject]. Any of the attributes that 
-	# can carry a resource can set [new subject]
-	unless ($current_element->hasAttributeNsSafe($rdfans, 'rel')
-	||      $current_element->hasAttributeNsSafe($rdfans, 'rev'))
+	my $NEW_SUBJECT_ATTR_ABOUT = sub
 	{
-		# [new subject] is set to the URI obtained from the first match
-		# from the following rules:
-		
-		# by using the URI from @about, if present, obtained according to
-		# the section on CURIE and URI Processing ; 
 		if ($current_element->hasAttributeNsSafe($rdfans, 'about'))
 		{
-			$new_subject = $self->_expand_curie(
+			my $s = $self->_expand_curie(
 				$current_element->getAttributeNsSafe($rdfans, 'about'),
 				element   => $current_element,
 				attribute => 'about',
@@ -1377,27 +1059,71 @@ sub _consume_element
 				terms     => $local_term_mappings,
 				xml_base  => $xml_base,
 				);
-			$new_subject_elem = $current_element;
+			my $e = $current_element;
+			return ($s, $e);
 		}
-			
-		# otherwise, by using the URI from @src, if present, obtained
-		# according to the section on CURIE and URI Processing.
-		if ($current_element->hasAttributeNsSafe($rdfans, 'src') 
-		and !defined $new_subject)
+		return;
+	};
+	
+	my $NEW_SUBJECT_ATTR_SRC = sub
+	{
+		if ($current_element->hasAttributeNsSafe($rdfans, 'src'))
 		{
-			$new_subject = $self->uri(
+			my $s = $self->uri(
 				$current_element->getAttributeNsSafe($rdfans, 'src'),
 				{'element'=>$current_element,'xml_base'=>$hrefsrc_base}
 				);
-			$new_subject_elem = $current_element;
+			my $e = $current_element;
+			return ($s, $e);
 		}
-			
-		# otherwise , by using the URI from @resource, if present, obtained
-		# according to the section on CURIE and URI Processing ; 
-		if ($current_element->hasAttributeNsSafe($rdfans, 'resource')
-		and !defined $new_subject)
+		return;
+	};
+	
+	my $NEW_SUBJECT_DEFAULTS = sub
+	{
+		if ($current_element == $current_element->ownerDocument->documentElement)
 		{
-			$new_subject = $self->_expand_curie(
+			return ($self->uri, $current_element);
+		}
+		
+		# if the element is the head or body element then act as if
+		# there is an empty @about present, and process it according to
+		# the rule for @about, above; 
+		if ($self->{options}{xhtml_elements}
+		&& ($current_element->namespaceURI eq 'http://www.w3.org/1999/xhtml')
+		&& ($current_element->tagName eq 'head' || $current_element->tagName eq 'body'))
+		{
+			return ($parent_object, $parent_object_elem)
+				if $self->{options}{xhtml_elements}==2;
+			return ($self->uri, $current_element);
+		}
+
+		# EXTENSION: atom elements
+		if ($self->{options}{atom_elements}
+		&& ($current_element->namespaceURI eq 'http://www.w3.org/2005/Atom')
+		&& ($current_element->tagName eq 'feed' || $current_element->tagName eq 'entry'))
+		{
+			return ($self->_atom_magic($current_element), $current_element);
+		}
+		
+		return;
+	};
+	
+	my $NEW_SUBJECT_INHERIT = sub
+	{
+		$skip_element = 1
+			if shift
+			&& not $current_element->hasAttributeNsSafe($rdfans, 'property');
+
+		return ($parent_object, $parent_object_elem) if $parent_object;
+		return;
+	};
+	
+	my $NEW_SUBJECT_ATTR_RESOURCE = sub
+	{
+		if ($current_element->hasAttributeNsSafe($rdfans, 'resource'))
+		{
+			my $s = $self->_expand_curie(
 				$current_element->getAttributeNsSafe($rdfans, 'resource'), 
 				element   => $current_element,
 				attribute => 'resource',
@@ -1405,77 +1131,200 @@ sub _consume_element
 				terms     => $local_term_mappings,
 				xml_base  => $xml_base,
 				);
-			$new_subject_elem = $current_element;
+			return ($s, $current_element);
 		}
-			
-		# otherwise , by using the URI from @href, if present, obtained
-		# according to the section on CURIE and URI Processing.
-		if ($current_element->hasAttributeNsSafe($rdfans, 'href')
-		and !defined $new_subject)
+		return;
+	};
+
+	my $NEW_SUBJECT_ATTR_HREF = sub
+	{
+		if ($current_element->hasAttributeNsSafe($rdfans, 'href'))
 		{
-			$new_subject = $self->uri(
+			my $s = $self->uri(
 				$current_element->getAttributeNsSafe($rdfans, 'href'),
 				{'element'=>$current_element,'xml_base'=>$hrefsrc_base}
 				);
-			$new_subject_elem = $current_element;
+			return ($s, $current_element);
 		}
-			
-		# If no URI is provided by a resource attribute, then the first
-		# match from the following rules will apply: 
-		unless (defined $new_subject)
+		return;
+	};
+
+	my $NEW_SUBJECT_ATTR_TYPEOF = sub
+	{
+		if ($current_element->hasAttributeNsSafe($rdfans, 'typeof')
+		or  $current_element->hasAttributeNsSafe($rdfans, 'instanceof'))
 		{
-			# if the element is the head or body element then act as if
-			# there is an empty @about present, and process it according to
-			# the rule for @about, above; 
-			if ($self->{'options'}->{'xhtml_elements'}
-			&& ($current_element->namespaceURI eq 'http://www.w3.org/1999/xhtml')
-			&& ($current_element->tagName eq 'head' || $current_element->tagName eq 'body'))
+			if ($current_element->hasAttributeNsSafe($rdfans, 'instanceof')
+			and not $current_element->hasAttributeNsSafe($rdfans, 'typeof'))
 			{
-				$new_subject = $self->uri;
-				$new_subject_elem = $current_element;
-			}
-
-			# EXTENSION: atom elements
-			elsif ($self->{'options'}->{'atom_elements'}
-			&& ($current_element->namespaceURI eq 'http://www.w3.org/2005/Atom')
-			&& ($current_element->tagName eq 'feed' || $current_element->tagName eq 'entry'))
-			{
-				$new_subject = $self->_atom_magic($current_element);
-				$new_subject_elem = $current_element;
-			}
-
-			# if @instanceof is present, obtained according to the section
-			# on CURIE and URI Processing , then [new subject] is set to be
-			# a newly created [bnode]; 
-			elsif ($current_element->hasAttributeNsSafe($rdfans, 'typeof')
-				||  $current_element->hasAttributeNsSafe($rdfans, 'instanceof'))
-			{
-				$new_subject = $self->bnode($current_element);
-				$new_subject_elem = $current_element;
-				
-				if ($current_element->hasAttributeNsSafe($rdfans, 'instanceof')
-				&& !$current_element->hasAttributeNsSafe($rdfans, 'typeof'))
-				{
-					$self->_log_error(
-						ERR_WARNING,
-						ERR_CODE_INSTANCEOF_USED,
-						"Deprecated \@instanceof found; using it anyway.",
-						element => $current_element,
-						);
-				}
+				$self->_log_error(
+					ERR_WARNING,
+					ERR_CODE_INSTANCEOF_USED,
+					"Deprecated \@instanceof found; using it anyway.",
+					element => $current_element,
+					);
 			}
 			
-			# otherwise, if [parent object] is present, [new subject] is set
-			# to the value of [parent object]. Additionally if @property is not
-			# present then the [skip element] flag is set to 'true'; 
-			elsif ($parent_object)
+			return ($self->bnode($current_element), $current_element);
+		}
+		return;
+	};
+
+	# If the current element contains no @rel or @rev attribute, then the
+	# next step is to establish a value for new subject. This step has two
+	# possible alternatives.
+	#
+	# If the current element contains the @property attribute, but does not
+	# contain either the @content or @datatype attributes, then
+	#
+	if (!$current_element->hasAttributeNsSafe($rdfans, 'rel')
+	and !$current_element->hasAttributeNsSafe($rdfans, 'rev')
+	and  $current_element->hasAttributeNsSafe($rdfans, 'property')
+	and !$current_element->hasAttributeNsSafe($rdfans, 'datatype')
+	and !$current_element->hasAttributeNsSafe($rdfans, 'content')
+	and  $self->{options}{property_resources})
+	{
+		# new subject is set to the resource obtained from the first match
+		# from the following rule:
+		#
+		#   - by using the resource from @about, if present, obtained according
+		#     to the section on CURIE and IRI Processing;
+		#   - otherwise, if the element is the root element of the document, then
+		#     act as if there is an empty @about present, and process it according
+		#     to the rule for @about, above;
+		#   - otherwise, if parent object is present, new subject is set to the
+		#     value of parent object.
+		#
+		# TOBYINK: we add @src to that for RDFa 1.0/1.1 mish-mashes.
+		#
+		foreach my $code (
+			$NEW_SUBJECT_ATTR_ABOUT,
+			($NEW_SUBJECT_ATTR_SRC) x!$self->{options}{src_sets_object},
+			$NEW_SUBJECT_DEFAULTS,
+			$NEW_SUBJECT_INHERIT,
+		) {
+			($new_subject, $new_subject_elem) = $code->() unless $new_subject;
+		}
+		
+		# If @typeof is present then typed resource is set to the resource
+		# obtained from the first match from the following rules:
+		#
+		if ($current_element->hasAttributeNsSafe($rdfans, 'typeof')
+		or  $current_element->hasAttributeNsSafe($rdfans, 'instanceof'))
+		{
+			#   - by using the resource from @about, if present, obtained
+			#     according to the section on CURIE and IRI Processing;
+			#   - otherwise, if the element is the root element of the
+			#     document, then act as if there is an empty @about present
+			#     and process it according to the previous rule;
+			#
+			foreach my $code (
+				$NEW_SUBJECT_ATTR_ABOUT,
+				($NEW_SUBJECT_ATTR_SRC) x!$self->{options}{src_sets_object},
+				$NEW_SUBJECT_DEFAULTS,
+			) {
+				($typed_resource, $typed_resource_elem) = $code->() unless $typed_resource;
+			}
+			
+			#   - otherwise,
+			unless ($typed_resource)
 			{
-				$new_subject = $parent_object;
-				$new_subject_elem = $parent_object_elem;
-				$skip_element = 1
-					unless $current_element->hasAttributeNsSafe($rdfans, 'property');
+				#     + by using the resource from @resource, if present,
+				#       obtained according to the section on CURIE and IRI
+				#       Processing;
+				#     + otherwise, by using the IRI from @href, if present,
+				#       obtained according to the section on CURIE and IRI
+				#       Processing;
+				#     + otherwise, by using the IRI from @src, if present,
+				#       obtained according to the section on CURIE and IRI
+				#       Processing;
+				#
+				foreach my $code (
+					$NEW_SUBJECT_ATTR_RESOURCE,
+					$NEW_SUBJECT_ATTR_HREF,
+					($NEW_SUBJECT_ATTR_SRC) x!!$self->{options}{src_sets_object},
+				) {
+					($typed_resource, $typed_resource_elem) = $code->() unless $typed_resource;
+				}
+				
+				#     + otherwise, the value of typed resource is set to a
+				#       newly created bnode.
+				#
+				unless ($typed_resource)
+				{
+					($typed_resource, $typed_resource_elem) =
+						($self->bnode($current_element), $current_element);
+				}
+				
+				#     + The value of the current object resource is then set
+				#       to the value of typed resource.
+				#
+				($current_object_resource, $current_object_resource_elem) = 
+					($typed_resource, $typed_resource_elem);
 			}
 		}
+	}
+	
+	# otherwise
+	elsif (!$current_element->hasAttributeNsSafe($rdfans, 'rel')
+	   and !$current_element->hasAttributeNsSafe($rdfans, 'rev'))
+	{
+		#   - If the element contains an @about, @href, @src, or @resource
+		#     attribute, new subject is set to the resource obtained as
+		#     follows:
+		#     + by using the resource from @about, if present, obtained
+		#       according to the section on CURIE and IRI Processing;
+		#     + otherwise, by using the resource from @resource, if
+		#       present, obtained according to the section on CURIE and
+		#       IRI Processing;
+		#     + otherwise, by using the IRI from @href, if present,
+		#       obtained according to the section on CURIE and IRI
+		#       Processing;
+		#     + otherwise, by using the IRI from @src, if present,
+		#       obtained according to the section on CURIE and IRI
+		#       Processing.
+		#   - otherwise, if no resource is provided by a resource
+		#     attribute, then the first match from the following rules
+		#     will apply: 
+		#     + if the element is the root element of the document,
+		#       then act as if there is an empty @about present, and
+		#       process it according to the rule for @about, above;
+		#     + otherwise, if @typeof is present, then new subject is
+		#       set to be a newly created bnode;
+		#     + otherwise, if parent object is present, new subject is
+		#       set to the value of parent object. Additionally, if
+		#       @property is not present then the skip element flag is
+		#       set to 'true'.
+		#
+		my $i;
+		foreach my $code (
+			$NEW_SUBJECT_ATTR_ABOUT,
+			($NEW_SUBJECT_ATTR_SRC) x!$self->{options}{src_sets_object},
+			$NEW_SUBJECT_ATTR_RESOURCE,
+			$NEW_SUBJECT_ATTR_HREF,
+			($NEW_SUBJECT_ATTR_SRC) x!!$self->{options}{src_sets_object},
+			$NEW_SUBJECT_DEFAULTS,
+			$NEW_SUBJECT_ATTR_TYPEOF,
+			sub { $NEW_SUBJECT_INHERIT->(1) },
+		) {
+			last if $new_subject;
+			($new_subject, $new_subject_elem) = $code->();
+		}
+
+#		if ($current_element->{'x-foo'})
+#		{
+#			use Data::Dumper;
+#			print Dumper \%args;
+#		}
+		
+		#   - Finally, if @typeof is present, set the typed resource
+		#     to the value of new subject.
+		#
+		if ($current_element->hasAttributeNsSafe($rdfans, 'typeof')
+		or  $current_element->hasAttributeNsSafe($rdfans, 'instanceof'))
+		{
+			($typed_resource, $typed_resource_elem) = ($new_subject, $new_subject_elem);
+		}		
 	}
 	
 	# If the [current element] does contain a valid @rel or @rev URI, obtained 
@@ -1484,150 +1333,59 @@ sub _consume_element
 	# object resource]:
 	else
 	{
-		# [new subject] is set to the URI obtained from the first match
-		# from the following rules: 
-		
-		# by using the URI from @about, if present, obtained according
-		# to the section on CURIE and URI Processing; 
-		if ($current_element->hasAttributeNsSafe($rdfans, 'about'))
-		{
-			$new_subject = $self->_expand_curie(
-				$current_element->getAttributeNsSafe($rdfans, 'about'),
-				element   => $current_element,
-				attribute => 'about',
-				prefixes  => $local_uri_mappings,
-				terms     => $local_term_mappings,
-				xml_base  => $xml_base,
-				);
-			$new_subject_elem = $current_element;
-		}
-			
-		# otherwise, by using the URI from @src, if present, obtained
-		# according to the section on CURIE and URI Processing.
-		if ($current_element->hasAttributeNsSafe($rdfans, 'src')
-		and !defined $new_subject
-		and !$self->{options}{src_sets_object})  # RDFa 1.0/1.1 diff
-		{
-			$new_subject = $self->uri(
-				$current_element->getAttributeNsSafe($rdfans, 'src'),
-				{'element'=>$current_element,'xml_base'=>$hrefsrc_base}
-				);
-			$new_subject_elem = $current_element;
+		foreach my $code (
+			$NEW_SUBJECT_ATTR_ABOUT,
+			($NEW_SUBJECT_ATTR_SRC)    x!$self->{options}{src_sets_object},
+			($NEW_SUBJECT_ATTR_TYPEOF) x!$self->{options}{typeof_resources},
+			$NEW_SUBJECT_DEFAULTS,
+			$NEW_SUBJECT_INHERIT,
+		) {
+			($new_subject, $new_subject_elem) = $code->() unless $new_subject;
 		}
 
-		# If no URI is provided then the first match from the following rules
-		# will apply: 
-		unless (defined $new_subject)
-		{
-			# if the element is the head or body element then act as if
-			# there is an empty @about present, and process it according
-			# to the rule for @about, above; 
-			if ($self->{'options'}->{'xhtml_elements'}
-			&& ($current_element->namespaceURI eq 'http://www.w3.org/1999/xhtml')
-			&& ($current_element->tagName eq 'head' || $current_element->tagName eq 'body'))
-			{
-				$new_subject = $self->uri;
-				$new_subject_elem = $current_element;
-			}
-			
-			# EXTENSION: atom elements
-			elsif ($self->{'options'}->{'atom_elements'}
-			&& ($current_element->namespaceURI eq 'http://www.w3.org/2005/Atom')
-			&& ($current_element->tagName eq 'feed' || $current_element->tagName eq 'entry'))
-			{
-				$new_subject = $self->_atom_magic($current_element);
-				$new_subject_elem = $current_element;
-			}
-			
-			# if @instanceof is present, obtained according to the section
-			# on CURIE and URI Processing, then [new subject] is set to be a
-			# newly created [bnode]; 
-			elsif ($current_element->hasAttributeNsSafe($rdfans, 'typeof')
-				||  $current_element->hasAttributeNsSafe($rdfans, 'instanceof'))
-			{
-				$new_subject = $self->bnode($current_element);
-				$new_subject_elem = $current_element;
-				
-				if ($current_element->hasAttributeNsSafe($rdfans, 'instanceof')
-				&& !$current_element->hasAttributeNsSafe($rdfans, 'typeof'))
-				{
-					$self->_log_error(
-						ERR_WARNING,
-						ERR_CODE_INSTANCEOF_USED,
-						"Deprecated \@instanceof found; using it anyway.",
-						element => $current_element,
-						);
-				}
-			}
-			
-			# otherwise, if [parent object] is present, [new subject] is set 
-			# to that. 
-			elsif ($parent_object)
-			{
-				$new_subject = $parent_object;
-				$new_subject_elem = $parent_object_elem;
-			}
+		foreach my $code (
+			$NEW_SUBJECT_ATTR_RESOURCE,
+			$NEW_SUBJECT_ATTR_HREF,
+			($NEW_SUBJECT_ATTR_SRC) x!!$self->{options}{src_sets_object},
+		) {
+			($current_object_resource, $current_object_resource_elem) = $code->() unless $current_object_resource;
 		}
 		
-		# Then the [current object resource] is set to the URI obtained
-		# from the first match from the following rules: 
-		
-		# by using the URI from @resource, if present, obtained according to
-		# the section on CURIE and URI Processing; 
-		if ($current_element->hasAttributeNsSafe($rdfans, 'resource'))
+		if ($current_element->hasAttributeNsSafe($rdfans, 'typeof')
+		or  $current_element->hasAttributeNsSafe($rdfans, 'instanceof'))
 		{
-			$current_object_resource = $self->_expand_curie(
-				$current_element->getAttributeNsSafe($rdfans, 'resource'), 
-				element   => $current_element,
-				attribute => 'resource',
-				prefixes  => $local_uri_mappings,
-				terms     => $local_term_mappings,
-				xml_base  => $xml_base,
-				);
-			$current_object_resource_elem = $current_element;
+			if ($current_element->hasAttributeNsSafe($rdfans, 'about'))
+			{
+				($typed_resource, $typed_resource_elem) = ($new_subject, $new_subject_elem);
+			}
+			elsif ($self->{options}{typeof_resources})
+			{
+				($current_object_resource, $current_object_resource_elem) =
+					($self->bnode($current_element), $current_element)
+					unless $current_object_resource;
+						
+				($typed_resource, $typed_resource_elem) = ($current_object_resource, $current_object_resource_elem);
+			}
+			else
+			{
+				($typed_resource, $typed_resource_elem) = ($new_subject, $new_subject_elem);
+			}
 		}
-			
-		# otherwise, by using the URI from @href, if present, obtained according
-		# to the section on CURIE and URI Processing.
-		if ($current_element->hasAttributeNsSafe($rdfans, 'href')
-		and !defined $current_object_resource)
-		{
-			$current_object_resource = $self->uri(
-				$current_element->getAttributeNsSafe($rdfans, 'href'),
-				{'element'=>$current_element,'xml_base'=>$hrefsrc_base}
-				);
-			$current_object_resource_elem = $current_element;
-		}
-		
-		# RDFa 1.1 uses @src like @href.
-		if ($current_element->hasAttributeNsSafe($rdfans, 'src')
-		and !defined $current_object_resource
-		and $self->{options}{src_sets_object})
-		{
-			$current_object_resource = $self->uri(
-				$current_element->getAttributeNsSafe($rdfans, 'src'),
-				{'element'=>$current_element,'xml_base'=>$hrefsrc_base}
-				);
-			$current_object_resource_elem = $current_element;
-		}
-		
-		# Note that final value of the [current object resource] will either
-		# be null (from initialization), a full URI or a bnode. 		
 	}
 	
-	# NOTE: x876587
-	if (!defined $new_subject
-	and $current_element->nodePath eq $self->dom->documentElement->nodePath)
-	{
-		$new_subject = $self->uri('');
-		$new_subject_elem = $self->dom->documentElement;
-		$skip_element = 1
-		unless $current_element->hasAttributeNsSafe($rdfans, 'property');
-	}
+#	# NOTE: x876587
+#	if (!defined $new_subject
+#	and $current_element->nodePath eq $self->dom->documentElement->nodePath)
+#	{
+#		$new_subject = $self->uri('');
+#		$new_subject_elem = $self->dom->documentElement;
+#		$skip_element = 1
+#		unless $current_element->hasAttributeNsSafe($rdfans, 'property');
+#	}
 	
-	# If in any of the previous steps a [new subject] was set to a non-null
+	# If in any of the previous steps a [typed resource] was set to a non-null
 	# value, it is now used to provide a subject for type values
-	if ($new_subject
+	if ($typed_resource
 	&& (  $current_element->hasAttributeNsSafe($rdfans, 'instanceof')
 		|| $current_element->hasAttributeNsSafe($rdfans, 'typeof')))
 	{
@@ -1682,17 +1440,14 @@ sub _consume_element
 
 			my $E = { # provenance tracking
 				current   => $current_element,
-				subject   => $new_subject_elem,
+				subject   => $typed_resource_elem,
 				predicate => $current_element,
 				object    => $current_element,
 				graph     => $graph_elem,
 				};
-			$self->_insert_triple_resource($E, $new_subject, RDF_TYPE, $rdftype, $graph);
+			$self->_insert_triple_resource($E, $typed_resource, RDF_TYPE, $rdftype, $graph);
 			$activity++;
 		}
-
-		# Note that none of this block is executed if there is no [new subject]
-		# value, i.e., [new subject] remains null. 
 	}
 
 	# EXTENSION: @longdesc
@@ -1720,9 +1475,14 @@ sub _consume_element
 	# different from the parent object; The list mapping taken from the
 	# evaluation context is set to a new, empty mapping.
 	if (defined $new_subject
-	and $new_subject ne $parent_object)
+	and $new_subject ne $parent_subject || !%$list_mappings)
 	{
-		$list_mappings = {};
+		$list_mappings = {
+			'::meta' => {
+				id    => Data::UUID->new->create_str,
+				owner => $current_element,
+			},
+		};
 	}
 
 	# If in any of the previous steps a [current object resource] was set to
@@ -1741,31 +1501,43 @@ sub _consume_element
 			{
 				# if the local list mapping does not contain a list associated with
 				# the IRI, instantiate a new list and add to local list mappings
-				$list_mappings->{'REL:'.$r} = [] unless defined $list_mappings->{'REL:'.$r};
+				$list_mappings->{$r} = [] unless defined $list_mappings->{$r};
 				
 				# add the current object resource to the list associated with the IRI
 				# in the local list mapping
-				push @{ $list_mappings->{'REL:'.$r} }, [resource => $current_object_resource];
+				push @{ $list_mappings->{$r} }, [resource => $current_object_resource];
+				$activity++;
 			}
 		}
-
-		if ($current_element->hasAttributeNsSafe($rdfans, 'inlist')
-		and $current_element->hasAttributeNsSafe($rdfans, 'rev'))
-		{
-			foreach my $r (@REV)
-			{
-				# if the local list mapping does not contain a list associated with
-				# the IRI, instantiate a new list and add to local list mappings
-				$list_mappings->{'REV:'.$r} = [] unless defined $list_mappings->{'REV:'.$r};
-				
-				# add the current object resource to the list associated with the IRI
-				# in the local list mapping
-				push @{ $list_mappings->{'REV:'.$r} }, [resource => $current_object_resource];
-			}
-		}
-
-		# Predicates for the [ current object resource ] can be set b
-		# using one or both of the @rel and @rev attributes:
+		
+# XXX:@inlist doesn't support @rev?
+#
+#		if ($current_element->hasAttributeNsSafe($rdfans, 'inlist')
+#		and $current_element->hasAttributeNsSafe($rdfans, 'rev'))
+#		{
+#			foreach my $r (@REV)
+#			{
+#				# if the local list mapping does not contain a list associated with
+#				# the IRI, instantiate a new list and add to local list mappings
+#				$list_mappings->{'REV:'.$r} = [] unless defined $list_mappings->{'REV:'.$r};
+#				
+#				# add the current object resource to the list associated with the IRI
+#				# in the local list mapping
+#				push @{ $list_mappings->{'REV:'.$r} }, [resource => $current_object_resource];
+#			}
+#		}
+		
+		my $E = { # provenance tracking
+			current   => $current_element,
+			subject   => $new_subject_elem,
+			predicate => $current_element,
+			object    => $current_object_resource_elem,
+			graph     => $graph_elem,
+			};
+		
+		# Predicates for the [ current object resource ] can be set by
+		# using one or both of the @rel and @rev attributes, but, in
+		# case of the @rel attribute, only if the @inlist is not present:
 		#
 		#    * If present, @rel will contain one or more URIs, obtained
 		#      according to the section on CURIE and URI Processing each
@@ -1778,19 +1550,15 @@ sub _consume_element
 		#      object
 		#          [current object resource] 
 		
-		my $E = { # provenance tracking
-			current   => $current_element,
-			subject   => $new_subject_elem,
-			predicate => $current_element,
-			object    => $current_object_resource_elem,
-			graph     => $graph_elem,
-			};
-		foreach my $r (@REL)
+		unless ($current_element->hasAttributeNsSafe($rdfans, 'inlist'))
 		{
-			$self->_insert_triple_resource($E, $new_subject, $r, $current_object_resource, $graph);
-			$activity++;
+			foreach my $r (@REL)
+			{
+				$self->_insert_triple_resource($E, $new_subject, $r, $current_object_resource, $graph);
+				$activity++;
+			}
 		}
-
+		
 		#    * If present, @rev will contain one or more URIs, obtained
 		#      according to the section on CURIE and URI Processing each
 		#      of which is used to generate a triple as follows:
@@ -1839,7 +1607,7 @@ sub _consume_element
 			map {
 				$current_element->hasAttributeNsSafe($rdfans, 'inlist')
 				?{
-					list              => do { $list_mappings->{'REL:'.$_} = [] unless defined $list_mappings->{'REL:'.$_}; $list_mappings->{'REL:'.$_}; },
+					list              => do { $list_mappings->{$_} = [] unless defined $list_mappings->{$_}; $list_mappings->{$_} },
 					direction         => 'none',
 				}
 				:{
@@ -1863,12 +1631,13 @@ sub _consume_element
 		
 		push @$local_incomplete_triples,
 			map {
-				$current_element->hasAttributeNsSafe($rdfans, 'inlist')
-				?{
-					list              => do { $list_mappings->{'REV:'.$_} = [] unless defined $list_mappings->{'REV:'.$_}; $list_mappings->{'REV:'.$_}; },
-					direction         => 'none',
-				}
-				:{
+#				$current_element->hasAttributeNsSafe($rdfans, 'inlist')
+#				?{
+#					list              => do { $list_mappings->{'REV:'.$_} = [] unless defined $list_mappings->{'REV:'.$_}; $list_mappings->{'REV:'.$_}; },
+#					direction         => 'none',
+#				}
+#				:{
+				+{
 					predicate         => $_,
 					direction         => 'reverse',
 					graph             => $graph,
@@ -1881,9 +1650,9 @@ sub _consume_element
 		$current_object_resource_elem = $current_element;
 	}
 
-	# The next step of the iteration is to establish any [current object
-	# literal
-	my @current_object_literal;
+	# The next step of the iteration is to establish any [current 
+	# property value]
+	my @current_property_value;
 	
 	my @prop = $self->_split_tokens( $current_element->getAttributeNsSafe($rdfans, 'property') );
 
@@ -1909,27 +1678,82 @@ sub _consume_element
 		# to the section on CURIE and URI Processing and then the actual
 		# literal value is obtained as follows:
 		
+		# HTML+RDFa
+		if ($self->{options}{datetime_attr}
+		and (
+			$current_element->hasAttributeNsSafe($rdfans, 'datetime')
+			or $current_element->namespaceURI eq 'http://www.w3.org/1999/xhtml'
+				&& lc($current_element->tagName) eq 'time'
+		)) {
+			@current_property_value = (
+				$current_element->hasAttributeNsSafe($rdfans, 'datetime')
+					? $current_element->getAttributeNsSafe($rdfans, 'datetime')
+					: $self->_element_to_string($current_element)
+			);
+						
+			push @current_property_value, do
+			{
+				local $_ = $current_property_value[0];
+				
+				if (!!$has_datatype == !!1)
+					{ $datatype }
+				elsif (/^(\-?\d{4,})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(:(\d{2})(?:\.\d+)?)?(Z|(?:[\+\-]\d{2}:?\d{2}))?$/i)
+					{ 'http://www.w3.org/2001/XMLSchema#dateTime' }
+				elsif (/^(\d{2}):(\d{2})(:(\d{2})(?:\.\d+)?)?(Z|(?:[\+\-]\d{2}:?\d{2}))?$/i)
+					{ 'http://www.w3.org/2001/XMLSchema#time' }
+				elsif (/^(\-?\d{4,})-(\d{2})-(\d{2})(Z|(?:[\+\-]\d{2}:?\d{2}))?$/i)
+					{ 'http://www.w3.org/2001/XMLSchema#date' }
+				elsif (/^(\-?\d{4,})-(\d{2})(Z|(?:[\+\-]\d{2}:?\d{2}))?$/i)
+					{ 'http://www.w3.org/2001/XMLSchema#gYearMonth' } # XXX: not in spec!
+				elsif (/^(\-?\d{4,})(Z|(?:[\+\-]\d{2}:?\d{2}))?$/i)
+					{ 'http://www.w3.org/2001/XMLSchema#gYear' } # XXX: not in spec!
+				elsif (/^--(\d{2})-(\d{2})(Z|(?:[\+\-]\d{2}:?\d{2}))?$/i)
+					{ 'http://www.w3.org/2001/XMLSchema#gMonthDay' } # XXX: not in spec!
+				elsif (/^---(\d{2})(Z|(?:[\+\-]\d{2}:?\d{2}))?$/i)
+					{ 'http://www.w3.org/2001/XMLSchema#gDay' } # XXX: not in spec!
+				elsif (/^--(\d{2})(Z|(?:[\+\-]\d{2}:?\d{2}))?$/i)
+					{ 'http://www.w3.org/2001/XMLSchema#gMonth' } # XXX: not in spec!
+				elsif (/^P([\d\.]+Y)?([\d\.]+M)?([\d\.]+D)?(T([\d\.]+H)?([\d\.]+M)?([\d\.]+S)?)?$/i)
+					{ 'http://www.w3.org/2001/XMLSchema#duration' }
+				else
+					{ undef }
+			}, $current_language;
+		}
+
+		# HTML+RDFa
+		elsif ($self->{options}{value_attr}
+		and $current_element->hasAttributeNsSafe($rdfans, 'value'))
+		{
+			@current_property_value = (
+				$current_element->getAttributeNsSafe($rdfans, 'value'),
+				($has_datatype ? $datatype : undef),
+				$current_language,
+			);
+		}
+
 		# as a [ plain literal ] if: 
 		#
 		# @content is present; 
-		if ($current_element->hasAttributeNsSafe($rdfans, 'content'))
+		elsif ($current_element->hasAttributeNsSafe($rdfans, 'content'))
 		{
-			@current_object_literal = ($current_element->getAttributeNsSafe($rdfans, 'content'),
+			@current_property_value = (
+				$current_element->getAttributeNsSafe($rdfans, 'content'),
 				($has_datatype ? $datatype : undef),
-				$current_language);
+				$current_language,
+			);
 		}
 		
 		# OpenDocument 1.2 extension
 		elsif (defined $self->{options}{bookmark_end}
-		&& defined $self->{options}{bookmark_name}
-		&& (
-			'{}'.$self->{options}{bookmark_start} eq sprintf('{%s}%s',$current_element->namespaceURI,$current_element->localname)
-			|| $self->{options}{bookmark_start} eq sprintf('{%s}%s',$current_element->namespaceURI,$current_element->localname)
-		))
-		{
-			@current_object_literal = ($self->_element_to_bookmarked_string($current_element),
+		and    defined $self->{options}{bookmark_name}
+		and    sprintf('{%s}%s', $current_element->namespaceURI, $current_element->localname)
+		         ~~ ['{}'.$self->{options}{bookmark_start}, $self->{options}{bookmark_start}]
+		) {
+			@current_property_value = (
+				$self->_element_to_bookmarked_string($current_element),
 				($has_datatype ? $datatype: undef),
-				$current_language);
+				$current_language,
+			);
 		}
 		
 		# Additionally, if there is a value for [current language] then
@@ -1943,20 +1767,23 @@ sub _consume_element
 		# or there are no child nodes;
 		# or the body of the [ current element ] does have non-text
 		#    child nodes but @datatype is present, with an empty value. 
-		elsif ((!$current_element->getElementsByTagName('*')) 
-		||     ($has_datatype and $datatype eq ''))
+		elsif ($has_datatype and $datatype eq '')
 		{
-			@current_object_literal = ($self->_element_to_string($current_element),
+			@current_property_value = (
+				$self->_element_to_string($current_element),
 				($has_datatype ? $datatype: undef),
-				$current_language);
+				$current_language,
+			);
 		}
 
 		# as an [XML literal] if: explicitly rdf:XMLLiteral.
 		elsif ($datatype eq RDF_XMLLIT)
 		{
-			@current_object_literal = ($self->_element_to_xml($current_element, $current_language),
+			@current_property_value = (
+				$self->_element_to_xml($current_element, $current_language),
 				RDF_XMLLIT,
-				$current_language);
+				$current_language,
+			);
 			$recurse = $self->{options}{xmllit_recurse};
 		}
 		
@@ -1974,16 +1801,70 @@ sub _consume_element
 		{
 			if ($current_element->hasAttributeNsSafe($rdfans, 'content'))
 			{
-				@current_object_literal = ($current_element->getAttributeNsSafe($rdfans, 'content'),
+				@current_property_value = (
+					$current_element->getAttributeNsSafe($rdfans, 'content'),
 					$datatype,
-					$current_language);
+					$current_language,
+				);
 			}
 			else
 			{
-				@current_object_literal = ($self->_element_to_string($current_element),
+				@current_property_value = (
+					$self->_element_to_string($current_element),
 					$datatype,
-					$current_language);
+					$current_language,
+				);
 			}
+		}
+		
+		elsif ($self->{options}{property_resources}
+		and    !$current_element->hasAttributeNsSafe($rdfans, 'datatype')
+		and    !$current_element->hasAttributeNsSafe($rdfans, 'content')
+		and    !$current_element->hasAttributeNsSafe($rdfans, 'rel')
+		and    !$current_element->hasAttributeNsSafe($rdfans, 'rev')
+		and (
+			   $current_element->hasAttributeNsSafe($rdfans, 'resource')
+			or $current_element->hasAttributeNsSafe($rdfans, 'href')
+			or $current_element->hasAttributeNsSafe($rdfans, 'src')
+				&& $self->{options}{src_sets_object}
+			))
+		{
+			my $resource;
+			foreach my $attr (qw(resource href src))
+			{
+				next unless $current_element->hasAttributeNsSafe($rdfans, $attr);
+				$resource = $self->_expand_curie(
+					$current_element->getAttributeNsSafe($rdfans, $attr),
+					element   => $current_element,
+					attribute => $attr,
+					prefixes  => $local_uri_mappings,
+					terms     => $local_term_mappings,
+					xml_base  => $xml_base,
+				);
+				last if defined $resource;
+			}
+			@current_property_value = ([ $resource ]) if defined $resource;
+		}
+		
+		elsif ($self->{options}{property_resources}
+		and    defined $typed_resource
+		and    $current_element->hasAttributeNsSafe($rdfans, 'typeof')
+		and   !$current_element->hasAttributeNsSafe($rdfans, 'about'))
+		{
+			@current_property_value = ([ $typed_resource ]);
+		}
+
+		# or all children of the [current element] are text nodes;
+		# or there are no child nodes;
+		# or the body of the [ current element ] does have non-text
+		#    child nodes but @datatype is present, with an empty value. 
+		elsif (not $current_element->getElementsByTagName('*'))
+		{
+			@current_property_value = (
+				$self->_element_to_string($current_element),
+				($has_datatype ? $datatype: undef),
+				$current_language,
+			);
 		}
 
 		# In RDFa 1.0 by default generate an XML Literal;
@@ -1992,14 +1873,14 @@ sub _consume_element
 		{
 			if ($self->{options}{xmllit_default})
 			{
-				@current_object_literal = ($self->_element_to_xml($current_element, $current_language),
+				@current_property_value = ($self->_element_to_xml($current_element, $current_language),
 					RDF_XMLLIT,
 					$current_language);
 				$recurse = $self->{options}{xmllit_recurse};
 			}
 			else
 			{
-				@current_object_literal = ($self->_element_to_string($current_element),
+				@current_property_value = ($self->_element_to_string($current_element),
 					undef,
 					$current_language);
 			}
@@ -2020,7 +1901,7 @@ sub _consume_element
 		};
 	foreach my $property (@prop)
 	{
-		# The [current object literal] is then used with each predicate to
+		# The [current property value] is then used with each predicate to
 		# generate a triple as follows:
 		# 
 		# subject
@@ -2040,17 +1921,32 @@ sub _consume_element
 			);
 		next unless defined $p;
 		
-		if ($current_element->hasAttributeNsSafe($rdfans, 'inlist'))
+		if (ref $current_property_value[0] eq 'ARRAY')
 		{
-			$list_mappings->{'PROPERTY:'.$p} = [] unless defined $list_mappings->{'PROPERTY:'.$p};
-			push @{ $list_mappings->{'PROPERTY:'.$p} }, [literal => @current_object_literal];
+			if ($current_element->hasAttributeNsSafe($rdfans, 'inlist'))
+			{
+				$list_mappings->{$p} = [] unless defined $list_mappings->{$p};
+				push @{ $list_mappings->{$p} }, [resource => $current_property_value[0][0]];
+			}
+			else
+			{
+				$self->_insert_triple_resource($E, $new_subject, $p, $current_property_value[0][0], $graph);
+				$activity++;
+			}
 		}
 		else
 		{
-			$self->_insert_triple_literal($E, $new_subject, $p, @current_object_literal, $graph);
-			$activity++;
+			if ($current_element->hasAttributeNsSafe($rdfans, 'inlist'))
+			{
+				$list_mappings->{$p} = [] unless defined $list_mappings->{$p};
+				push @{ $list_mappings->{$p} }, [literal => @current_property_value];
+			}
+			else
+			{
+				$self->_insert_triple_literal($E, $new_subject, $p, @current_property_value, $graph);
+				$activity++;
+			}
 		}
-		
 		# Once the triple has been created, if the [datatype] of the
 		# [current object literal] is rdf:XMLLiteral, then the [recurse]
 		# flag is set to false.
@@ -2058,128 +1954,6 @@ sub _consume_element
 #			if $datatype eq RDF_XMLLIT;
 	}
 
-	# If the [recurse] flag is 'true', all elements that are children of the 
-	# [current element] are processed using the rules described here, using a 
-	# new [evaluation context], initialized as follows
-	my $flag = 0;
-	if ($recurse)
-	{
-		foreach my $kid ($current_element->getChildrenByTagName('*'))
-		{
-			# If the [skip element] flag is 'true' then the new [evaluation context]
-			# is a copy of the current context that was passed in to this level of
-			# processing, with the [language] and [list of URI mappings] values
-			# replaced with the local values; 
-			if ($skip_element)
-			{
-				$flag = $self->_consume_element($kid,
-					base                => $base,
-					parent_subject      => $parent_subject,
-					parent_subject_elem => $parent_subject_elem,
-					parent_object       => $parent_object,
-					parent_object_elem  => $parent_object_elem,
-					uri_mappings        => $uri_mappings,
-					term_mappings       => $term_mappings,
-					incomplete_triples  => $incomplete_triples,
-					list_mappings       => $list_mappings,
-					language            => $current_language,
-					graph               => $graph,
-					graph_elem          => $graph_elem,
-					xml_base            => $xml_base,
-				) || $flag;
-			}
-			
-			# Otherwise, the values are: 
-			else
-			{
-				$flag = $self->_consume_element($kid,
-					base                => $base,
-					parent_subject      => $new_subject,
-					parent_subject_elem => $new_subject_elem,
-					parent_object       => (defined $current_object_resource ? $current_object_resource : (defined $new_subject ? $new_subject : $parent_subject)),
-					parent_object_elem  => (defined $current_object_resource_elem ? $current_object_resource_elem : (defined $new_subject_elem ? $new_subject_elem : $parent_subject_elem)),
-					uri_mappings        => $local_uri_mappings,
-					term_mappings       => $local_term_mappings,
-					incomplete_triples  => $local_incomplete_triples,
-					list_mappings       => $list_mappings,
-					language            => $current_language,
-					graph               => $graph,
-					graph_elem          => $graph_elem,
-					xml_base            => $xml_base,
-				) || $flag;
-			}
-		}	
-	}
-
-	### use Data::Dumper; print Dumper($list_mappings);
-	
-	# Once all the child elements have been traversed, list triples are 
-	# generated, if necessary.
-	foreach my $iri (keys %$list_mappings)
-	{
-		# For each IRI in the local list mapping, if the equivalent list does
-		# not exist in the evaluation context, indicating that the list was
-		# originally defined on the current element, use the list as follows:
-		next if defined $args{list_mappings}->{$iri};
-		
-		# Create a new 'bnode' array containing newly created bnodes, one for
-		# each element in the list
-		my @bnode = map { $self->bnode; } @{ $list_mappings->{$iri} };		
-		my $first = @bnode ? $bnode[0] : undef;
-		
-		while (my $bnode = shift @bnode)
-		{
-			my $value = shift @{ $list_mappings->{$iri} };
-			my $type  = shift @$value;
-			
-			my $E = { # provenance tracking
-				current   => $current_element,
-				graph     => $graph_elem,
-				};
-			if ($type eq 'literal')
-			{
-				$self->_insert_triple_literal($E, $bnode, RDF_FIRST, @$value, $graph);
-			}
-			else
-			{
-				$self->_insert_triple_resource($E, $bnode, RDF_FIRST, @$value, $graph);
-			}
-
-			if (exists $bnode[0])
-			{
-				$self->_insert_triple_resource($E, $bnode, RDF_REST, $bnode[0], $graph);
-			}
-			else
-			{
-				$self->_insert_triple_resource($E, $bnode, RDF_REST, RDF_NIL, $graph);
-			}
-		}
-		
-		my $E = { # provenance tracking
-			current   => $current_element,
-			subject   => $new_subject_elem,
-			predicate => $current_element,
-			graph     => $graph_elem,
-			};
-		
-		my ($attr, $iri) = split /:/, $iri, 2;
-		
-		if (defined $first)
-		{
-			$attr eq 'REV'
-				? $self->_insert_triple_resource($E, $first, $iri, $new_subject, $graph)
-				: $self->_insert_triple_resource($E, $new_subject, $iri, $first, $graph);
-		}
-		else
-		{
-			$attr eq 'REV'
-				? $self->_insert_triple_resource($E, RDF_NIL, $iri, $new_subject, $graph)
-				: $self->_insert_triple_resource($E, $new_subject, $iri, RDF_NIL, $graph);
-		}
-			
-		$activity++;
-	}
-	
 #	# If the [skip element] flag is 'false', and either: the previous step
 #	# resulted in a 'true' flag, or [new subject] was set to a non-null and
 #	# non-bnode value, then any [incomplete triple]s within the current context
@@ -2233,32 +2007,147 @@ sub _consume_element
 		}
 	}
 
+	# If the [recurse] flag is 'true', all elements that are children of the 
+	# [current element] are processed using the rules described here, using a 
+	# new [evaluation context], initialized as follows
+	my $flag = 0;
+	if ($recurse)
+	{
+		my $evaluation_context;
+		
+		# If the [skip element] flag is 'true' then the new [evaluation context]
+		# is a copy of the current context that was passed in to this level of
+		# processing, with the [language] and [list of URI mappings] values
+		# replaced with the local values; 
+		if ($skip_element)
+		{
+			$evaluation_context = {
+				%$args,
+				base                => $base,
+				language            => $current_language,
+				uri_mappings        => $uri_mappings,
+				term_mappings       => $term_mappings,
+				list_mappings       => $list_mappings,
+#				parent_subject      => $parent_subject,
+#				parent_subject_elem => $parent_subject_elem,
+#				parent_object       => $parent_object,
+#				parent_object_elem  => $parent_object_elem,
+#				incomplete_triples  => $incomplete_triples,
+				graph               => $graph,
+				graph_elem          => $graph_elem,
+				xml_base            => $xml_base,
+				parent              => $args,
+			};
+		}
+		
+		# Otherwise, the values are: 
+		else
+		{
+			$evaluation_context = {
+				base                => $base,
+				parent_subject      => $new_subject,
+				parent_subject_elem => $new_subject_elem,
+				parent_object       => (defined $current_object_resource ? $current_object_resource : (defined $new_subject ? $new_subject : $parent_subject)),
+				parent_object_elem  => (defined $current_object_resource_elem ? $current_object_resource_elem : (defined $new_subject_elem ? $new_subject_elem : $parent_subject_elem)),
+				uri_mappings        => $local_uri_mappings,
+				term_mappings       => $local_term_mappings,
+				incomplete_triples  => $local_incomplete_triples,
+				list_mappings       => $list_mappings,
+				language            => $current_language,
+				graph               => $graph,
+				graph_elem          => $graph_elem,
+				xml_base            => $xml_base,
+				parent              => $args,
+			};
+		}
+		
+		foreach my $kid ($current_element->getChildrenByTagName('*'))
+		{
+			$flag = $self->_consume_element($kid, $evaluation_context) || $flag;
+		}
+	}
+
+	# Once all the child elements have been traversed, list triples are 
+	# generated, if necessary.
+	if ($list_mappings->{'::meta'}{owner} == $current_element)
+	{
+	foreach my $iri (keys %$list_mappings)
+	{
+		next if $iri eq '::meta';
+		
+		# For each IRI in the local list mapping, if the equivalent list does
+		# not exist in the evaluation context, indicating that the list was
+		# originally defined on the current element, use the list as follows:
+		if ($args->{list_mappings}{$iri} == $list_mappings->{$iri}
+		and ref $args->{list_mappings}{$iri} eq 'HASH'
+		and %{ $args->{list_mappings}{$iri} })
+		{
+			next;
+		}
+				
+		# Create a new 'bnode' array containing newly created bnodes, one for
+		# each element in the list
+		my @bnode = map { $self->bnode; } @{ $list_mappings->{$iri} };		
+		my $first = @bnode ? $bnode[0] : undef;
+		
+		while (my $bnode = shift @bnode)
+		{
+			my $value = shift @{ $list_mappings->{$iri} };
+			my $type  = shift @$value;
+			
+			my $E = { # provenance tracking
+				current   => $current_element,
+				graph     => $graph_elem,
+				};
+			if ($type eq 'literal')
+			{
+				$self->_insert_triple_literal($E, $bnode, RDF_FIRST, @$value, $graph);
+			}
+			else
+			{
+				$self->_insert_triple_resource($E, $bnode, RDF_FIRST, @$value, $graph);
+			}
+
+			if (exists $bnode[0])
+			{
+				$self->_insert_triple_resource($E, $bnode, RDF_REST, $bnode[0], $graph);
+			}
+			else
+			{
+				$self->_insert_triple_resource($E, $bnode, RDF_REST, RDF_NIL, $graph);
+			}
+		}
+		
+		my $E = { # provenance tracking
+			current   => $current_element,
+			subject   => $new_subject_elem,
+			predicate => $current_element,
+			graph     => $graph_elem,
+		};
+		
+		#my ($attr, $iri) = split /:/, $iri, 2;
+		my $attr = 'REL';
+		
+		if (defined $first)
+		{
+			$attr eq 'REV'
+				? $self->_insert_triple_resource($E, $first, $iri, $new_subject, $graph)
+				: $self->_insert_triple_resource($E, $new_subject, $iri, $first, $graph);
+		}
+		else
+		{
+			$attr eq 'REV'
+				? $self->_insert_triple_resource($E, RDF_NIL, $iri, $new_subject, $graph)
+				: $self->_insert_triple_resource($E, $new_subject, $iri, RDF_NIL, $graph);
+		}
+			
+		$activity++;
+	}
+	}
+	
 	return 1 if $activity || $new_subject || $flag;
 	return 0;
 }
-
-=item C<< $p->set_callbacks(\%callbacks) >>
-
-B<Advanced usage only.>
-
-Set callback functions for the parser to call on certain events. These are only necessary if
-you want to do something especially unusual.
-
-  $p->set_callbacks({
-    'pretriple_resource' => sub { ... } ,
-    'pretriple_literal'  => sub { ... } ,
-    'ontriple'           => undef ,
-    'onprefix'           => \&some_function ,
-    });
-
-Either of the two pretriple callbacks can be set to the string 'print' instead of a coderef.
-This enables built-in callbacks for printing Turtle to STDOUT.
-
-For details of the callback functions, see the section CALLBACKS. If used, C<set_callbacks>
-must be called I<before> C<consume>. C<set_callbacks> returns a reference to the parser
-object itself.
-
-=cut
 
 sub set_callbacks
 # Set callback functions for handling RDF triples.
@@ -2354,18 +2243,6 @@ sub _print1
 	
 	return;
 }
-
-=item C<< $p->element_subjects >>
-
-B<Advanced usage only.>
-
-Gets/sets a hashref of { xpath => RDF::Trine::Node } mappings.
-
-This is not touched during normal RDFa parsing, only being used by the @role and
-@cite features where RDF resources (i.e. URIs and blank nodes) are needed to
-represent XML elements themselves.
-
-=cut
 
 sub element_subjects
 {
@@ -2858,6 +2735,9 @@ sub __expand_curie
 					element   => $args{element},
 					attribute => $args{attribute},
 					);
+				
+				return $1 if $token =~ /^\[_:(.+)\]$/i;
+				return $token;
 			}
 
 			return $bnode;
@@ -2871,6 +2751,19 @@ sub __expand_curie
 		$token   = $1;
 	}
 	
+	# CURIEs - default vocab
+	if ($token =~ /^($XML::RegExp::NCName)$/
+	and ($is_safe || $args{'attribute'} =~ /^(rel|rev|property|typeof|datatype|role)$/i || $args{'allow_unsafe_default_vocab'}))
+	{
+		my $suffix = $token;
+		
+		if (defined $args{'prefixes'}{'(VOCAB)'})
+			{ return $args{'prefixes'}{'(VOCAB)'} . $suffix; }
+	
+		return undef if $is_safe;
+	}
+
+	
 	# Keywords / terms / whatever-they're-called
 	if ($token =~ /^($XML::RegExp::NCName)$/
 	and ($is_safe || $args{'attribute'} =~ /^(rel|rev|property|typeof|datatype|role)$/i || $args{'allow_unsafe_term'}))
@@ -2878,33 +2771,37 @@ sub __expand_curie
 		my $terms = $args{'terms'};
 		my $attr  = $args{'attribute'};
 		
-		return $terms->{'sensitive'}->{$attr}->{$token}
-			if defined $terms->{'sensitive'}->{ $attr }->{$token};
+		return $terms->{'sensitive'}{$attr}{$token}
+			if defined $terms->{'sensitive'}{ $attr }{$token};
 			
-		return $terms->{'sensitive'}->{'*'}->{$token}
-			if defined $terms->{'sensitive'}->{'*'}->{$token};
+		return $terms->{'sensitive'}{'*'}{$token}
+			if defined $terms->{'sensitive'}{'*'}{$token};
 			
-		return $terms->{'insensitive'}->{$attr}->{lc $token}
-			if defined $terms->{'insensitive'}->{$attr}->{lc $token};
+		return $terms->{'insensitive'}{$attr}{lc $token}
+			if defined $terms->{'insensitive'}{$attr}{lc $token};
 			
-		return $terms->{'insensitive'}->{'*'}->{lc $token}
-			if defined $terms->{'insensitive'}->{'*'}->{lc $token};
+		return $terms->{'insensitive'}{'*'}{lc $token}
+			if defined $terms->{'insensitive'}{'*'}{lc $token};
 	}
 
 	# CURIEs - prefixed
 	if ($token =~ /^($XML::RegExp::NCName)?:(\S*)$/
-	and ($is_safe || $args{'attribute'} =~ /^(rel|rev|property|typeof|datatype|role)$/i || $args{'allow_unsafe_curie'}))
+	and (
+		$is_safe
+		or $args{attribute} =~ /^(rel|rev|property|typeof|datatype|role)$/i
+		or $self->{options}{safe_optional}
+	))
 	{
-		$token =~ /^($XML::RegExp::NCName)?:(\S+)$/;
+		$token =~ /^($XML::RegExp::NCName)?:(\S*)$/;
 		my $prefix = (defined $1 && length $1) ? $1 : '(DEFAULT PREFIX)';
 		my $suffix = $2;
 		
-		if (defined $args{'prefixes'}->{'(DEFAULT PREFIX)'} && $prefix eq '(DEFAULT PREFIX)')
-			{ return $args{'prefixes'}->{'(DEFAULT PREFIX)'} . $suffix; }
-		elsif (defined $args{'prefixes'}->{'sensitive'}->{$prefix})
-			{ return $args{'prefixes'}->{'sensitive'}->{$prefix} . $suffix; }
-		elsif (defined $args{'prefixes'}->{'insensitive'}->{lc $prefix})
-			{ return $args{'prefixes'}->{'insensitive'}->{lc $prefix} . $suffix; }
+		if (defined $args{'prefixes'}{'(DEFAULT PREFIX)'} && $prefix eq '(DEFAULT PREFIX)')
+			{ return $args{'prefixes'}{'(DEFAULT PREFIX)'} . $suffix; }
+		elsif (defined $args{'prefixes'}{'sensitive'}{$prefix})
+			{ return $args{'prefixes'}{'sensitive'}{$prefix} . $suffix; }
+		elsif (defined $args{'prefixes'}{'insensitive'}{lc $prefix})
+			{ return $args{'prefixes'}{'insensitive'}{lc $prefix} . $suffix; }
 
 		if ($is_safe)
 		{
@@ -2923,36 +2820,28 @@ sub __expand_curie
 	}
 
 	# CURIEs - bare prefixes
-	if ($self->{'options'}->{'prefix_bare'}
+	if ($self->{options}{prefix_bare}
 	and $token =~ /^($XML::RegExp::NCName)$/
-	and ($is_safe || $args{'attribute'} =~ /^(rel|rev|property|typeof|datatype|role)$/i || $args{'allow_unsafe_curie'}))
+	and (
+		$is_safe
+		or $args{attribute} =~ /^(rel|rev|property|typeof|datatype|role)$/i
+		or $self->{options}{safe_optional}
+	))
 	{
 		my $prefix = $token;
 		my $suffix = '';
 		
-		if (defined $args{'prefixes'}->{'sensitive'}->{$prefix})
-			{ return $args{'prefixes'}->{'sensitive'}->{$prefix} . $suffix; }
-		elsif (defined $args{'prefixes'}->{'insensitive'}->{lc $prefix})
-			{ return $args{'prefixes'}->{'insensitive'}->{lc $prefix} . $suffix; }
+		if (defined $args{'prefixes'}{'sensitive'}{$prefix})
+			{ return $args{'prefixes'}{'sensitive'}{$prefix} . $suffix; }
+		elsif (defined $args{'prefixes'}{'insensitive'}{lc $prefix})
+			{ return $args{'prefixes'}{'insensitive'}{lc $prefix} . $suffix; }
 	}
 
 	# Absolute URIs
 	if ($token =~ /^[A-Z][A-Z0-9\.\+-]*:/i and !$is_safe
-	and ($self->{'options'}->{'full_uris'} || $args{'attribute'} =~ /^(about|resource|graph)$/i))
+	and ($self->{'options'}{'full_uris'} || $args{'attribute'} =~ /^(about|resource|graph)$/i))
 	{
 		return $token;
-	}
-
-	# CURIEs - default vocab
-	if ($token =~ /^($XML::RegExp::NCName)$/
-	and ($is_safe || $args{'attribute'} =~ /^(rel|rev|property|typeof|datatype|role)$/i || $args{'allow_unsafe_default_vocab'}))
-	{
-		my $suffix = $token;
-		
-		if (defined $args{'prefixes'}->{'(VOCAB)'})
-			{ return $args{'prefixes'}->{'(VOCAB)'} . $suffix; }
-	
-		return undef if $is_safe;
 	}
 
 	# Relative URIs
@@ -2973,7 +2862,201 @@ sub __expand_curie
 	return undef;
 }
 
-1;
+__PACKAGE__
+__END__
+
+=head1 NAME
+
+RDF::RDFa::Parser - flexible RDFa parser
+
+=head1 SYNOPSIS
+
+If you're wanting to work with an RDF::Trine::Model that can be queried with SPARQL, etc:
+
+ use RDF::RDFa::Parser;
+ my $url     = 'http://example.com/document.html';
+ my $options = RDF::RDFa::Parser::Config->new('xhtml', '1.1');
+ my $rdfa    = RDF::RDFa::Parser->new_from_url($url, $options);
+ my $model   = $rdfa->graph;
+
+For dealing with local data:
+
+ use RDF::RDFa::Parser;
+ my $base_url = 'http://example.com/document.html';
+ my $options  = RDF::RDFa::Parser::Config->new('xhtml', '1.1');
+ my $rdfa     = RDF::RDFa::Parser->new($markup, $base_url, $options);
+ my $model    = $rdfa->graph;
+
+A simple set of operations for working with Open Graph Protocol data:
+
+ use RDF::RDFa::Parser;
+ my $url     = 'http://www.rottentomatoes.com/m/net/';
+ my $options = RDF::RDFa::Parser::Config->tagsoup;
+ my $rdfa    = RDF::RDFa::Parser->new_from_url($url, $options);
+ print $rdfa->opengraph('title') . "\n";
+ print $rdfa->opengraph('image') . "\n";
+
+=head1 DESCRIPTION
+
+=head2 Constructors
+
+=over 4
+
+=item C<< $p = RDF::RDFa::Parser->new($markup, $base, [$config], [$storage]) >>
+
+This method creates a new RDF::RDFa::Parser object and returns it.
+
+The $markup variable may contain an XHTML/XML string, or a
+XML::LibXML::Document. If a string, the document is parsed using
+XML::LibXML::Parser or HTML::HTML5::Parser, depending on the
+configuration in $config. XML well-formedness errors will cause the
+function to die.
+
+$base is a URL used to resolve relative links found in the document.
+
+$config optionally holds an RDF::RDFa::Parser::Config object which
+determines the set of rules used to parse the RDFa. It defaults to
+XHTML+RDFa 1.1.
+
+B<Advanced usage note:> $storage optionally holds an RDF::Trine::Store
+object. If undef, then a new temporary store is created.
+
+=item C<< $p = RDF::RDFa::Parser->new_from_url($url, [$config], [$storage]) >>
+
+=item C<< $p = RDF::RDFa::Parser->new_from_uri($url, [$config], [$storage]) >>
+
+$url is a URL to fetch and parse, or an HTTP::Response object.
+
+$config optionally holds an RDF::RDFa::Parser::Config object which
+determines the set of rules used to parse the RDFa. The default is
+to determine the configuration by looking at the HTTP response
+Content-Type header; it's probably sensible to keep the default.
+
+$storage optionally holds an RDF::Trine::Store object. If undef, then
+a new temporary store is created.
+
+This function can also be called as C<new_from_url> or C<new_from_uri>.
+Same thing.
+
+=item C<< $p = RDF::RDFa::Parser->new_from_response($response, [$config], [$storage]) >>
+
+$response is an C<HTTP::Response> object.
+
+Otherwise the same as C<new_from_url>. 
+
+=back
+
+=head2 Public Methods
+
+=over 4
+
+=item C<< $p->graph  >>
+
+This will return an RDF::Trine::Model containing all the RDFa
+data found on the page.
+
+B<Advanced usage note:> If passed a graph URI as a parameter,
+will return a single named graph from within the page. This
+feature is only useful if you're using named graphs.
+
+=item C<< $p->graphs >>
+
+B<Advanced usage only.>
+
+Will return a hashref of all named graphs, where the graph name is a
+key and the value is a RDF::Trine::Model tied to a temporary storage.
+
+This method is only useful if you're using named graphs.
+
+=item C<< $p->opengraph([$property])  >>
+
+If $property is provided, will return the value or list of values (if
+called in list context) for that Open Graph Protocol property. (In pure
+RDF terms, it returns the non-bnode objects of triples where the
+subject is the document base URI; and the predicate is $property,
+with non-URI $property strings taken as having the implicit prefix
+'http://ogp.me/ns#'. There is no distinction between literal and
+non-literal values; literal datatypes and languages are dropped.)
+
+If $property is omitted, returns a list of possible properties.
+
+Example:
+
+  foreach my $property (sort $p->opengraph)
+  {
+    print "$property :\n";
+    foreach my $val (sort $p->opengraph($property))
+    {
+      print "  * $val\n";
+    }
+  }
+
+See also: L<http://opengraphprotocol.org/>.
+
+=item C<< $p->dom >>
+
+Returns the parsed XML::LibXML::Document.
+
+=item C<< $p->uri( [$other_uri] ) >>
+
+Returns the base URI of the document being parsed. This will usually be the
+same as the base URI provided to the constructor, but may differ if the
+document contains a <base> HTML element.
+
+Optionally it may be passed a parameter - an absolute or relative URI - in
+which case it returns the same URI which it was passed as a parameter, but
+as an absolute URI, resolved relative to the document's base URI.
+
+This seems like two unrelated functions, but if you consider the consequence
+of passing a relative URI consisting of a zero-length string, it in fact makes
+sense.
+
+=item C<< $p->errors >>
+
+Returns a list of errors and warnings that occurred during parsing.
+
+=item C<< $p->processor_graph >>
+
+As per C<< $p->errors >> but returns data as an RDF model.
+
+=item C<< $p->consume >>
+
+B<Advanced usage only.>
+
+The document is parsed for RDFa. As of RDF::RDFa::Parser 1.09x,
+this is called automatically when needed; you probably don't need
+to touch it unless you're doing interesting things with callbacks.
+
+=item C<< $p->set_callbacks(\%callbacks) >>
+
+B<Advanced usage only.>
+
+Set callback functions for the parser to call on certain events. These are only necessary if
+you want to do something especially unusual.
+
+  $p->set_callbacks({
+    'pretriple_resource' => sub { ... } ,
+    'pretriple_literal'  => sub { ... } ,
+    'ontriple'           => undef ,
+    'onprefix'           => \&some_function ,
+    });
+
+Either of the two pretriple callbacks can be set to the string 'print' instead of a coderef.
+This enables built-in callbacks for printing Turtle to STDOUT.
+
+For details of the callback functions, see the section CALLBACKS. If used, C<set_callbacks>
+must be called I<before> C<consume>. C<set_callbacks> returns a reference to the parser
+object itself.
+
+=item C<< $p->element_subjects >>
+
+B<Advanced usage only.>
+
+Gets/sets a hashref of { xpath => RDF::Trine::Node } mappings.
+
+This is not touched during normal RDFa parsing, only being used by the @role and
+@cite features where RDF resources (i.e. URIs and blank nodes) are needed to
+represent XML elements themselves.
 
 =back
 
@@ -3190,8 +3273,7 @@ Otherwise, the same as XML.
 
 =item * B<DataRSS>
 
-Support for the E<lt>?profile?E<gt> processing instruction; defines some default
-prefixes. Otherwise, the same as Atom.
+Defines some default prefixes. Otherwise, the same as Atom.
 
 =item * B<OpenDocument XML>
 
@@ -3310,6 +3392,12 @@ SVG) using namespaces:
 Any Config option may be given using auto config, except 'use_rtnlx', 'dom_parser',
 and of course 'auto_config' itself. 
 
+=head2 Profiles
+
+Support for Profiles (an experimental RDFa 1.1 feature) was added in
+version 1.09_00, but dropped after version 1.096, because the feature
+was removed from draft specs.
+
 =head1 BUGS
 
 RDF::RDFa::Parser 0.21 passed all approved tests in the XHTML+RDFa
@@ -3320,6 +3408,27 @@ RDF::RDFa::Parser 0.22 (used in conjunction with HTML::HTML5::Parser
 tests in the HTML4+RDFa and HTML5+RDFa test suites at the time of
 its release; except test cases 0113 and 0121, which the author of
 this module believes mandate incorrect HTML parsing.
+
+RDF::RDFa::Parser 1.096_01 passes all approved tests on the default
+graph (not the processor graph) in the RDFa 1.1 test suite for language
+versions 1.0 and host languages xhtml1, html4 and html5, with the
+following exceptions which are skipped:
+
+=over
+
+=item * B<0140> - wilful violation, pending proof that the test is backed up by the spec.
+
+=item * B<0198> - an XML canonicalisation test that may be dropped in the future.
+
+=item * B<0212> - wilful violation, as passing this test would require regressing on the old RDFa 1.0 test suite.
+
+=item * B<0251> to B<0256> pass with RDFa 1.1 and are skipped in RDFa 1.0 because they use RDFa-1.1-specific syntax.
+
+=item * B<0256> is additionally skipped in HTML4 mode, as the author believes xml:lang should be ignored in HTML versions prior to HTML5.
+
+=item * B<0303> - wilful violation, as this feature is simply awful.
+	
+=back
 
 Please report any bugs to L<http://rt.cpan.org/>.
 
@@ -3338,12 +3447,12 @@ If this is missing, the parser should still work, but will be very slow.
 
 =head1 SEE ALSO
 
-L<RDF::RDFa::Parser::Config>, L<RDF::RDFa::Parser::Profile>. 
+L<RDF::RDFa::Parser::Config>. 
 
 L<XML::LibXML>, L<RDF::Trine>, L<HTML::HTML5::Parser>, L<HTML::HTML5::Sanity>,
 L<RDF::RDFa::Generator>, L<RDF::RDFa::Linter>.
 
-L<http://www.perlrdf.org/>.
+L<http://www.perlrdf.org/>, L<http://rdfa.info>.
 
 =head1 AUTHOR
 
@@ -3356,11 +3465,15 @@ building RDF::Trine models. Neubert Joachim taught me to use XML
 catalogues, which massively speeds up parsing of XHTML files that have
 DTDs.
 
-=head1 COPYRIGHT
+=head1 COPYRIGHT AND LICENCE
 
-Copyright 2008-2011 Toby Inkster
+Copyright 2008-2012 Toby Inkster
 
-This library is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
-=cut
+=head1 DISCLAIMER OF WARRANTIES
+
+THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.

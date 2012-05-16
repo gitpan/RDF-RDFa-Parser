@@ -15,7 +15,7 @@ my:project
 	:homepage       <https://metacpan.org/release/RDF-RDFa-Parser> ;
 	:download-page  <https://metacpan.org/release/RDF-RDFa-Parser> ;
 	:bug-database   <http://rt.cpan.org/Dist/Display.html?Queue=RDF-RDFa-Parser> ;
-	:repository     [ a :SVNRepository ; :browse <http://goddamn.co.uk/svn-web/perlmods/browse/RDF-RDFa-Parser/> ] ;
+	:repository     [ a :HgRepository ; :browse <https://bitbucket.org/tobyink/p5-rdf-rdfa-parser> ] ;
 	:maintainer     toby:i ;
 	:developer      toby:i ;
 	:documenter     toby:i ;
@@ -27,6 +27,9 @@ my:project
 		[ rdfs:label "RDFa"@en ] ,
 		[ rdfs:label "Semantic Web"@en ] ,
 		[ rdfs:label "HTML"@en ] ,
+		[ rdfs:label "HTML 3.2"@en ] ,
+		[ rdfs:label "HTML 4"@en ] ,
+		[ rdfs:label "HTML5"@en ] ,
 		[ rdfs:label "XHTML"@en ] ,
 		[ rdfs:label "Atom"@en ] ,
 		[ rdfs:label "SVG"@en ] ,

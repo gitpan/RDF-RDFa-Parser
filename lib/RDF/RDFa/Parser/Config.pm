@@ -1,6 +1,6 @@
 package RDF::RDFa::Parser::Config;
 
-use base qw(Exporter);
+use parent qw(Exporter);
 use constant {
 	HOST_ATOM     => 'atom',
 	HOST_DATARSS  => 'datarss',
@@ -26,22 +26,21 @@ use RDF::RDFa::Parser::OpenDocumentObjectModel;
 use URI::Escape qw'uri_unescape';
 
 our @EXPORT_OK = qw(HOST_ATOM HOST_DATARSS HOST_HTML4 HOST_HTML5 HOST_OPENDOCUMENT_XML HOST_OPENDOCUMENT_ZIP HOST_SVG HOST_XHTML HOST_XML RDFA_10 RDFA_11);
-our $VERSION = '1.096';
+our $VERSION = '1.097';
 our $CONFIGS = {
 	'host' => {
 		HOST_ATOM() => {
 			'atom_elements'         => 1,
-			'default_profiles'      => 'tag:buzzword.org.uk,2010:rdfa:profile:ietf',
+			'initial_context'       => 'tag:buzzword.org.uk,2010:rdfa:profile:ietf',
 		},
 		HOST_DATARSS() => {
 			'atom_elements'         => 1,
-			'default_profiles'      => 'http://search.yahoo.com/searchmonkey-profile tag:buzzword.org.uk,2010:rdfa:profile:ietf',
-			'profile_pi'            => 1,
+			'initial_context'       => 'http://search.yahoo.com/searchmonkey-profile tag:buzzword.org.uk,2010:rdfa:profile:ietf',
 		},
 		HOST_HTML32() => {
-			'default_profiles'      => 'tag:buzzword.org.uk,2010:rdfa:profile:html32',
 			'dom_parser'            => 'html',
 			'embedded_rdfxml'       => 0,
+			'intial_context'        => 'tag:buzzword.org.uk,2010:rdfa:profile:html32',
 			'prefix_nocase_xmlns'   => 1,
 			'xhtml_base'            => 1,
 			'xhtml_elements'        => 1,
@@ -50,9 +49,10 @@ our $CONFIGS = {
 			'xml_lang'              => 0,
 		},
 		HOST_HTML4() => {
-			'default_profiles'      => 'tag:buzzword.org.uk,2010:rdfa:profile:html4',
+			
 			'dom_parser'            => 'html',
 			'embedded_rdfxml'       => 0,
+			'initial_context'       => 'tag:buzzword.org.uk,2010:rdfa:profile:html4 http://www.w3.org/2011/rdfa-context/html-rdfa-1.1',
 			'prefix_nocase_xmlns'   => 1,
 			'xhtml_base'            => 1,
 			'xhtml_elements'        => 1,
@@ -61,9 +61,9 @@ our $CONFIGS = {
 			'xml_lang'              => 0,
 		},
 		HOST_HTML5() => {
-			'default_profiles'      => 'tag:buzzword.org.uk,2010:rdfa:profile:html5',
 			'dom_parser'            => 'html',
 			'embedded_rdfxml'       => 0,
+			'initial_context'       => 'tag:buzzword.org.uk,2010:rdfa:profile:html5 http://www.w3.org/2011/rdfa-context/html-rdfa-1.1',
 			'prefix_nocase_xmlns'   => 1,
 			'xhtml_base'            => 1,
 			'xhtml_elements'        => 1,
@@ -107,7 +107,7 @@ our $CONFIGS = {
 			'bookmark_name'         => undef,
 			'bookmark_start'        => undef,
 			'cite_attr'             => 0,
-			'default_profiles'      => 'http://www.w3.org/1999/xhtml/vocab',
+			'datetime_attr'         => 0,
 			'dom_parser'            => 'xml',
 			'embedded_rdfxml'       => 1,
 			'full_uris'             => 0,
@@ -116,6 +116,7 @@ our $CONFIGS = {
 			'graph_type'            => 'about',
 			'graph_default'         => undef,
 			'graph_default_trine'   => undef,  # not officially exposed
+			'initial_context'       => 'http://www.w3.org/1999/xhtml/vocab',
 			'inlist_attr'           => 0,
 			'longdesc_attr'         => 0,
 			'lwp_ua'                => undef,
@@ -125,15 +126,18 @@ our $CONFIGS = {
 			'prefix_default'        => 'http://www.w3.org/1999/xhtml/vocab#',
 			'prefix_nocase_attr'    => 0,
 			'prefix_nocase_xmlns'   => 0,
-			'profile_attr'          => 0,
-			'profile_pi'            => 0,
+			'property_resources'    => 0,
 			'role_attr'             => 0,
 			'safe_anywhere'         => 0,
+			'safe_optional'         => 0,
 			'skolemize'             => 0,
 			'src_sets_object'       => 0,
 			'tdb_service'           => 0,
+			'typeof_resources'      => 0,
+			'uri_class'             => 'URI',
 			'use_rtnlx'             => 0,
 			'user_agent'            => undef,
+			'value_attr'            => 0,
 			'vocab_attr'            => 0,
 			'vocab_default'         => undef,
 			'vocab_triple'          => 0,
@@ -155,7 +159,7 @@ our $CONFIGS = {
 			'bookmark_name'         => undef,
 			'bookmark_start'        => undef,
 			'cite_attr'             => 0,
-			'default_profiles'      => 'http://www.w3.org/profile/rdfa-1.1',
+			'datetime_attr'         => 0,
 			'dom_parser'            => 'xml',
 			'embedded_rdfxml'       => 1,
 			'full_uris'             => 1, #diff
@@ -165,6 +169,7 @@ our $CONFIGS = {
 			'graph_default'         => undef,
 			'graph_default_trine'   => undef,
 			'inlist_attr'           => 1, #diff
+			'initial_context'       => 'http://www.w3.org/2011/rdfa-context/rdfa-1.1',
 			'longdesc_attr'         => 0,
 			'lwp_ua'                => undef,
 			'ns'                    => undef,
@@ -173,15 +178,18 @@ our $CONFIGS = {
 			'prefix_default'        => 'http://www.w3.org/1999/xhtml/vocab#',
 			'prefix_nocase_attr'    => 1, #diff
 			'prefix_nocase_xmlns'   => 1, #diff
-			'profile_attr'          => 0,
-			'profile_pi'            => 0,
+			'property_resources'    => 1, #diff
 			'role_attr'             => 0,
 			'safe_anywhere'         => 1, #diff
+			'safe_optional'         => 1, #diff
 			'src_sets_object'       => 1, #diff
 			'skolemize'             => 0,
 			'tdb_service'           => 0,
+			'typeof_resources'      => 1, #diff
+			'uri_class'             => 'URI',
 			'use_rtnlx'             => 0,
 			'user_agent'            => undef,
+			'value_attr'            => 0,
 			'vocab_attr'            => 1, #diff
 			'vocab_default'         => undef,
 			'vocab_triple'          => 1,
@@ -197,18 +205,28 @@ our $CONFIGS = {
 	},
 	'combination' => {
 		'xhtml+1.1' => {
-			'default_profiles'      => 'http://www.w3.org/profile/html-rdfa-1.1',
+			'initial_context'       => 'http://www.w3.org/2011/rdfa-context/xhtml-rdfa-1.1 http://www.w3.org/2011/rdfa-context/rdfa-1.1',
+			'xhtml_elements'        => 2,
 			
 			# XHTML+RDFa 1.1 wants to use @lang, though
 			# neither XHTML's host language rules, nor
 			# RDFa 1.1's rules individually use it.
 			'xhtml_lang'            => 1,
 		},
+		'html32+1.1' => {
+			'datetime_attr'         => 1,
+			'value_attr'            => 1,
+			'xhtml_elements'        => 2,
+		},
 		'html4+1.1' => {
-			'default_profiles'      => 'http://www.w3.org/profile/html-rdfa-1.1',
+			'datetime_attr'         => 1,
+			'value_attr'            => 1,
+			'xhtml_elements'        => 2,
 		},
 		'html5+1.1' => {
-			'default_profiles'      => 'http://www.w3.org/profile/html-rdfa-1.1',
+			'datetime_attr'         => 1,
+			'value_attr'            => 1,
+			'xhtml_elements'        => 2,
 		},
 	},
 };
@@ -246,8 +264,6 @@ sub new
 
 	$self->merge_options(\%options)
 		if %options;
-		
-	$self->_expand_keywords;
 	
 	$self->{'_host'} = $host;
 	$self->{'_rdfa'} = $version;
@@ -259,19 +275,13 @@ sub new
 sub tagsoup
 {
 	my ($class) = @_;
-	my @profiles = qw[
-		http://www.w3.org/1999/xhtml/vocab
-		tag:buzzword.org.uk,2010:rdfa:profile:ietf
-		tag:buzzword.org.uk,2010:rdfa:profile:forgotten
-		];
 	return $class->new(
 		HOST_HTML5,
 		RDFA_LATEST,
 		cite_attr        => 1,
-		default_profiles => join(' ', @profiles),
 		role_attr        => 1,
 		longdesc_attr    => 1,
-		);
+	);
 }
 
 sub host_from_media_type
@@ -390,7 +400,7 @@ sub auto_config
 		next if $o=~ /^(use_rtnlx|dom_parser|auto_config)$/i;
 		$count++;
 		
-		if (lc $o eq 'default_profiles')
+		if (lc $o eq 'initial_context')
 		{
 			$x->{lc $o} .= ' ' . $options->{$o};
 		}
@@ -401,7 +411,6 @@ sub auto_config
 	}
 	
 	$self->merge_options(%$x);
-	$self->_expand_keywords;
 	
 	return $count;
 }
@@ -429,7 +438,7 @@ sub merge_options
 	
 	while (my ($key, $value) = each %opts)
 	{
-		if ($key =~ m'^(default_profiles)$'i
+		if ($key =~ m'^(initial_context)$'i
 		&&  defined $self->{$key}
 		&&  length $self->{$key})
 		{
@@ -445,34 +454,6 @@ sub merge_options
 			$self->{$key}  = $value;
 		}
 	}
-}
-
-sub _expand_keywords
-{
-	my $self  = shift;
-	my $terms = $self->{'keyword_bundles'} || '';
-	
-	warn "keyword_bundles is very deprecated." if length $terms;
-	
-	$self->{default_profiles} .= ' http://www.w3.org/1999/xhtml/vocab'
-		if $terms =~ /\b(rdfa|xhv)\b/i;
-
-	$self->{default_profiles} .= ' tag:buzzword.org.uk,2010:rdfa:profile:'.(lc $1)
-		if $terms =~ /\b(html\d+)\b/i;
-
-	$self->{default_profiles} .= ' tag:buzzword.org.uk,2010:rdfa:profile:ietf'
-		if $terms =~ /\b(iana|ietf)\b/i;
-
-	$self->{default_profiles} .= ' http://www.w3.org/2003/g/data-view'
-		if $terms =~ /\b(grddl)\b/i;
-
-	$self->{default_profiles} .= ' tag:buzzword.org.uk,2010:rdfa:profile:aria-role'
-		if $terms =~ /\b(aria\-role|xhv)\b/i;
-
-	$self->{default_profiles} .= ' tag:buzzword.org.uk,2010:rdfa:profile:xhtml-role'
-		if $terms =~ /\b(xhtml\-role|xhv)\b/i;
-
-	return;
 }
 
 1;
@@ -564,7 +545,9 @@ in brackets.
 
 =item * B<cite_attr> - support @cite [0]
 
-=item * B<default_profiles> - whitespace-separated list of profiles to load by default. ['http://www.w3.org/1999/xhtml/vocab', 'http://www.w3.org/profiles/rdfa-1.1 http://www.w3.org/profiles/html-rdfa-1.1']
+=item * B<datetime_attr> - support @datetime attribute and HTML5 <time> element. [0]
+
+=item * B<default_profiles> - THIS OPTION IS NO LONGER SUPPORTED!
 
 =item * B<dom_parser> - parser to use to turn a markup string into a DOM. 'html', 'opendocument' (i.e. zipped XML) or 'xml'. ['xml']
 
@@ -580,7 +563,9 @@ in brackets.
 
 =item * B<graph_default> - default graph name. [undef]
 
-=item * B<keyword_bundles> - NO LONGER SUPPORTED - use default_profiles instead.
+=item * B<initial_context> - space-separated list of URIs, which must be keys in %RDF::RDFa::Parser::InitialContext::Known [?]
+
+=item * B<inlist_attr> - support @inlist. [0, 1]
 
 =item * B<longdesc_attr> - support @longdesc [0]
 
@@ -600,13 +585,17 @@ in brackets.
 
 =item * B<prefix_nocase_xmlns> - ignore case-sensitivity of CURIE prefixes defined via xmlns. [0, 1]
 
-=item * B<profile_attr> - support RDFa profile attribute. [0]
+=item * B<profile_attr> - THIS OPTION IS NO LONGER SUPPORTED!
 
-=item * B<profile_pi> - support DataRSS-style profile processing instruction. [0]
+=item * B<profile_pi> - THIS OPTION IS NO LONGER SUPPORTED!
+
+=item * B<property_resources> - @property works for resources [0, 1]
 
 =item * B<role_attr> - support for XHTML @role [0]
 
 =item * B<safe_anywhere> - allow Safe CURIEs in @rel/@rev/etc. [0, 1]
+
+=item * B<safe_optional> - allow Unsafe CURIEs in @about/@resource. [0, 1]
 
 =item * B<skolemize> - mint URIs instead of blank node identifiers. [0]
 
@@ -614,9 +603,13 @@ in brackets.
 
 =item * B<tdb_service> - use thing-described-by.org to name some bnodes. [0]
 
+=item * B<typeof_resources> - allow @typeof to occasionally apply to objects rather than subjects. [0, 1]
+
 =item * B<user_agent> - a User-Agent header to use for HTTP requests. Ignored if lwp_ua is provided. [undef]
 
 =item * B<use_rtnlx> - use RDF::Trine::Node::Literal::XML. 0=no, 1=if available. [0]
+
+=item * B<value_attr> - support @value attribute (like @content) [0]
 
 =item * B<vocab_attr> - support @vocab from RDFa 1.1. [0, 1]
 
@@ -626,7 +619,7 @@ in brackets.
 
 =item * B<xhtml_base> - process <base> element. 0=no, 1=yes, 2=use it for RDF/XML too. [1]                      
 
-=item * B<xhtml_elements> - process <head> and <body> specially. [1]
+=item * B<xhtml_elements> - process <head> and <body> specially. (Different special handling for XHTML+RDFa 1.0 and 1.1.) [1, 2]
 
 =item * B<xhtml_lang> - support @lang rather than just @xml:lang. [0]
 
@@ -685,11 +678,15 @@ L<RDF::RDFa::Parser>.
 
 Toby Inkster E<lt>tobyink@cpan.orgE<gt>.
 
-=head1 COPYRIGHT
+=head1 COPYRIGHT AND LICENCE
 
-Copyright 2008-2011 Toby Inkster
+Copyright 2008-2012 Toby Inkster
 
-This library is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
-=cut
+=head1 DISCLAIMER OF WARRANTIES
+
+THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
