@@ -551,7 +551,7 @@ my:v_1-096_01
 		dcs:versus my:v_1-096 ;
 		dcs:item
 			[ rdfs:label "Support CURIEs which end in colon."@en ; a dcs:Bugfix ] ,
-			[ rdfs:label "Currently passing RDFa 1.1 test suite (in 'xt' tests, available in repo but not on CPAN)."@en ; a dcs:Packaging ] ,
+			[ rdfs:label "Currently passing RDFa 1.1 test suite for RDFa 1.0 and 1.1 in HTML4, HTML5 and XHTML1 ('xt' tests, available in repo but not on CPAN)."@en ; a dcs:Packaging ] ,
 			[ rdfs:label "Start cleaning up 'examples' directory."@en ; a dcs:Packaging ] ,
 			[ rdfs:label "Support HTML5 <time> element, and @datetime attribute."@en ; a dcs:Addition ] ,
 			[ rdfs:label "Support HTML5 <data> element, and @value attribute."@en ; a dcs:Addition ] ,
@@ -564,5 +564,21 @@ my:v_1-096_01
 			[ rdfs:label "RDF::RDFa::Parser::InitialContext."@en ; a dcs:Addition ] ,
 			[ rdfs:label "Dropped a little relative URI resolution hack that I don't think is needed any more."@en ; a dcs:Removal ] ,
 			[ rdfs:label "Remove @profile support, plus entire profile mechanism."@en ; a dcs:Removal ]
+		] .
+
+my:project :release my:v_1-096_02 .
+my:v_1-096_02
+	a               :Version ;
+	dc:issued       "2012-05-17"^^xsd:date ;
+	:revision       "1.096_02"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.096_02.tar.gz> ;
+	rdfs:label      "RDFa 1.1 Release Candidate 6.02"@en ;
+	dcs:changeset [
+		dcs:versus my:v_1-096_01 ;
+		dcs:item
+			[ rdfs:label "XHTML5 is now a host language in its own right - a mashup between HTML5 and XHTML1, but with added xml:base support."@en ; a dcs:Addition ] ,
+			[ rdfs:label "The xml:base attribute was being ignored in a few places when it shouldn't have been."@en ; a dcs:Bugfix ] ,
+			[ rdfs:label "Now passing RDFa 1.1 test suite for RDFa 1.1 in XML, SVG and XHTML5."@en ; a dcs:Packaging ] ,
+			[ rdfs:label "Promote an old OpenDocument example to a test case."@en ; a dcs:Packaging ]
 		] .
 

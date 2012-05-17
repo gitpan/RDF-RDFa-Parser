@@ -1,9 +1,46 @@
 package RDF::RDFa::Parser::InitialContext;
 
+use 5.010;
 use strict;
 no warnings;
 
+BEGIN {
+	$RDF::RDFa::Parser::InitialContext::AUTHORITY = 'cpan:TOBYINK';
+	$RDF::RDFa::Parser::InitialContext::VERSION   = '1.096_02';	
+}
+
+my @rdfa_10 = qw(
+	alternate appendix bookmark cite chapter contents copyright
+	first glossary help icon index last license meta next p3pv1 prev
+	role section stylesheet subsection start top up
+);
+
+my @std_roles = qw(
+	banner complementary contentinfo definition main
+	navigation note search
+);
+
+my @aria_roles = qw(
+	alert alertdialog application article button checkbox
+	columnheader combobox dialog directory document grid
+	gridcell group heading img link list listbox listitem
+	log marquee math menu menubar menuitem menuitemcheckbox
+	menuitemradio option presentation progressbar radio
+	radiogroup region row rowheader separator slider
+	spinbutton status tab tablist tabpanel textbox timer
+	toolbar tooltip tree treegrid treeitem
+);
+
 our %Known = (
+
+	'tag:buzzword.org.uk,2010:rdfa:profile:rdfa-1.0' => {
+		map {;
+			"$_\@rel" => "http://www.w3.org/1999/xhtml/vocab#$_",
+			"$_\@rev" => "http://www.w3.org/1999/xhtml/vocab#$_",
+		}
+		@rdfa_10
+	},
+	
 
 	'http://www.w3.org/2011/rdfa-context/rdfa-1.1' => {
 		qw(
@@ -55,39 +92,15 @@ our %Known = (
 	'http://www.w3.org/2011/rdfa-context/html-rdfa-1.1' => {},
 	
 	'tag:buzzword.org.uk,2010:rdfa:profile:xhtml-role' => {
-		map {; "$_\@role" => "http://www.w3.org/1999/xhtml/vocab#$_" }
-		qw(
-			banner complementary contentinfo definition main
-			navigation note search
-		)
+		map {; lc("$_\@role") => "http://www.w3.org/1999/xhtml/vocab#$_" }
+		@rdfa_10, 'itsRules', @std_roles, @aria_roles,
 	},
 
 	'tag:buzzword.org.uk,2010:rdfa:profile:aria-role' => {
 		map {; "$_\@role" => "http://www.w3.org/1999/xhtml/vocab#$_" }
-		qw(
-			alert alertdialog application article button checkbox
-			columnheader combobox dialog directory document grid
-			gridcell group heading img link list listbox listitem
-			log marquee math menu menubar menuitem menuitemcheckbox
-			menuitemradio option presentation progressbar radio
-			radiogroup region row rowheader separator slider
-			spinbutton status tab tablist tabpanel textbox timer
-			toolbar tooltip tree treegrid treeitem
-		)
+		@std_roles, @aria_roles,
 	},
 
-	'http://www.w3.org/1999/xhtml/vocab' => {
-		map {;
-			"$_\@rel" => "http://www.w3.org/1999/xhtml/vocab#$_",
-			"$_\@rev" => "http://www.w3.org/1999/xhtml/vocab#$_",
-		}
-		qw(
-			alternate appendix bookmark cite chapter contents copyright
-			first glossary help icon index last license meta next p3pv1 prev
-			role section stylesheet subsection start top up
-		)
-	},
-	
 	# perl -MWeb::Magic -E'Web::Magic->new("http://www.iana.org/assignments/link-relations/link-relations.xml")->findnodes("//*[local-name()=\"value\"]")->foreach(sub {say $_->textContent})'
 	'tag:buzzword.org.uk,2010:rdfa:profile:ietf' => {
 		map {;

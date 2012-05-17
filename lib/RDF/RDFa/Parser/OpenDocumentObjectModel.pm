@@ -1,6 +1,10 @@
 package RDF::RDFa::Parser::OpenDocumentObjectModel;
 
-our $VERSION = '1.096_01';
+BEGIN {
+	$RDF::RDFa::Parser::OpenDocumentObjectModel::AUTHORITY = 'cpan:TOBYINK';
+	$RDF::RDFa::Parser::OpenDocumentObjectModel::VERSION   = '1.096_02';	
+}
+
 our @Types = qw(
 	application/vnd.oasis.opendocument.chart
 	application/vnd.oasis.opendocument.database

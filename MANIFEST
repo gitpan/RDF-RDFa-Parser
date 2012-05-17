@@ -1,6 +1,7 @@
 Changes
 examples/rdfa10-to-ntriples.pl
 examples/rdfa11-to-ntriples.pl
+examples/xml_rdfa11-to-ntriples.pl
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
 inc/Module/Install/AutoInstall.pm
@@ -160,5 +161,7 @@ t/05namedgraphs.t
 t/06xmlbase.t
 t/07rdfxml.t
 t/08atom.t
+t/09opendocument.odt
+t/09opendocument.t
 TODO
 SIGNATURE                                Public-key signature (added by MakeMaker)

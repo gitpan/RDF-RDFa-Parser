@@ -6,6 +6,16 @@ Home page:    <https://metacpan.org/release/RDF-RDFa-Parser>
 Bug tracker:  <http://rt.cpan.org/Dist/Display.html?Queue=RDF-RDFa-Parser>
 Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
 
+1.096_02  2012-05-17  # RDFa 1.1 Release Candidate 6.02
+
+ - (Addition) XHTML5 is now a host language in its own right - a mashup
+   between HTML5 and XHTML1, but with added xml:base support.
+ - (Bugfix) The xml:base attribute was being ignored in a few places when
+   it shouldn't have been.
+ - (Packaging) Now passing RDFa 1.1 test suite for RDFa 1.1 in XML, SVG and
+   XHTML5.
+ - (Packaging) Promote an old OpenDocument example to a test case.
+
 1.096_01  2012-05-16  # RDFa 1.1 Release Candidate 6.01
 
  - (Addition) RDF::RDFa::Parser::InitialContext.
@@ -14,8 +24,9 @@ Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
  - (Bugfix) Support CURIEs which end in colon.
  - (Bugfix) When _:foo found in a predicate, don't generate a random bnode
    identifier, instead treat as a weird URI.
- - (Packaging) Currently passing RDFa 1.1 test suite (in 'xt' tests,
-   available in repo but not on CPAN).
+ - (Packaging) Currently passing RDFa 1.1 test suite for RDFa 1.0 and 1.1
+   in HTML4, HTML5 and XHTML1 ('xt' tests, available in repo but not on
+   CPAN).
  - (Packaging) Start cleaning up 'examples' directory.
  - (Removal) Dropped a little relative URI resolution hack that I don't
    think is needed any more.

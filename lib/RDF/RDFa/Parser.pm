@@ -1,5 +1,10 @@
 package RDF::RDFa::Parser;
 
+BEGIN {
+	$RDF::RDFa::Parser::AUTHORITY = 'cpan:TOBYINK';
+	$RDF::RDFa::Parser::VERSION   = '1.096_02';	
+}
+
 use Carp qw();
 use Data::UUID;
 use File::ShareDir qw(dist_file);
@@ -45,7 +50,6 @@ use constant {
 use common::sense;
 use 5.010;
 
-our $VERSION = '1.096_01';
 our $HAS_AWOL;
 
 BEGIN
@@ -642,9 +646,11 @@ sub _consume_element
 	# xml:base - important for RDF/XML extension
 	if ($current_element->hasAttributeNsSafe(XML_XML_NS, 'base'))
 	{
+		my $old_base = $xml_base;
 		$xml_base = $current_element->getAttributeNsSafe(XML_XML_NS, 'base');
 		$xml_base =~ s/#.*$//g;
-		$xml_base = $self->uri($xml_base);
+		$xml_base = $self->uri($xml_base,
+			{'element'=>$current_element,'xml_base'=>$old_base});
 	}
 	my $hrefsrc_base = $base;
 	if ($self->{options}{xml_base}==2 && defined $xml_base)
@@ -899,7 +905,8 @@ sub _consume_element
 		if ($self->{'options'}->{'graph_type'} eq 'id'
 		&&  $current_element->hasAttributeNsSafe($xmlns, $attr))
 		{
-			$graph = $self->uri('#' . $current_element->getAttributeNsSafe($xmlns, $attr));
+			$graph = $self->uri('#' . $current_element->getAttributeNsSafe($xmlns, $attr),
+				{'element'=>$current_element,'xml_base'=>$hrefsrc_base});
 		}
 		elsif ($self->{'options'}->{'graph_type'} eq 'about'
 		&&  $current_element->hasAttributeNsSafe($xmlns, $attr))
@@ -958,7 +965,7 @@ sub _consume_element
 			{
 				$self->{element_subjects}->{$current_element->nodePath} = $self->uri(sprintf('#%s',
 					$current_element->getAttribute('id')),
-					{'element'=>$current_element,'xml_base'=>$xml_base});
+					{'element'=>$current_element,'xml_base'=>$hrefsrc_base});
 			}
 			elsif (!defined $self->{element_subjects}->{$current_element->nodePath})
 			{
@@ -994,7 +1001,7 @@ sub _consume_element
 			{
 				$self->{element_subjects}->{$current_element->nodePath} = $self->uri(sprintf('#%s',
 					$current_element->getAttribute('id')),
-					{'element'=>$current_element,'xml_base'=>$xml_base});
+					{'element'=>$current_element,'xml_base'=>$hrefsrc_base});
 			}
 			elsif (!defined $self->{element_subjects}->{$current_element->nodePath})
 			{
@@ -1083,7 +1090,7 @@ sub _consume_element
 	{
 		if ($current_element == $current_element->ownerDocument->documentElement)
 		{
-			return ($self->uri, $current_element);
+			return ($self->uri(undef, {'element'=>$current_element,'xml_base'=>$hrefsrc_base}), $current_element);
 		}
 		
 		# if the element is the head or body element then act as if
@@ -1095,7 +1102,7 @@ sub _consume_element
 		{
 			return ($parent_object, $parent_object_elem)
 				if $self->{options}{xhtml_elements}==2;
-			return ($self->uri, $current_element);
+			return ($self->uri(undef, {'element'=>$current_element,'xml_base'=>$hrefsrc_base}), $current_element);
 		}
 
 		# EXTENSION: atom elements

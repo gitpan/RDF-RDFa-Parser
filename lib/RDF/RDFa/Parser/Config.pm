@@ -1,5 +1,10 @@
 package RDF::RDFa::Parser::Config;
 
+BEGIN {
+	$RDF::RDFa::Parser::Config::AUTHORITY = 'cpan:TOBYINK';
+	$RDF::RDFa::Parser::Config::VERSION   = '1.096_02';	
+}
+
 use parent qw(Exporter);
 use constant {
 	HOST_ATOM     => 'atom',
@@ -11,6 +16,7 @@ use constant {
 	HOST_OPENDOCUMENT_ZIP => 'opendocument-zip',
 	HOST_SVG      => 'svg',
 	HOST_XHTML    => 'xhtml',
+	HOST_XHTML5   => 'xhtml5',
 	HOST_XML      => 'xml',
 };
 use constant {
@@ -25,8 +31,8 @@ use 5.010;
 use RDF::RDFa::Parser::OpenDocumentObjectModel;
 use URI::Escape qw'uri_unescape';
 
-our @EXPORT_OK = qw(HOST_ATOM HOST_DATARSS HOST_HTML4 HOST_HTML5 HOST_OPENDOCUMENT_XML HOST_OPENDOCUMENT_ZIP HOST_SVG HOST_XHTML HOST_XML RDFA_10 RDFA_11);
-our $VERSION = '1.097';
+our @EXPORT_OK = qw(HOST_ATOM HOST_DATARSS HOST_HTML4 HOST_HTML5 HOST_OPENDOCUMENT_XML HOST_OPENDOCUMENT_ZIP HOST_SVG HOST_XHTML HOST_XHTML5 HOST_XML RDFA_10 RDFA_11);
+
 our $CONFIGS = {
 	'host' => {
 		HOST_ATOM() => {
@@ -49,7 +55,6 @@ our $CONFIGS = {
 			'xml_lang'              => 0,
 		},
 		HOST_HTML4() => {
-			
 			'dom_parser'            => 'html',
 			'embedded_rdfxml'       => 0,
 			'initial_context'       => 'tag:buzzword.org.uk,2010:rdfa:profile:html4 http://www.w3.org/2011/rdfa-context/html-rdfa-1.1',
@@ -89,11 +94,16 @@ our $CONFIGS = {
 		},
 		HOST_SVG() => {},
 		HOST_XHTML() => {
-			# 'default_profiles'      => 'http://www.w3.org/1999/xhtml/vocab', ## this differs between XHTML+RDFa 1.0 and 1.1.
 			'embedded_rdfxml'       => 0,
 			'xhtml_base'            => 1,
 			'xhtml_elements'        => 1,
 			'xml_base'              => 0,
+		},
+		HOST_XHTML5() => {
+			'embedded_rdfxml'       => 0,
+			'xhtml_base'            => 1,
+			'xhtml_elements'        => 1,
+			'xml_base'              => 2,
 		},
 		HOST_XML() => {},
 	},
@@ -116,7 +126,7 @@ our $CONFIGS = {
 			'graph_type'            => 'about',
 			'graph_default'         => undef,
 			'graph_default_trine'   => undef,  # not officially exposed
-			'initial_context'       => 'http://www.w3.org/1999/xhtml/vocab',
+			'initial_context'       => 'tag:buzzword.org.uk,2010:rdfa:profile:rdfa-1.0',
 			'inlist_attr'           => 0,
 			'longdesc_attr'         => 0,
 			'lwp_ua'                => undef,
@@ -227,6 +237,13 @@ our $CONFIGS = {
 			'datetime_attr'         => 1,
 			'value_attr'            => 1,
 			'xhtml_elements'        => 2,
+		},
+		'xhtml5+1.1' => {
+			'datetime_attr'         => 1,
+			'initial_context'       => 'tag:buzzword.org.uk,2010:rdfa:profile:html5 http://www.w3.org/2011/rdfa-context/html-rdfa-1.1 http://www.w3.org/2011/rdfa-context/xhtml-rdfa-1.1',
+			'value_attr'            => 1,
+			'xhtml_elements'        => 2,
+			'xhtml_lang'            => 1,
 		},
 	},
 };
@@ -344,7 +361,7 @@ sub lwp_ua
 	
 	unless (ref $self->{lwp_ua})
 	{
-		my $uastr = sprintf('%s/%s ', 'RDF::RDFa::Parser', $VERSION);
+		my $uastr = sprintf('%s/%s ', 'RDF::RDFa::Parser', RDF::RDFa::Parser->VERSION);
 		if (defined $self->{'user_agent'})
 		{
 			if ($self->{'user_agent'} =~ /\s+$/)
@@ -479,7 +496,9 @@ All you need to know about is the constructor:
 
 $host is the host language. Generally you would supply one of the
 following constants; the default is HOST_XHTML. Internet media types
-are accepted (e.g. 'text/html' or 'image/svg+xml').
+are accepted (e.g. 'text/html' or 'image/svg+xml'), but it's usually
+better to use a constant as some media types are shared (e.g. HTML4
+and HTML5 both use the same media type).
 
 =over
 
@@ -500,6 +519,8 @@ are accepted (e.g. 'text/html' or 'image/svg+xml').
 =item * B<< RDF::RDFa::Parser::Config->HOST_SVG >>
 
 =item * B<< RDF::RDFa::Parser::Config->HOST_XHTML >>
+
+=item * B<< RDF::RDFa::Parser::Config->HOST_XHTML5 >>
 
 =item * B<< RDF::RDFa::Parser::Config->HOST_XML >>
 
@@ -551,7 +572,7 @@ in brackets.
 
 =item * B<dom_parser> - parser to use to turn a markup string into a DOM. 'html', 'opendocument' (i.e. zipped XML) or 'xml'. ['xml']
 
-=item * B<embedded_rdfxml> - find plain RDF/XML chunks within document. 0=no, 1=handle, 2=skip. [0]                      
+=item * B<embedded_rdfxml> - find plain RDF/XML chunks within document. 0=no, 1=handle, 2=skip. [0]
 
 =item * B<full_uris> - support full URIs in CURIE-only attributes. [0, 1]
 

@@ -14,15 +14,16 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 3dbb3dfa9d2733cdf37cc84dc2b484632cdb81f2 Changes
+SHA1 abba5ee3c800b81a1a6ac0670190b6649fa946eb Changes
 SHA1 1d54db0b8134eb1c8ea0cee400f9dc612bcaa61a LICENSE
-SHA1 505313e4a2977578739fe9221c509a1a72aefc79 MANIFEST
-SHA1 5ff4190c8aef0919894d6e4468da3e324ae18ac5 META.yml
+SHA1 7f1bcdc8a1af345b168c71fb4bc1d667b01e9e28 MANIFEST
+SHA1 dc3738ad08cdf676acccc1defa95106a9145a0e7 META.yml
 SHA1 5391cc35db658809505db2be59d47aa2f073c376 Makefile.PL
 SHA1 aeb9ee27c60a21abf7ea4de64b2e70265264f49a README
-SHA1 306fc99581a696a96d71282c041f864b29ec219f TODO
+SHA1 a36d1c4b1b56ac35ab203052434620083c15f486 TODO
 SHA1 d884d36734412091fd5b0819addf7c4af7bcf807 examples/rdfa10-to-ntriples.pl
 SHA1 eb1a8c8df6a1c14329925e7fae0425f6670fc33b examples/rdfa11-to-ntriples.pl
+SHA1 832f344929ab00b7cf7cb4db96f5ff5ecb45f21e examples/xml_rdfa11-to-ntriples.pl
 SHA1 5d94bc10deff1dd74e4bc5dfa6fc015e39271f15 inc/Module/AutoInstall.pm
 SHA1 40106479d4e07f379cb82ca1d69fca92e3a40f47 inc/Module/Install.pm
 SHA1 34a24a530ecf0365cc02e4150b06c9bed702a441 inc/Module/Install/AutoInstall.pm
@@ -43,11 +44,11 @@ SHA1 6b807287940754cc31a3db59f2b22e363d5525be inc/Module/Package/Dist/RDF.pm
 SHA1 e31c281782183601e1e057c5914f63269e043932 inc/Scalar/Util.pm
 SHA1 5eae2f71c45a996a296d2445b18d0589307111f0 inc/Scalar/Util/PP.pm
 SHA1 eef6bff62046bff2ce08ba132d0b58fba30f40b4 inc/YAML/Tiny.pm
-SHA1 c18309685bb0fe88563604b0f8112fba4a92a441 lib/RDF/RDFa/Parser.pm
-SHA1 650b10dd1bf31c56b7cbd0788468c60ee7afabdc lib/RDF/RDFa/Parser/Config.pm
-SHA1 22d454e850f7938c842233112c97faca91027eda lib/RDF/RDFa/Parser/InitialContext.pm
-SHA1 0b79e680177ba812d5601991da8e7a910a545ad2 lib/RDF/RDFa/Parser/OpenDocumentObjectModel.pm
-SHA1 c911b6664478ced43d4dceb9d28378d1b02e3f7e meta/changes.ttl
+SHA1 3a75e54d5671a57f524fd94dc60afa33c768b126 lib/RDF/RDFa/Parser.pm
+SHA1 22676f94648157b00897d1b459aff560dcd3e8e6 lib/RDF/RDFa/Parser/Config.pm
+SHA1 d94ad17e563f4feeeff3034619c6c2e2d969aba6 lib/RDF/RDFa/Parser/InitialContext.pm
+SHA1 25d8316cb3d4fe2233eef331f84cd735da392f8a lib/RDF/RDFa/Parser/OpenDocumentObjectModel.pm
+SHA1 4ac9ec4cbdfc68479a7903de1b50d2ab76c42c04 meta/changes.ttl
 SHA1 62f51df6ba01008bfc22f7ce7a55a2604b07588d meta/doap.ttl
 SHA1 c276f86c44b9c1438341d2ef996b7486af3dd9fe meta/makefile.ttl
 SHA1 ef2d6d99d8dfea7159e583f9b5ad35d5814f2271 share/catalogue/index.xml
@@ -177,10 +178,12 @@ SHA1 02dde52dfe7b0dbd8230ffa5e435e68fd40a1baa t/05namedgraphs.t
 SHA1 b2340c8bce4d33e4f01ba2ca25a1c3d904f6f4f6 t/06xmlbase.t
 SHA1 2ba0149b0dd5ca8a950032dfdd660dcf1b2dd68d t/07rdfxml.t
 SHA1 2227c12c1acdc5802ceb16a16b470886b5e7b3ae t/08atom.t
+SHA1 1ae46578afb987cff79ddf20cceea226ea8e37ea t/09opendocument.odt
+SHA1 7c7af2572beef1952d66c6240b1976a71a067a2f t/09opendocument.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAk+z2s4ACgkQzr+BKGoqfTkiLQCgizEIIVtuhwb7Cx+RwaIrY8xu
-llkAoKozxc77kTh66PugXyu29MTj5DbX
-=yC2z
+iEYEARECAAYFAk+1SO0ACgkQzr+BKGoqfTmfJgCfaJRS39MD0atHUZOJvoZj2vUv
+ZMoAn3eEH18XnxdorvzdrCj0KDLf+dn9
+=ORxA
 -----END PGP SIGNATURE-----
