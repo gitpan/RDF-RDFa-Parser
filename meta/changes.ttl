@@ -582,3 +582,23 @@ my:v_1-096_02
 			[ rdfs:label "Promote an old OpenDocument example to a test case."@en ; a dcs:Packaging ]
 		] .
 
+
+my:project :release my:v_1-096_03 .
+my:v_1-096_03
+	a               :Version ;
+	dc:issued       "2012-05-20"^^xsd:date ;
+	:revision       "1.096_03"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.096_03.tar.gz> ;
+	rdfs:label      "RDFa 1.1 Release Candidate 6.03"@en ;
+	dcs:changeset [
+		dcs:versus my:v_1-096_02 ;
+		dcs:item
+			[ rdfs:label "Fix crash in RDFa version guessing."@en ; a dcs:Bugfix ] ,
+			[ rdfs:label "RDF::RDFa::Parser Distiller PSGI in the 'examples' directory."@en ; a dcs:Addition ] ,
+			[ rdfs:label "Allow unparsable markup (i.e. DOM cannot be generated) to result in a simple error (reported via error callbacks, etc) rather than croaking."@en ] ,
+			[ rdfs:label "Slight improvements to processor_graph, to allow it to pass test cases from RDFa 1.1 test suite."@en ] ,
+			[ rdfs:label "New output_graph and processor_and_output_graph methods."@en ; a dcs:Addition ] ,
+			[ rdfs:label "ERR_CODE_CURIE_UNDEFINED is now a warning, not an error."@en ] ,
+			[ rdfs:label "Lots more work on 'xt' tests - can now output EARL, which is bundled in the 'meta' directory of the release."@en ; a dcs:Packaging ]
+		] .
+

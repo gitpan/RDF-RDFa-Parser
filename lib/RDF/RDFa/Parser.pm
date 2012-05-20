@@ -2,7 +2,7 @@ package RDF::RDFa::Parser;
 
 BEGIN {
 	$RDF::RDFa::Parser::AUTHORITY = 'cpan:TOBYINK';
-	$RDF::RDFa::Parser::VERSION   = '1.096_02';	
+	$RDF::RDFa::Parser::VERSION   = '1.096_03';	
 }
 
 use Carp qw();
@@ -27,6 +27,7 @@ use constant {
 	ERR_ERROR    => 'e',
 	};
 use constant {
+	ERR_CODE_HOST                  =>  'HOST01',
 	ERR_CODE_RDFXML_MUDDLE         =>  'RDFX01',
 	ERR_CODE_RDFXML_MESS           =>  'RDFX02',
 	ERR_CODE_PREFIX_BUILTIN        =>  'PRFX01',
@@ -85,55 +86,55 @@ sub new
 
 	# Rationalise $markup and set $dom
 	# ================================
+	Carp::croak("Need to provide markup to parse.") unless defined $markup;
+	
 	my $dom;
-	if (!defined $markup)
-	{
-		die "Need to provide markup to parse.";
-	}
-	elsif (blessed($markup) && $markup->isa('XML::LibXML::Document'))
-	{
-		$dom    = $markup;
-		$markup = $dom->toString;
-	}
-	elsif ($config->{'dom_parser'} =~ /^(opendocument|opendoc|odf|od)$/i)
-	{
-		my $parser = RDF::RDFa::Parser::OpenDocumentObjectModel->new;
-		$dom = $parser->parse_string($markup, $base_uri);
-	}
-	elsif ($config->{'dom_parser'} =~ /^(html|tagsoup|soup)$/i)
-	{
-		my $parser = HTML::HTML5::Parser->new;
-		$dom = fix_document( $parser->parse_string($markup) );
-	}
-	else
-	{
-		my $parser  = XML::LibXML->new;
-		
-		my $catalogue = dist_file('RDF-RDFa-Parser', 'catalogue/index.xml');
-		$parser->load_catalog($catalogue)
-			if -r $catalogue;
-		$parser->validation(0);
-		$parser->recover(1);
-		
-		$dom = $parser->parse_string($markup);
-	}
-
+	eval {
+		if (blessed($markup) && $markup->isa('XML::LibXML::Document'))
+		{
+			$dom    = $markup;
+			$markup = $dom->toString;
+		}
+		elsif ($config->{'dom_parser'} =~ /^(opendocument|opendoc|odf|od|odt)$/i)
+		{
+			my $parser = RDF::RDFa::Parser::OpenDocumentObjectModel->new;
+			$dom = $parser->parse_string($markup, $base_uri);
+		}
+		elsif ($config->{'dom_parser'} =~ /^(html|tagsoup|soup)$/i)
+		{
+			my $parser = HTML::HTML5::Parser->new;
+			$dom = fix_document( $parser->parse_string($markup) );
+		}
+		else
+		{
+			my $parser  = XML::LibXML->new;
+			
+			my $catalogue = dist_file('RDF-RDFa-Parser', 'catalogue/index.xml');
+			$parser->load_catalog($catalogue)
+				if -r $catalogue;
+			$parser->validation(0);
+			#$parser->recover(1);
+			
+			$dom = $parser->parse_string($markup);
+		}
+	};
+	
 	# Rationalise $store
 	# ==================
 	$store = RDF::Trine::Store::Memory->temporary_store
 		unless defined $store;
 
 	my $self = bless {
-		'baseuri'  => $base_uri,
-		'origbase' => $base_uri,
-		'dom'      => $dom,
-		'model'    => RDF::Trine::Model->new($store),
-		'bnodes'   => 0,
-		'sub'      => {},
-		'options'  => $config,
-		'Graphs'   => {},
-		'errors'   => [],
-		'consumed' => 0,
+		baseuri  => $base_uri,
+		origbase => $base_uri,
+		dom      => $dom,
+		model    => RDF::Trine::Model->new($store),
+		bnodes   => 0,
+		sub      => {},
+		options  => $config,
+		Graphs   => {},
+		errors   => [],
+		consumed => 0,
 		}, $class;
 	
 	$config->auto_config($self);
@@ -142,7 +143,7 @@ sub new
 		if $config->{guess_rdfa_version};
 
 	# HTML <base> element.
-	if ($self->{'options'}->{'xhtml_base'})
+	if ($dom and $self->{options}{xhtml_base})
 	{
 		my @bases = $self->dom->getElementsByTagName('base');
 		my $base;
@@ -154,7 +155,7 @@ sub new
 				$base =~ s/#.*$//g;
 			}
 		}
-		$self->{'baseuri'} = $self->uri($base)
+		$self->{baseuri} = $self->uri($base)
 			if defined $base && length $base;
 	}
 	
@@ -234,6 +235,11 @@ sub graph
 	{
 		return $self->{model};
 	}
+}
+
+sub output_graph
+{
+	shift->graph;
 }
 
 sub graphs
@@ -404,6 +410,7 @@ sub processor_graph
 	};
 
 	my $typemap = {(
+		ERR_CODE_HOST                  , 'DocumentError',
 		ERR_CODE_RDFXML_MUDDLE         , '',
 		ERR_CODE_RDFXML_MESS           , 'DocumentError',
 		ERR_CODE_PREFIX_BUILTIN        , 'DocumentError',
@@ -450,6 +457,15 @@ sub processor_graph
 	return $model;
 }
 
+sub processor_and_output_graph
+{
+	my $self  = shift;
+	my $model = RDF::Trine::Model->new;
+	$self->$_->get_statements->each(sub { $model->add_statement(+shift) })
+		foreach qw( processor_graph graph );
+	return $model;
+}
+
 sub _log_error
 {
 	my ($self, $level, $code, $message, %args) = @_;
@@ -472,11 +488,28 @@ sub _log_error
 
 sub consume
 {
-	my $self = shift;
+	my ($self, %args) = @_;
 	
 	return if $self->{'consumed'};
 	$self->{'consumed'}++;
-		
+	
+	if (!$self->{dom})
+	{
+		if ($args{survive})
+		{
+			$self->_log_error(
+				ERR_ERROR,
+				ERR_CODE_HOST,
+				'Input could not be parsed into a DOM!',
+				);
+		}
+		else
+		{
+			Carp::croak("Input could not be parsed into a DOM!");
+		}
+		return $self;
+	}
+	
 	if ($self->{options}{graph})
 	{
 		$self->{options}{graph_attr} = 'graph'
@@ -1908,6 +1941,8 @@ sub _consume_element
 		};
 	foreach my $property (@prop)
 	{
+		next unless defined $current_property_value[0];
+		
 		# The [current property value] is then used with each predicate to
 		# generate a triple as follows:
 		# 
@@ -2814,7 +2849,7 @@ sub __expand_curie
 		{
 			$prefix = ($prefix eq '(DEFAULT PREFIX)') ? '' : $prefix;
 			$self->_log_error(
-				ERR_ERROR,
+				ERR_WARNING,
 				ERR_CODE_CURIE_UNDEFINED,
 				"CURIE '$token' used in safe CURIE, but '$prefix' is undefined.",
 				token     => $token,
@@ -3026,6 +3061,14 @@ Returns a list of errors and warnings that occurred during parsing.
 
 As per C<< $p->errors >> but returns data as an RDF model.
 
+=item C<< $p->output_graph >>
+
+An alias for C<graph>, but does not accept a parameter.
+
+=item C<< $p->processor_and_output_graph >>
+
+Union of the above two graphs.
+
 =item C<< $p->consume >>
 
 B<Advanced usage only.>
@@ -3033,6 +3076,10 @@ B<Advanced usage only.>
 The document is parsed for RDFa. As of RDF::RDFa::Parser 1.09x,
 this is called automatically when needed; you probably don't need
 to touch it unless you're doing interesting things with callbacks.
+
+Calling C<< $p->consume(survive => 1) >> will avoid crashing (e.g.
+when the markup provided cannot be parsed), and instead make more
+errors available in C<< $p->errors >>.
 
 =item C<< $p->set_callbacks(\%callbacks) >>
 

@@ -6,6 +6,19 @@ Home page:    <https://metacpan.org/release/RDF-RDFa-Parser>
 Bug tracker:  <http://rt.cpan.org/Dist/Display.html?Queue=RDF-RDFa-Parser>
 Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
 
+1.096_03  2012-05-20  # RDFa 1.1 Release Candidate 6.03
+
+ - (Addition) New output_graph and processor_and_output_graph methods.
+ - (Addition) RDF::RDFa::Parser Distiller PSGI in the 'examples' directory.
+ - (Bugfix) Fix crash in RDFa version guessing.
+ - (Packaging) Lots more work on 'xt' tests - can now output EARL, which is
+   bundled in the 'meta' directory of the release.
+ - Allow unparsable markup (i.e. DOM cannot be generated) to result in a
+   simple error (reported via error callbacks, etc) rather than croaking.
+ - ERR_CODE_CURIE_UNDEFINED is now a warning, not an error.
+ - Slight improvements to processor_graph, to allow it to pass test cases
+   from RDFa 1.1 test suite.
+
 1.096_02  2012-05-17  # RDFa 1.1 Release Candidate 6.02
 
  - (Addition) XHTML5 is now a host language in its own right - a mashup

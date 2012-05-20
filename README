@@ -135,12 +135,22 @@ DESCRIPTION
     "$p->processor_graph"
         As per "$p->errors" but returns data as an RDF model.
 
+    "$p->output_graph"
+        An alias for "graph", but does not accept a parameter.
+
+    "$p->processor_and_output_graph"
+        Union of the above two graphs.
+
     "$p->consume"
         Advanced usage only.
 
         The document is parsed for RDFa. As of RDF::RDFa::Parser 1.09x, this
         is called automatically when needed; you probably don't need to
         touch it unless you're doing interesting things with callbacks.
+
+        Calling "$p->consume(survive => 1)" will avoid crashing (e.g. when
+        the markup provided cannot be parsed), and instead make more errors
+        available in "$p->errors".
 
     "$p->set_callbacks(\%callbacks)"
         Advanced usage only.

@@ -2,7 +2,7 @@ package RDF::RDFa::Parser::Config;
 
 BEGIN {
 	$RDF::RDFa::Parser::Config::AUTHORITY = 'cpan:TOBYINK';
-	$RDF::RDFa::Parser::Config::VERSION   = '1.096_02';	
+	$RDF::RDFa::Parser::Config::VERSION   = '1.096_03';	
 }
 
 use parent qw(Exporter);
@@ -343,10 +343,19 @@ sub guess_rdfa_version
 	
 	my $rdfans = $config->{'ns'} || undef;
 	my $version;
-	$version = $parser->dom->documentElement->hasAttributeNsSafe($rdfans, 'version')
-		? $parser->dom->documentElement->getAttributeNsSafe($rdfans, 'version')
-		: undef;
-	
+	if ($rdfans)
+	{
+		$version = $parser->dom->documentElement->hasAttributeNS($rdfans, 'version')
+			? $parser->dom->documentElement->getAttributeNS($rdfans, 'version')
+			: undef;
+	}
+	else
+	{
+		$version = $parser->dom->documentElement->hasAttribute('version')
+			? $parser->dom->documentElement->getAttribute('version')
+			: undef;
+	}
+		
 	if (defined $version and $version =~ /\bRDFa\s+(\d+\.\d+)\b/i)
 	{
 		return $config->rehost($config->{'_host'}, $1);

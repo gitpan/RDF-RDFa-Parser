@@ -1,4 +1,8 @@
 Changes
+examples/rdfa-distiller-psgi/app.cgi
+examples/rdfa-distiller-psgi/app.html
+examples/rdfa-distiller-psgi/app.psgi
+examples/rdfa-distiller-psgi/README
 examples/rdfa10-to-ntriples.pl
 examples/rdfa11-to-ntriples.pl
 examples/xml_rdfa11-to-ntriples.pl
@@ -32,6 +36,16 @@ MANIFEST			This list of files
 META.yml
 meta/changes.ttl
 meta/doap.ttl
+meta/earl/html4-rdfa10-tests.ttl
+meta/earl/html4-rdfa11-tests.ttl
+meta/earl/html5-rdfa10-tests.ttl
+meta/earl/html5-rdfa11-tests.ttl
+meta/earl/README
+meta/earl/svg-rdfa11-tests.ttl
+meta/earl/xhtml1-rdfa10-tests.ttl
+meta/earl/xhtml1-rdfa11-tests.ttl
+meta/earl/xhtml5-rdfa11-tests.ttl
+meta/earl/xml-rdfa11-tests.ttl
 meta/makefile.ttl
 README
 share/catalogue/index.xml

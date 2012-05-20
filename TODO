@@ -1,2 +1,3 @@
-* Track changes to RDFa 1.1
-* RDFa-to-Other PSGI
+* Integrate some of the host-language guessing logic from PSGI into modules.
+* Vocabulary expansion (probably not before 1.097).
+* RDF::Trine::Parser-compatible API.
