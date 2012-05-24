@@ -2,7 +2,7 @@ package RDF::RDFa::Parser::Config;
 
 BEGIN {
 	$RDF::RDFa::Parser::Config::AUTHORITY = 'cpan:TOBYINK';
-	$RDF::RDFa::Parser::Config::VERSION   = '1.096_03';	
+	$RDF::RDFa::Parser::Config::VERSION   = '1.096_04';	
 }
 
 use parent qw(Exporter);
@@ -37,11 +37,13 @@ our $CONFIGS = {
 	'host' => {
 		HOST_ATOM() => {
 			'atom_elements'         => 1,
-			'initial_context'       => 'tag:buzzword.org.uk,2010:rdfa:profile:ietf',
+			'initial_context'       => '',
+			'vocab_default'         => 'http://www.iana.org/assignments/relation/',
 		},
 		HOST_DATARSS() => {
 			'atom_elements'         => 1,
-			'initial_context'       => 'http://search.yahoo.com/searchmonkey-profile tag:buzzword.org.uk,2010:rdfa:profile:ietf',
+			'initial_context'       => 'http://search.yahoo.com/searchmonkey-profile',
+			'vocab_default'         => 'http://www.iana.org/assignments/relation/',
 		},
 		HOST_HTML32() => {
 			'dom_parser'            => 'html',

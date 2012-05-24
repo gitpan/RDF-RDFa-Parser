@@ -6,7 +6,7 @@ no warnings;
 
 BEGIN {
 	$RDF::RDFa::Parser::InitialContext::AUTHORITY = 'cpan:TOBYINK';
-	$RDF::RDFa::Parser::InitialContext::VERSION   = '1.096_03';	
+	$RDF::RDFa::Parser::InitialContext::VERSION   = '1.096_04';	
 }
 
 my @rdfa_10 = qw(

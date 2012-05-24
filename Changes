@@ -6,6 +6,13 @@ Home page:    <https://metacpan.org/release/RDF-RDFa-Parser>
 Bug tracker:  <http://rt.cpan.org/Dist/Display.html?Queue=RDF-RDFa-Parser>
 Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
 
+1.096_04  2012-05-24  # RDFa 1.1 Release Candidate 6.04
+
+ - (Addition) RDF::TrineX::Parser::RDFa - a less crufty API layered on top
+   of RDF::RDFa::Parser.
+ - (Update) Implement minor changes for new version of Atom+RDFa draft
+   spec.
+
 1.096_03  2012-05-20  # RDFa 1.1 Release Candidate 6.03
 
  - (Addition) New output_graph and processor_and_output_graph methods.

@@ -8,7 +8,7 @@
 @prefix test: <http://rdfa.info/vocabs/rdfa-test#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-[] dc:date "2012-05-20T20:54:12Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:09Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -16,9 +16,9 @@
 		a earl:TestResult ;
 		earl:outcome earl:passed
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0201.svg> .
-[] dc:date "2012-05-20T20:54:12Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:09Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -26,9 +26,9 @@
 		earl:outcome earl:passed ;
 		a earl:TestResult
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0202.svg> .
-[] dc:date "2012-05-20T20:54:13Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:09Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -36,9 +36,9 @@
 		earl:outcome earl:passed ;
 		a earl:TestResult
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0203.svg> .
-[] dc:date "2012-05-20T20:54:13Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:10Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -46,9 +46,9 @@
 		earl:outcome earl:passed ;
 		a earl:TestResult
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0214.xhtml> .
-[] dc:date "2012-05-20T20:54:13Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:10Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -56,9 +56,9 @@
 		a earl:TestResult ;
 		earl:outcome earl:passed
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0218.xhtml> .
-[] dc:date "2012-05-20T20:54:13Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:10Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -66,9 +66,9 @@
 		earl:outcome earl:passed ;
 		a earl:TestResult
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0219.xhtml> .
-[] dc:date "2012-05-20T20:54:13Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:10Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -76,9 +76,9 @@
 		a earl:TestResult ;
 		earl:outcome earl:passed
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0220.xhtml> .
-[] dc:date "2012-05-20T20:54:13Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:10Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -86,9 +86,9 @@
 		a earl:TestResult ;
 		earl:outcome earl:passed
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0221.xhtml> .
-[] dc:date "2012-05-20T20:54:13Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:10Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -96,9 +96,9 @@
 		a earl:TestResult ;
 		earl:outcome earl:passed
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0222.xhtml> .
-[] dc:date "2012-05-20T20:54:13Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:10Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -106,9 +106,9 @@
 		earl:outcome earl:passed ;
 		a earl:TestResult
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0223.xhtml> .
-[] dc:date "2012-05-20T20:54:13Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:11Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -116,9 +116,9 @@
 		earl:outcome earl:passed ;
 		a earl:TestResult
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0224.xhtml> .
-[] dc:date "2012-05-20T20:54:14Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:11Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -126,9 +126,9 @@
 		earl:outcome earl:passed ;
 		a earl:TestResult
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0225.xhtml> .
-[] dc:date "2012-05-20T20:54:14Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:11Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -136,9 +136,9 @@
 		earl:outcome earl:passed ;
 		a earl:TestResult
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0226.xhtml> .
-[] dc:date "2012-05-20T20:54:14Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:11Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -146,9 +146,9 @@
 		a earl:TestResult ;
 		earl:outcome earl:passed
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0227.xhtml> .
-[] dc:date "2012-05-20T20:54:15Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:12Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -156,9 +156,9 @@
 		a earl:TestResult ;
 		earl:outcome earl:passed
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0234.xhtml> .
-[] dc:date "2012-05-20T20:54:15Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:12Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -166,9 +166,9 @@
 		a earl:TestResult ;
 		earl:outcome earl:passed
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0235.xhtml> .
-[] dc:date "2012-05-20T20:54:15Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:12Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -176,9 +176,9 @@
 		a earl:TestResult ;
 		earl:outcome earl:passed
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0236.xhtml> .
-[] dc:date "2012-05-20T20:54:15Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:12Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -186,9 +186,9 @@
 		earl:outcome earl:passed ;
 		a earl:TestResult
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0237.xhtml> .
-[] dc:date "2012-05-20T20:54:15Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:13Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -196,9 +196,9 @@
 		earl:outcome earl:passed ;
 		a earl:TestResult
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0238.xhtml> .
-[] dc:date "2012-05-20T20:54:15Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:13Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -206,9 +206,9 @@
 		earl:outcome earl:passed ;
 		a earl:TestResult
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0239.xhtml> .
-[] dc:date "2012-05-20T20:54:16Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:14Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -216,9 +216,9 @@
 		a earl:TestResult ;
 		earl:outcome earl:passed
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0259.xhtml> .
-[] dc:date "2012-05-20T20:54:16Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:14Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -226,9 +226,9 @@
 		earl:outcome earl:passed ;
 		a earl:TestResult
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0289.xhtml> .
-[] dc:date "2012-05-20T20:54:16Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:14Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -236,9 +236,9 @@
 		a earl:TestResult ;
 		earl:outcome earl:passed
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0290.xhtml> .
-[] dc:date "2012-05-20T20:54:16Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:14Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -246,9 +246,9 @@
 		earl:outcome earl:passed ;
 		a earl:TestResult
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0291.xhtml> .
-[] dc:date "2012-05-20T20:54:17Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:14Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -256,9 +256,9 @@
 		a earl:TestResult ;
 		earl:outcome earl:passed
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0292.xhtml> .
-[] dc:date "2012-05-20T20:54:17Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:14Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -266,9 +266,9 @@
 		earl:outcome earl:passed ;
 		a earl:TestResult
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0293.xhtml> .
-[] dc:date "2012-05-20T20:54:20Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:18Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -276,9 +276,9 @@
 		earl:outcome earl:passed ;
 		a earl:TestResult
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0295.xhtml> .
-[] dc:date "2012-05-20T20:54:20Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:19Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -286,9 +286,9 @@
 		earl:outcome earl:passed ;
 		a earl:TestResult
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0296.xhtml> .
-[] dc:date "2012-05-20T20:54:21Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:19Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -296,9 +296,9 @@
 		earl:outcome earl:passed ;
 		a earl:TestResult
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0297.xhtml> .
-[] dc:date "2012-05-20T20:54:21Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:20Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -306,9 +306,9 @@
 		a earl:TestResult ;
 		earl:outcome earl:passed
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0298.xhtml> .
-[] dc:date "2012-05-20T20:54:21Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:20Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -316,9 +316,9 @@
 		earl:outcome earl:passed ;
 		a earl:TestResult
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0299.xhtml> .
-[] dc:date "2012-05-20T20:54:21Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:20Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -326,9 +326,9 @@
 		earl:outcome earl:passed ;
 		a earl:TestResult
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0300.xhtml> .
-[] dc:date "2012-05-20T20:54:21Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:20Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -336,9 +336,9 @@
 		a earl:TestResult ;
 		earl:outcome earl:passed
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0301.xhtml> .
-[] dc:date "2012-05-20T20:54:22Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:21Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -346,9 +346,9 @@
 		a earl:TestResult ;
 		earl:outcome earl:passed
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0302.xhtml> .
-[] dc:date "2012-05-20T20:54:22Z"^^xsd:dateTime ;
+[] dc:date "2012-05-24T10:42:21Z"^^xsd:dateTime ;
 	a earl:Assertion ;
 	earl:assertedBy rrp:xt ;
 	earl:mode earl:automatic ;
@@ -356,7 +356,7 @@
 		earl:outcome earl:passed ;
 		a earl:TestResult
 	] ;
-	earl:subject dist:v_1-096_03 ;
+	earl:subject dist:v_1-096_04 ;
 	earl:test <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0304.svg> .
 <http://rdfa.info/test-suite/test-cases/rdfa1.1/svg/0201.svg> dc:identifier "0201" ;
 	dc:title "Expressing an attribute using @property" ;

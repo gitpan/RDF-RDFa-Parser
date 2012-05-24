@@ -2,7 +2,7 @@ package RDF::RDFa::Parser;
 
 BEGIN {
 	$RDF::RDFa::Parser::AUTHORITY = 'cpan:TOBYINK';
-	$RDF::RDFa::Parser::VERSION   = '1.096_03';	
+	$RDF::RDFa::Parser::VERSION   = '1.096_04';	
 }
 
 use Carp qw();
@@ -2940,6 +2940,17 @@ A simple set of operations for working with Open Graph Protocol data:
 
 =head1 DESCRIPTION
 
+L<RDF::TrineX::Parser::RDFa> provides a saner interface for this module.
+If you are new to parsing RDFa with Perl, then that's the best place to
+start.
+
+=head2 Forthcoming API Changes
+
+Some of the logic regarding host language and RDFa version guessing
+is likely to be removed from RDF::RDFa::Parser and
+RDF::RDFa::Parser::Config, and shifted into RDF::TrineX::Parser::RDFa
+instead.
+
 =head2 Constructors
 
 =over 4
@@ -3500,6 +3511,8 @@ If this is missing, the parser should still work, but will be very slow.
 =back
 
 =head1 SEE ALSO
+
+L<RDF::TrineX::Parser::RDFa> provides a saner interface for this module.
 
 L<RDF::RDFa::Parser::Config>. 
 

@@ -30,12 +30,17 @@ lib/RDF/RDFa/Parser.pm
 lib/RDF/RDFa/Parser/Config.pm
 lib/RDF/RDFa/Parser/InitialContext.pm
 lib/RDF/RDFa/Parser/OpenDocumentObjectModel.pm
+lib/RDF/TrineX/Parser/RDFa.pm
 LICENSE
 Makefile.PL
 MANIFEST			This list of files
 META.yml
 meta/changes.ttl
 meta/doap.ttl
+meta/earl/atom-rdfa10-tests.ttl
+meta/earl/atom-rdfa11-tests.ttl
+meta/earl/datarss-rdfa10-tests.ttl
+meta/earl/datarss-rdfa11-tests.ttl
 meta/earl/html4-rdfa10-tests.ttl
 meta/earl/html4-rdfa11-tests.ttl
 meta/earl/html5-rdfa10-tests.ttl
@@ -177,5 +182,6 @@ t/07rdfxml.t
 t/08atom.t
 t/09opendocument.odt
 t/09opendocument.t
+t/10trine.t
 TODO
 SIGNATURE                                Public-key signature (added by MakeMaker)

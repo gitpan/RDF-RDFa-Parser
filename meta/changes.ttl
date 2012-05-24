@@ -602,3 +602,17 @@ my:v_1-096_03
 			[ rdfs:label "Lots more work on 'xt' tests - can now output EARL, which is bundled in the 'meta' directory of the release."@en ; a dcs:Packaging ]
 		] .
 
+my:project :release my:v_1-096_04 .
+my:v_1-096_04
+	a               :Version ;
+	dc:issued       "2012-05-24"^^xsd:date ;
+	:revision       "1.096_04"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.096_04.tar.gz> ;
+	rdfs:label      "RDFa 1.1 Release Candidate 6.04"@en ;
+	dcs:changeset [
+		dcs:versus my:v_1-096_03 ;
+		dcs:item
+			[ rdfs:label "Implement minor changes for new version of Atom+RDFa draft spec."@en ; a dcs:Update ] ,
+			[ rdfs:label "RDF::TrineX::Parser::RDFa - a less crufty API layered on top of RDF::RDFa::Parser."@en ; a dcs:Addition ]
+		] .
+

@@ -29,6 +29,16 @@ SYNOPSIS
      print $rdfa->opengraph('image') . "\n";
 
 DESCRIPTION
+    RDF::TrineX::Parser::RDFa provides a saner interface for this module. If
+    you are new to parsing RDFa with Perl, then that's the best place to
+    start.
+
+  Forthcoming API Changes
+    Some of the logic regarding host language and RDFa version guessing is
+    likely to be removed from RDF::RDFa::Parser and
+    RDF::RDFa::Parser::Config, and shifted into RDF::TrineX::Parser::RDFa
+    instead.
+
   Constructors
     "$p = RDF::RDFa::Parser->new($markup, $base, [$config], [$storage])"
         This method creates a new RDF::RDFa::Parser object and returns it.
@@ -530,6 +540,8 @@ BUGS
             missing, the parser should still work, but will be very slow.
 
 SEE ALSO
+    RDF::TrineX::Parser::RDFa provides a saner interface for this module.
+
     RDF::RDFa::Parser::Config.
 
     XML::LibXML, RDF::Trine, HTML::HTML5::Parser, HTML::HTML5::Sanity,

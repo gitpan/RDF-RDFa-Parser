@@ -14,13 +14,13 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 e52cfe9f70c9e600c24f0b5a90788aaa7b34f703 Changes
+SHA1 e1c7a2117aef662532aec2acc660cbe93b99c12c Changes
 SHA1 1d54db0b8134eb1c8ea0cee400f9dc612bcaa61a LICENSE
-SHA1 2819885d1112dd75754c815be5ceff117ea83585 MANIFEST
-SHA1 42e8cc6586667d7e17ee739ef9e17cf4192e19e1 META.yml
+SHA1 5877ec017254c8e48d5c75a45493c1aa40af5814 MANIFEST
+SHA1 a4c717fabe00fee6890d6648185e49712ac7a4f8 META.yml
 SHA1 5391cc35db658809505db2be59d47aa2f073c376 Makefile.PL
-SHA1 aed9a30baafa211a6eeebeb1cddc60cbfc0de189 README
-SHA1 ba9c606002db1155b457568bc03c4253d9012940 TODO
+SHA1 d52d83df139795d60dd34d6e17c5e2a4c9c2fe71 README
+SHA1 298c81133206bcf0f21168fab0620ae0a692da2d TODO
 SHA1 ac3c1ba031ddd3212aaa17ec165b31a57c681f9d examples/rdfa-distiller-psgi/README
 SHA1 d799108c75a6832d73a519f46829ee5a4075b9e2 examples/rdfa-distiller-psgi/app.cgi
 SHA1 5ab972a6f1e4131cda56785db249785d889490c7 examples/rdfa-distiller-psgi/app.html
@@ -48,22 +48,27 @@ SHA1 6b807287940754cc31a3db59f2b22e363d5525be inc/Module/Package/Dist/RDF.pm
 SHA1 e31c281782183601e1e057c5914f63269e043932 inc/Scalar/Util.pm
 SHA1 5eae2f71c45a996a296d2445b18d0589307111f0 inc/Scalar/Util/PP.pm
 SHA1 eef6bff62046bff2ce08ba132d0b58fba30f40b4 inc/YAML/Tiny.pm
-SHA1 b6993a9b27e45106efd93570d7200463eff7d038 lib/RDF/RDFa/Parser.pm
-SHA1 61a1f1f48c917c66a39989a7344c55bce1b0a789 lib/RDF/RDFa/Parser/Config.pm
-SHA1 dec53eef3afde520c6b2fe9ab61db9b85443ee61 lib/RDF/RDFa/Parser/InitialContext.pm
-SHA1 63c9e2d0c3fe4f89975dbacbffc79fb29a89aa7c lib/RDF/RDFa/Parser/OpenDocumentObjectModel.pm
-SHA1 f4fe83b7b4dac47906ae5aac2ab401906e7b042c meta/changes.ttl
+SHA1 2b2c7873249ec4ef1c6150fc373e06c90212e9a1 lib/RDF/RDFa/Parser.pm
+SHA1 9ced59b738cf7af4e85206528d4b9daedb16503d lib/RDF/RDFa/Parser/Config.pm
+SHA1 9a72c60999e04692812999a107219342c0a76109 lib/RDF/RDFa/Parser/InitialContext.pm
+SHA1 39bcfd502aba092946c41d240eead34f889dc682 lib/RDF/RDFa/Parser/OpenDocumentObjectModel.pm
+SHA1 e4691708dda727eb13bc6ad1c29cf9379de2ab4a lib/RDF/TrineX/Parser/RDFa.pm
+SHA1 4a676cb32cf6554217b0ac230434610c42b9d344 meta/changes.ttl
 SHA1 62f51df6ba01008bfc22f7ce7a55a2604b07588d meta/doap.ttl
-SHA1 3f43ad43c0e12c15b4a81e5fa9cce309e72ce6d8 meta/earl/README
-SHA1 4f124f55870835bcb87ef96935f5256e30b50b85 meta/earl/html4-rdfa10-tests.ttl
-SHA1 bc8b233ffb086e3a4d6ee3fa9ad8c2490eb4412f meta/earl/html4-rdfa11-tests.ttl
-SHA1 7dfcb152b2d1400abea646efb09ec1d6bc1b7930 meta/earl/html5-rdfa10-tests.ttl
-SHA1 0a2ad4d7c566c933f733c3436072cf8943c84533 meta/earl/html5-rdfa11-tests.ttl
-SHA1 05c7241fd2a36f22f0bfa314c12ef25e191cd720 meta/earl/svg-rdfa11-tests.ttl
-SHA1 879acd5c4855c1ddebd1fe674c315dc410587dcd meta/earl/xhtml1-rdfa10-tests.ttl
-SHA1 390aed7187eefaf3a0d74e0ed7a29af047042e51 meta/earl/xhtml1-rdfa11-tests.ttl
-SHA1 9632f6e73fe38f182c2c0b6f3ac3c8d9a34a349f meta/earl/xhtml5-rdfa11-tests.ttl
-SHA1 e24798052e0cb5de97589c8dc9b0eea3aa9dd694 meta/earl/xml-rdfa11-tests.ttl
+SHA1 1d283a275a1c94125eb7670a5e5631f69f648575 meta/earl/README
+SHA1 fb6a63c7e824dc332ae2f2036a9990d0a68d7551 meta/earl/atom-rdfa10-tests.ttl
+SHA1 e80e5696a1544a2790fde3e2ae279e0f873e1d01 meta/earl/atom-rdfa11-tests.ttl
+SHA1 8fe65927c0b6a3f11e3e98121973a5841b8f4f6b meta/earl/datarss-rdfa10-tests.ttl
+SHA1 de7e77792355d84ad8fb5c2013eb0abf1be7d7f2 meta/earl/datarss-rdfa11-tests.ttl
+SHA1 9ac4f9f4b0a8f755b3040a7f4d8da9ec23fdce4a meta/earl/html4-rdfa10-tests.ttl
+SHA1 0c65a247683543abc81dd87af05cbd2a948ea119 meta/earl/html4-rdfa11-tests.ttl
+SHA1 486c04386b7e3136ba0514bcd96b3101f2c14e63 meta/earl/html5-rdfa10-tests.ttl
+SHA1 da9742a37c84b6307652f2ddd9316761dea66f3e meta/earl/html5-rdfa11-tests.ttl
+SHA1 37df708184a7bd240f88935017eee21a8be20838 meta/earl/svg-rdfa11-tests.ttl
+SHA1 96bd1fd673e5aca7aee9f7c97c3ce211733fa08f meta/earl/xhtml1-rdfa10-tests.ttl
+SHA1 32a64a3b2874da62b5e623e2b8e0ab701c8c2366 meta/earl/xhtml1-rdfa11-tests.ttl
+SHA1 94ea1701efc6c8fef51109c831c2a3bab922d776 meta/earl/xhtml5-rdfa11-tests.ttl
+SHA1 db3d432279e703a0515cc425884a01520ca5ade6 meta/earl/xml-rdfa11-tests.ttl
 SHA1 c276f86c44b9c1438341d2ef996b7486af3dd9fe meta/makefile.ttl
 SHA1 ef2d6d99d8dfea7159e583f9b5ad35d5814f2271 share/catalogue/index.xml
 SHA1 9a3157a5419d575ea91bd0b912d139573423c94c share/catalogue/www.w3.org/MarkUp/DTD/aria-attributes-1.mod
@@ -194,10 +199,11 @@ SHA1 2ba0149b0dd5ca8a950032dfdd660dcf1b2dd68d t/07rdfxml.t
 SHA1 2227c12c1acdc5802ceb16a16b470886b5e7b3ae t/08atom.t
 SHA1 1ae46578afb987cff79ddf20cceea226ea8e37ea t/09opendocument.odt
 SHA1 7c7af2572beef1952d66c6240b1976a71a067a2f t/09opendocument.t
+SHA1 4f1a216653b9761eeddb107efa681484dbe4d6b8 t/10trine.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAk+5XsIACgkQzr+BKGoqfTkZzgCdGv2NrXTS6iUaNtRNDFVcP5TE
-mZ0AoKnxY7Wx/EQKRXlq1ICrx+ci3pGv
-=jE1V
+iEYEARECAAYFAk++FlwACgkQzr+BKGoqfTkIZQCfY+qSps3P2p2buJzAJhMNANih
+boQAoKmd7Wo6SBbvy4MMxHlQbYsH01et
+=tiGN
 -----END PGP SIGNATURE-----

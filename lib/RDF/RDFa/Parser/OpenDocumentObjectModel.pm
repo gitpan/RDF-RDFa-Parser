@@ -2,7 +2,7 @@ package RDF::RDFa::Parser::OpenDocumentObjectModel;
 
 BEGIN {
 	$RDF::RDFa::Parser::OpenDocumentObjectModel::AUTHORITY = 'cpan:TOBYINK';
-	$RDF::RDFa::Parser::OpenDocumentObjectModel::VERSION   = '1.096_03';	
+	$RDF::RDFa::Parser::OpenDocumentObjectModel::VERSION   = '1.096_04';	
 }
 
 our @Types = qw(
