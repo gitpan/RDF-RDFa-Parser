@@ -616,3 +616,18 @@ my:v_1-096_04
 			[ rdfs:label "RDF::TrineX::Parser::RDFa - a less crufty API layered on top of RDF::RDFa::Parser."@en ; a dcs:Addition ]
 		] .
 
+my:project :release my:v_1-097 .
+my:v_1-097
+	a               :Version ;
+	dc:issued       "2012-06-07"^^xsd:date ;
+	:revision       "1.097"^^xsd:string ;
+	:file-release   <http://backpan.cpan.org/authors/id/T/TO/TOBYINK/RDF-RDFa-Parser-1.097.tar.gz> ;
+	rdfs:label      "RDFa 1.1 Release Candidate 7"@en ;
+	dcs:changeset [
+		dcs:versus my:v_1-096_04 ;
+		dcs:item
+			[ rdfs:label "Add RDFa1.1+role test suite to 'xt' - tests all pass."@en ] ,
+			[ rdfs:label "Two new methods for RDF::TrineX::Parser::RDFa - rdfa_flavour and rdfa_version."@en ; a dcs:Addition ],
+			[ rdfs:label "@role no longer respects @vocab."@en ; a dcs:Update ]
+		] .
+

@@ -25,6 +25,7 @@ inc/Module/Package.pm
 inc/Module/Package/Dist/RDF.pm
 inc/Scalar/Util.pm
 inc/Scalar/Util/PP.pm
+inc/unicore/Name.pm
 inc/YAML/Tiny.pm
 lib/RDF/RDFa/Parser.pm
 lib/RDF/RDFa/Parser/Config.pm
@@ -44,12 +45,16 @@ meta/earl/datarss-rdfa11-tests.ttl
 meta/earl/html4-rdfa10-tests.ttl
 meta/earl/html4-rdfa11-tests.ttl
 meta/earl/html5-rdfa10-tests.ttl
+meta/earl/html5-rdfa11-role-tests.ttl
 meta/earl/html5-rdfa11-tests.ttl
 meta/earl/README
 meta/earl/svg-rdfa11-tests.ttl
 meta/earl/xhtml1-rdfa10-tests.ttl
+meta/earl/xhtml1-rdfa11-role-tests.ttl
 meta/earl/xhtml1-rdfa11-tests.ttl
+meta/earl/xhtml5-rdfa11-role-tests.ttl
 meta/earl/xhtml5-rdfa11-tests.ttl
+meta/earl/xml-rdfa11-role-tests.ttl
 meta/earl/xml-rdfa11-tests.ttl
 meta/makefile.ttl
 README

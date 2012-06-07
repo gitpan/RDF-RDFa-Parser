@@ -2,7 +2,7 @@ package RDF::RDFa::Parser;
 
 BEGIN {
 	$RDF::RDFa::Parser::AUTHORITY = 'cpan:TOBYINK';
-	$RDF::RDFa::Parser::VERSION   = '1.096_04';	
+	$RDF::RDFa::Parser::VERSION   = '1.097';	
 }
 
 use Carp qw();
@@ -2799,7 +2799,9 @@ sub __expand_curie
 	{
 		my $suffix = $token;
 		
-		if (defined $args{'prefixes'}{'(VOCAB)'})
+		if ($args{'attribute'} eq 'role')
+			{ return 'http://www.w3.org/1999/xhtml/vocab#' . $suffix; }
+		elsif (defined $args{'prefixes'}{'(VOCAB)'})
 			{ return $args{'prefixes'}{'(VOCAB)'} . $suffix; }
 	
 		return undef if $is_safe;

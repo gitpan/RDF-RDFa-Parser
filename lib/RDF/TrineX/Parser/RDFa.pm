@@ -17,7 +17,7 @@ our ($AUTHORITY, $VERSION);
 BEGIN
 {
 	$AUTHORITY = 'cpan:TOBYINK';
-	$VERSION   = '1.096_04';
+	$VERSION   = '1.097';
 	
 	my @flavours = qw(XHTML HTML32 HTML4 HTML5 XHTML5 Atom DataRSS SVG XML OpenDocument);
 	my @versions = qw(1.0 1.1);
@@ -107,6 +107,9 @@ sub new
 		canonicalize => $canonicalize,
 	} => $class;
 }
+
+sub rdfa_flavour { shift->{flavour} }
+sub rdfa_version { shift->{version} }
 
 sub parse
 {
@@ -249,6 +252,21 @@ The following methods are supported, as documented in L<RDF::Trine::Parser>.
 =item C<< parse_file($base_uri, $fh, \&handler) >>
 
 =back
+
+The following additional methods are supported:
+
+=over
+
+=item C<< rdfa_flavour >>
+
+Returns the RDFa host language being used.
+
+=item C<< rdfa_version >>
+
+Returns the RDFa version number being used.
+
+=back
+
 
 =head2 Subclasses
 

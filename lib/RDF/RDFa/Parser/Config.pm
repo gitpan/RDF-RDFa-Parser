@@ -2,7 +2,7 @@ package RDF::RDFa::Parser::Config;
 
 BEGIN {
 	$RDF::RDFa::Parser::Config::AUTHORITY = 'cpan:TOBYINK';
-	$RDF::RDFa::Parser::Config::VERSION   = '1.096_04';	
+	$RDF::RDFa::Parser::Config::VERSION   = '1.097';	
 }
 
 use parent qw(Exporter);
